@@ -1,0 +1,11 @@
+/.vs
+/ElPrado.Core/bin
+/ElPrado.Core/obj
+/ElPrado.Data/bin
+/ElPrado.Data/obj
+/ElPrado.Dto/bin
+/ElPrado.Dto/obj
+/ElPrado.Services/bin
+/ElPrado.Services/obj
+/ElPrado.WebApi/bin
+/ElPrado.WebApi/obj
