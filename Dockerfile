@@ -1,7 +1,7 @@
 FROM mcr.microsoft.com/dotnet/sdk:7.0 AS build
 WORKDIR /src
 
-EXPOSE 8080
+EXPOSE 80
 
 #copiar archivos del proyecto
 COPY . .
