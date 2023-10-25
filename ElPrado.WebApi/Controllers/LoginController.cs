@@ -21,20 +21,23 @@ namespace ElPrado.WebApi.Controllers
         }
 
         [HttpPost("Usuario")]
-        public ActionResult<DtoLogin> LoginUsuario([FromBody] DtoLoginUsuario alta)
+        public ActionResult<ApiResponse<DtoLogin>> LoginUsuario([FromBody] DtoLoginUsuario alta)
         {
             try
             {
                 using LoginService loginService = new(null);
+                ApiResponse<DtoLogin> apiResponse = new();
                 DtoLogin? login = loginService.Login(alta.Alias, alta.Clave);
                 if (login != null)
                 {
                     login.Token = BuildToken(login);
-                    return login;
+                    apiResponse.Data = login;
+                    return apiResponse;
                 }
                 else
                 {
-                    return Unauthorized();
+                    apiResponse.Agregar("Clave inválida o usuario inexistente");
+                    return Unauthorized(apiResponse);
                 }
             }
             catch (Exception ex)
@@ -45,20 +48,23 @@ namespace ElPrado.WebApi.Controllers
         }
 
         [HttpPost("Cliente")]
-        public ActionResult<DtoLogin> LoginCliente([FromBody] DtoLoginCliente alta)
+        public ActionResult<ApiResponse<DtoLogin>> LoginCliente([FromBody] DtoLoginCliente alta)
         {
             try
             {
                 using LoginService loginService = new(null);
+                ApiResponse<DtoLogin> apiResponse = new();
                 DtoLogin? login = loginService.Login(alta.Propuesta, alta.DniCuit, alta.Clave);
                 if (login != null)
                 {
                     login.Token = BuildToken(login);
-                    return login;
+                    apiResponse.Data = login;
+                    return apiResponse;
                 }
                 else
                 {
-                    return Unauthorized();
+                    apiResponse.Agregar("Clave inválida o cliente inexistente");
+                    return Unauthorized(apiResponse);
                 }
             }
             catch (Exception ex)
@@ -69,15 +75,17 @@ namespace ElPrado.WebApi.Controllers
         }
 
         [HttpPost("Registrar")]
-        public ActionResult RegistrarCliente([FromBody] DtoLoginClienteAlta altaCliente)
+        public ActionResult<ApiResponse<int>> RegistrarCliente([FromBody] DtoLoginClienteAlta altaCliente)
         {
             try
             {
                 using LoginService loginService = new(null);
+                ApiResponse<int> apiResponse = new();
                 Resultados resultado = loginService.Registrar(altaCliente);
                 if (resultado.HayError)
                 {
-                    return BadRequest(resultado);
+                    apiResponse.Agregar(resultado);
+                    return BadRequest(apiResponse);
                 }
                 return Ok();
             }

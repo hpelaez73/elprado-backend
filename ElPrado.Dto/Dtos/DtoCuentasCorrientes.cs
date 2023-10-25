@@ -15,4 +15,12 @@
         public bool MedioCobroHabilitado { get; set; }
         public bool ConDeudaGrande { get; set; }
     }
+
+    public class DtoCuotasMercadoPago
+    {
+        public string Tipo { get; set; } = string.Empty;
+        public int Codigo { get; set; }
+        public int Cuota { get; set; }
+        public int Pago { get; set; }
+    }
 }

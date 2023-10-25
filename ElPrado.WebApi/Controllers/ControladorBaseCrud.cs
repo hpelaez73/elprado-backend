@@ -31,16 +31,20 @@ namespace ElPrado.WebApi.Controllers
         }
 
         [HttpGet("{id}")]
-        public ActionResult<TDto> Get(int id)
+        public ActionResult<ApiResponse<TDto>> Get(int id)
         {
             try
             {
-                TDto? dto = service.Visualizar(id);
-                if (dto == null)
+                ApiResponse<TDto> apiResponse = new()
                 {
-                    return NotFound();
+                    Data = service.Visualizar(id)
+                };
+                if (apiResponse.Data == null)
+                {
+                    apiResponse.Agregar("El registro no existe");
+                    return NotFound(apiResponse);
                 }
-                return dto;
+                return apiResponse;
             }
             catch (Exception ex)
             {

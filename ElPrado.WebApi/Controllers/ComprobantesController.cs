@@ -20,16 +20,20 @@ namespace ElPrado.WebApi.Controllers
         }
 
         [HttpGet("PeriodosFacturacion")]
-        public ActionResult<List<int>> PeriodosFacturacion()
+        public ActionResult<ApiResponse<List<int>>> PeriodosFacturacion()
         {
             try
             {
+                ApiResponse<List<int>> apiResponse = new();
+
                 List<int> listPeriodos = comprobantesService.PeriodosFacturacion();
                 if (listPeriodos.Count == 0)
                 {
-                    return NotFound();
+                    apiResponse.Agregar("No hay periodos facturados");
+                    return NotFound(apiResponse);
                 }
-                return listPeriodos;
+                apiResponse.Data = listPeriodos;
+                return apiResponse;
             }
             catch (Exception ex)
             {
@@ -39,12 +43,13 @@ namespace ElPrado.WebApi.Controllers
         }
 
         [HttpGet("Facturas/{periodo}")]
-        public IEnumerable<DtoComprobantesFacturasElectronicas> Facturas(int periodo)
+        public ApiResponse<IEnumerable<DtoComprobantesFacturasElectronicas>> Facturas(int periodo)
         {
             try
             {
-                return comprobantesService.Facturas(periodo);
-
+                ApiResponse<IEnumerable<DtoComprobantesFacturasElectronicas>> apiResponse = new();
+                apiResponse.Data = comprobantesService.Facturas(periodo);
+                return apiResponse;
             }
             catch (Exception ex)
             {

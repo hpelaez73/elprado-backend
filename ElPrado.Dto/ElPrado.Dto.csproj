@@ -6,4 +6,8 @@
     <Nullable>enable</Nullable>
   </PropertyGroup>
 
+  <ItemGroup>
+    <ProjectReference Include="..\ElPrado.Core\ElPrado.Core.csproj" />
+  </ItemGroup>
+
 </Project>
