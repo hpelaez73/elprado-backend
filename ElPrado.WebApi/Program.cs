@@ -17,7 +17,8 @@ var configBuilder = new ConfigurationBuilder()
     .AddEnvironmentVariables()
     .Build();
 
-builder.WebHost.UseConfiguration(configBuilder);
+builder.WebHost.UseConfiguration(configBuilder)
+    .UseUrls("http://*:80");
 
 // Configurar serilog
 builder.Host.UseSerilog((ctx, lc) => lc
