@@ -9,6 +9,6 @@ build_develop:
   script:
     - docker build -t "elpradowebapi" .
     - docker rm -f elpradowebapi || true
-    - docker run --restart=always --net netpub --ip 210.1.0.3 -p 80:80 --name elpradowebapi -d -v /etc/timezone:/etc/timezone:ro -v /etc/localtime:/etc/localtime:ro --env ASPNETCORE_ENVIRONMENT=Staging elpradowebapi
+    - docker run --restart=always --net netpub --ip 210.1.0.3 -p 44326:80 --name elpradowebapi -d -v /etc/timezone:/etc/timezone:ro -v /etc/localtime:/etc/localtime:ro --env ASPNETCORE_ENVIRONMENT=Staging elpradowebapi
   only:
     - develop
