@@ -31,6 +31,22 @@ builder.Services.AddControllers();
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 
+
+// Cors
+var policyName = "CorsPolicy";
+builder.Services.AddCors(options =>
+{
+    options.AddPolicy(name: policyName,
+        builder => builder
+            //.WithOrigins("*")
+            .AllowAnyOrigin()
+            .AllowAnyHeader()
+            .AllowAnyMethod()
+            //.AllowCredentials()
+            .SetIsOriginAllowed((host) => true)
+            .AllowAnyHeader());
+});
+
 builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
     .AddJwtBearer(options =>
     {
@@ -60,6 +76,8 @@ else
 {
     app.UseHttpsRedirection();
 }
+
+app.UseCors(policyName);
 
 app.UseAuthentication();
 
