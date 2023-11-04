@@ -33,18 +33,16 @@ builder.Services.AddSwaggerGen();
 
 
 // Cors
+var allowedOrigin = builder.Configuration.GetSection("AllowedOrigins").Get<string[]>() ?? new string[] {"*"};
+
 var policyName = "CorsPolicy";
 builder.Services.AddCors(options =>
 {
     options.AddPolicy(name: policyName,
         builder => builder
-            //.WithOrigins("*")
-            .AllowAnyOrigin()
+            .WithOrigins(allowedOrigin)
             .AllowAnyHeader()
-            .AllowAnyMethod()
-            //.AllowCredentials()
-            .SetIsOriginAllowed((host) => true)
-            .AllowAnyHeader());
+            .AllowAnyMethod());
 });
 
 builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
