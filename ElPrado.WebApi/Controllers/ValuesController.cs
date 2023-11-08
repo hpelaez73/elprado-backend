@@ -17,8 +17,10 @@ namespace ElPrado.WebApi.Controllers
             List<string> values = new()
             {
                 Environment.GetEnvironmentVariable("ASPNETCORE_ENVIRONMENT")!,
-                ConfiguracionGeneralSesion.StrConexion
+                ConfiguracionGeneralSesion.StrConexion,
             };
+            if (ConfiguracionGeneralSesion.AllowedOrigins != null)
+                values.AddRange(ConfiguracionGeneralSesion.AllowedOrigins);
             return values;
         }
     }

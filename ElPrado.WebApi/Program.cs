@@ -61,6 +61,7 @@ builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
     });
 
 ConfiguracionGeneralSesion.StrConexion = builder.Configuration.GetConnectionString("DefaultConnection") ?? strConexionLocal;
+ConfiguracionGeneralSesion.AllowedOrigins = allowedOrigin;
 
 var app = builder.Build();
 
