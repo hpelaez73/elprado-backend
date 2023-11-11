@@ -1,6 +1,4 @@
-﻿using System.Reflection.Metadata.Ecma335;
-
-namespace ElPrado.Dto.Dtos
+﻿namespace ElPrado.Dto.Dtos
 {
     public class DtoComprobantes
     {

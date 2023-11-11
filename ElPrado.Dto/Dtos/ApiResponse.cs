@@ -1,12 +1,11 @@
 ﻿using ElPrado.Core;
-using static System.Runtime.InteropServices.JavaScript.JSType;
 
 namespace ElPrado.Dto.Dtos
 {
     public class ApiResponse<T>
     {
         public bool Success { get; set; }
-        public string Message { get; set; } 
+        public string Message { get; set; }
         public T? Data { get; set; }
         public List<string> Errors { get; set; }
 

@@ -47,8 +47,10 @@ namespace ElPrado.WebApi.Controllers
         {
             try
             {
-                ApiResponse<IEnumerable<DtoComprobantesFacturasElectronicas>> apiResponse = new();
-                apiResponse.Data = comprobantesService.Facturas(periodo);
+                ApiResponse<IEnumerable<DtoComprobantesFacturasElectronicas>> apiResponse = new()
+                {
+                    Data = comprobantesService.Facturas(periodo)
+                };
                 return apiResponse;
             }
             catch (Exception ex)
