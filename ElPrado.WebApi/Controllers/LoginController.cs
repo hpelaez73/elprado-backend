@@ -87,7 +87,8 @@ namespace ElPrado.WebApi.Controllers
                     apiResponse.Agregar(resultado);
                     return BadRequest(apiResponse);
                 }
-                return Ok();
+                apiResponse.Message = "Usuario creado exitosamente";
+                return apiResponse;
             }
             catch (Exception ex)
             {
