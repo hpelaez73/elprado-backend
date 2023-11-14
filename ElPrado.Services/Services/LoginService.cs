@@ -70,5 +70,35 @@ namespace ElPrado.Services.Services
             }
             return resultado;
         }
+
+        public Resultados BorrarCliente(int codCliente)
+        {
+            Resultados resultado = new();
+
+            ClientesRepository clientesRepository = new(transaccion);
+            Clientes? cliente = clientesRepository.Buscar(codCliente);
+            if (cliente == null)
+            {
+                resultado.Agregar("El cliente no existe");
+                return resultado;
+            }
+            if (string.IsNullOrEmpty(cliente.ClaveAcceso)) resultado.Agregar("El cliente no está registrado en la Web");
+
+            if (resultado.HayError) return resultado;
+
+            try
+            {
+                cliente.ClaveAcceso = string.Empty;
+                clientesRepository.Modificar(cliente);
+
+                transaccion.Commit();
+            }
+            catch
+            {
+                transaccion.Rollback();
+                throw;
+            }
+            return resultado;
+        }
     }
 }

@@ -97,6 +97,30 @@ namespace ElPrado.WebApi.Controllers
             }
         }
 
+        [HttpDelete("{id}")]
+        public ActionResult<ApiResponse<int>> BorrarCliente(int id)
+        {
+            try
+            {
+                using LoginService loginService = new(null);
+                ApiResponse<int> apiResponse = new();
+                Resultados resultado = loginService.BorrarCliente(id);
+                if (resultado.HayError)
+                {
+                    apiResponse.Agregar(resultado);
+                    return BadRequest(apiResponse);
+                }
+                apiResponse.Data = id;
+                apiResponse.Message = "Usuario eliminado";
+                return apiResponse;
+            }
+            catch (Exception ex)
+            {
+                Serilog.Log.Error(ex, "{Controlador}.BorrarCliente({id}): {Mensaje}", this, id, ex.Message);
+                throw;
+            }
+        }
+
         private string BuildToken(DtoLogin login)
         {
             // CREAMOS EL HEADER //
