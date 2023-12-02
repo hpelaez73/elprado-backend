@@ -1,7 +1,5 @@
 ﻿using ElPrado.Core;
-using ElPrado.Core.Domains;
 using ElPrado.Data;
-using ElPrado.Data.Models;
 using ElPrado.Data.Repositories;
 using ElPrado.Dto.Dtos;
 
@@ -9,15 +7,15 @@ namespace ElPrado.Services.Services
 {
     public class CuentasCorrientesService : ServiceBase
     {
-        CreditosRepository creditosRepository;
-        ConfigCuotasPeriodicasRepository configCuotasPeriodicasRepository;
-        CuentasCorrientesRepository cuentasCorrientesRepository;
+        private CuentasCorrientesRepository cuentasCorrientesRepository => (repository as CuentasCorrientesRepository)!;
 
         public CuentasCorrientesService(Transaccion? transaccion) : base(transaccion)
         {
-            creditosRepository = new(base.transaccion);
-            configCuotasPeriodicasRepository = new(base.transaccion);
-            cuentasCorrientesRepository = new(base.transaccion);
+        }
+
+        protected override RepositoryBase CrearRepositorio()
+        {
+            return new CuentasCorrientesRepository(Transaccion);
         }
 
         public Resultados<List<DtoCuentasCorrientes>> PendientesMercadoPago()
@@ -49,7 +47,7 @@ namespace ElPrado.Services.Services
 
             Resultados<List<DtoCuentasCorrientes>> resultadoPendientes = PendientesMercadoPago();
             if (resultadoPendientes.HayError) resultado.Agregar(resultadoPendientes);
-            if (resultadoPendientes.Valor == null)
+            if (resultadoPendientes.Valor == null || resultadoPendientes.Valor.Count == 0)
             {
                 resultado.Agregar("No hay cuotas impagas");
                 return resultado;
@@ -58,8 +56,12 @@ namespace ElPrado.Services.Services
             List<DtoCuentasCorrientes> listCuotasSolicitud = new();
             foreach (DtoCuotasMercadoPago item in listCuotas)
             {
-                DtoCuentasCorrientes? cuota = listCuotasRestante.First(x => x.Tipo == item.Tipo && x.Codigo == item.Codigo && x.Cuota == item.Cuota && x.Pago == item.Pago);
-                if (cuota == null) resultado.Agregar("Una cuota seleccionada no se encuentra entre las pendientes de pago");
+                DtoCuentasCorrientes? cuota = listCuotasRestante.FirstOrDefault(x => x.Tipo == item.Tipo && x.Codigo == item.Codigo && x.Cuota == item.Cuota && x.Pago == item.Pago);
+                if (cuota == null)
+                {
+                    resultado.Agregar("Una cuota seleccionada no se encuentra entre las pendientes de pago");
+                    break;
+                }
                 else
                 {
                     listCuotasSolicitud.Add(cuota);
@@ -75,23 +77,43 @@ namespace ElPrado.Services.Services
 
             if (listCuotasSolicitud.Sum(x => x.Total) == 0) resultado.Agregar("El importe no puede ser 0");
 
-            //if (resultado.HayError) return resultado;
+            if (resultado.HayError) return resultado;
 
             try
             {
-                using MercadoPagoService mercadoPagoService = new(transaccion);
+                using MercadoPagoService mercadoPagoService = new(Transaccion);
 
                 resultado = mercadoPagoService.ArmarPago(listCuotasSolicitud, null);
 
-                if (resultado.EstaOK) transaccion.Commit();
-                else transaccion.Rollback();
+                if (resultado.EstaOK) Commit();
+                else Rollback();
             }
             catch
             {
-                transaccion.Rollback();
+                Rollback();
                 throw;
             }
             return resultado;
+        }
+
+        public bool NotificacionMercadoPago(string topic, long id)
+        {
+            if (topic != "payment") return false;
+
+            try
+            {
+                using MercadoPagoService mercadoPagoService = new(Transaccion);
+
+                mercadoPagoService.ImputarPago(id);
+
+                Commit();
+            }
+            catch
+            {
+                Rollback();
+                throw;
+            }
+            return true;
         }
     }
 }

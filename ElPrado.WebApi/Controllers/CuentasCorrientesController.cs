@@ -1,23 +1,22 @@
 ﻿using ElPrado.Core;
 using ElPrado.Dto.Dtos;
 using ElPrado.Services.Services;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace ElPrado.WebApi.Controllers
 {
     public class CuentasCorrientesController : ControladorBase
     {
-        CuentasCorrientesService cuentasCorrientesService;
+        private CuentasCorrientesService cuentasCorrientesService => (servicio as CuentasCorrientesService)!;
 
         public CuentasCorrientesController()
         {
-            cuentasCorrientesService = new(null);
         }
 
-        protected override void DisposeServicios()
+        protected override ServiceBase CrearServicio()
         {
-            cuentasCorrientesService.Dispose();
-            base.DisposeServicios();
+            return new CuentasCorrientesService(null);
         }
 
         [HttpGet("PendientesMercadoPago")]
@@ -60,6 +59,23 @@ namespace ElPrado.WebApi.Controllers
             catch (Exception ex)
             {
                 Serilog.Log.Error(ex, "{Controlador}.SolicitudMercadoPago({@listCuotas}): {Mensaje} {@Extras}", this, listCuotas, ex.Message);
+                throw;
+            }
+        }
+
+        [AllowAnonymous]
+        [HttpPost("NotificacionMercadoPago")]
+        public ActionResult NotificacionMercadoPago(string topic, long id)
+        {
+            try
+            {
+                bool resultado = cuentasCorrientesService.NotificacionMercadoPago(topic, id);
+                if (resultado) return Ok();
+                else return BadRequest();
+            }
+            catch (Exception ex)
+            {
+                Serilog.Log.Error(ex, "{Controlador}.NotificacionMercadoPago({topic}, {id}): {Mensaje} {@Extras}", this, topic, id, ex.Message);
                 throw;
             }
         }

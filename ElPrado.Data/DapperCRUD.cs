@@ -1,14 +1,10 @@
 ﻿using Dapper;
 using Microsoft.CSharp.RuntimeBinder;
-using System;
 using System.Collections.Concurrent;
-using System.Collections.Generic;
 using System.Data;
 using System.Diagnostics;
-using System.Linq;
 using System.Reflection;
 using System.Text;
-using System.Threading.Tasks;
 
 namespace ElPrado.Data
 {
@@ -20,9 +16,9 @@ namespace ElPrado.Data
         }
 
         private static DapperCRUD.Dialect _dialect = Dialect.Firebird;
-        private static string _encapsulation;
-        private static string _getIdentitySql;
-        private static string _getPagedListSql;
+        private static string _encapsulation = string.Empty;
+        private static string _getIdentitySql = string.Empty;
+        private static string _getPagedListSql = string.Empty;
 
         private static readonly ConcurrentDictionary<Type, string>
             TableNames = new ConcurrentDictionary<Type, string>();
@@ -162,7 +158,7 @@ namespace ElPrado.Data
         /// <param name="transaction"></param>
         /// <param name="commandTimeout"></param>
         /// <returns>Returns a single entity by a single id from table T.</returns>
-        public static T Get<T>(this IDbConnection connection, object id, IDbTransaction transaction = null,
+        public static T Get<T>(this IDbConnection connection, object id, IDbTransaction? transaction = null,
             int? commandTimeout = null)
         {
             var currenttype = typeof(T);
@@ -213,7 +209,7 @@ namespace ElPrado.Data
         /// <param name="commandTimeout"></param>
         /// <returns>Gets a list of entities with optional exact match where conditions</returns>
         public static IEnumerable<T> GetList<T>(this IDbConnection connection, object whereConditions,
-            IDbTransaction transaction = null, int? commandTimeout = null)
+            IDbTransaction? transaction = null, int? commandTimeout = null)
         {
             var currenttype = typeof(T);
             var name = GetTableName(currenttype);
@@ -253,7 +249,7 @@ namespace ElPrado.Data
         /// <param name="commandTimeout"></param>
         /// <returns>Gets a list of entities with optional SQL where conditions</returns>
         public static IEnumerable<T> GetList<T>(this IDbConnection connection, string conditions,
-            object parameters = null, IDbTransaction transaction = null, int? commandTimeout = null)
+            object? parameters = null, IDbTransaction? transaction = null, int? commandTimeout = null)
         {
             var currenttype = typeof(T);
             var name = GetTableName(currenttype);
@@ -305,7 +301,7 @@ namespace ElPrado.Data
         /// <param name="commandTimeout"></param>
         /// <returns>Gets a paged list of entities with optional exact match where conditions</returns>
         public static IEnumerable<T> GetListPaged<T>(this IDbConnection connection, int pageNumber, int rowsPerPage,
-            string conditions, string orderby, object parameters = null, IDbTransaction transaction = null,
+            string conditions, string orderby, object? parameters = null, IDbTransaction? transaction = null,
             int? commandTimeout = null)
         {
             if (string.IsNullOrEmpty(_getPagedListSql))
@@ -358,7 +354,7 @@ namespace ElPrado.Data
         /// <param name="commandTimeout"></param>
         /// <returns>The ID (primary key) of the newly inserted record if it is identity using the int? type, otherwise null</returns>
         public static int? Insert<TEntity>(this IDbConnection connection, TEntity entityToInsert,
-            IDbTransaction transaction = null, int? commandTimeout = null)
+            IDbTransaction? transaction = null, int? commandTimeout = null)
         {
             return Insert<int?, TEntity>(connection, entityToInsert, transaction, commandTimeout);
         }
@@ -378,7 +374,7 @@ namespace ElPrado.Data
         /// <param name="commandTimeout"></param>
         /// <returns>The ID (primary key) of the newly inserted record if it is identity using the defined type, otherwise null</returns>
         public static TKey Insert<TKey, TEntity>(this IDbConnection connection, TEntity entityToInsert,
-            IDbTransaction transaction = null, int? commandTimeout = null)
+            IDbTransaction? transaction = null, int? commandTimeout = null)
         {
 
             var idProps = GetIdProperties(entityToInsert).ToList();
@@ -426,7 +422,14 @@ namespace ElPrado.Data
             if ((keytype == typeof(int) || keytype == typeof(long)) &&
                 Convert.ToInt64(idProps.First().GetValue(entityToInsert, null)) == 0)
             {
-                sb.Append(";" + _getIdentitySql);
+                if (GetDialect() == Dialect.Firebird.ToString())
+                {
+                    sb.AppendFormat(" RETURNING {0} AS ID", GetColumnName(idProps.First()));
+                }
+                else
+                {
+                    sb.Append(";" + _getIdentitySql);
+                }
             }
             else
             {
@@ -461,7 +464,7 @@ namespace ElPrado.Data
         /// <param name="commandTimeout"></param>
         /// <returns>The number of affected records</returns>
         public static int Update<TEntity>(this IDbConnection connection, TEntity entityToUpdate,
-            IDbTransaction transaction = null, int? commandTimeout = null)
+            IDbTransaction? transaction = null, int? commandTimeout = null)
         {
             if (typeof(TEntity)
                 .IsInterface) //FallBack to BaseType Generic Method: https://stackoverflow.com/questions/4101784/calling-a-generic-method-with-a-dynamic-type
@@ -509,7 +512,7 @@ namespace ElPrado.Data
         /// <param name="transaction"></param>
         /// <param name="commandTimeout"></param>
         /// <returns>The number of records affected</returns>
-        public static int Delete<T>(this IDbConnection connection, T entityToDelete, IDbTransaction transaction = null,
+        public static int Delete<T>(this IDbConnection connection, T entityToDelete, IDbTransaction? transaction = null,
             int? commandTimeout = null)
         {
             var masterSb = new StringBuilder();
@@ -547,7 +550,7 @@ namespace ElPrado.Data
         /// <param name="transaction"></param>
         /// <param name="commandTimeout"></param>
         /// <returns>The number of records affected</returns>
-        public static int Delete<T>(this IDbConnection connection, object id, IDbTransaction transaction = null,
+        public static int Delete<T>(this IDbConnection connection, object id, IDbTransaction? transaction = null,
             int? commandTimeout = null)
         {
             var currenttype = typeof(T);
@@ -600,7 +603,7 @@ namespace ElPrado.Data
         /// <param name="commandTimeout"></param>
         /// <returns>The number of records affected</returns>
         public static int DeleteList<T>(this IDbConnection connection, object whereConditions,
-            IDbTransaction transaction = null, int? commandTimeout = null)
+            IDbTransaction? transaction = null, int? commandTimeout = null)
         {
             var masterSb = new StringBuilder();
             StringBuilderCache(masterSb, $"{typeof(T).FullName}_DeleteWhere{whereConditions?.GetType()?.FullName}",
@@ -640,7 +643,7 @@ namespace ElPrado.Data
         /// <param name="commandTimeout"></param>
         /// <returns>The number of records affected</returns>
         public static int DeleteList<T>(this IDbConnection connection, string conditions, object parameters = null,
-            IDbTransaction transaction = null, int? commandTimeout = null)
+            IDbTransaction? transaction = null, int? commandTimeout = null)
         {
             var masterSb = new StringBuilder();
             StringBuilderCache(masterSb, $"{typeof(T).FullName}_DeleteWhere{conditions}", sb =>
@@ -679,7 +682,7 @@ namespace ElPrado.Data
         /// <param name="commandTimeout"></param>
         /// <returns>Returns a count of records.</returns>
         public static int RecordCount<T>(this IDbConnection connection, string conditions = "",
-            object parameters = null, IDbTransaction transaction = null, int? commandTimeout = null)
+            object? parameters = null, IDbTransaction? transaction = null, int? commandTimeout = null)
         {
             var currenttype = typeof(T);
             var name = GetTableName(currenttype);
@@ -708,7 +711,7 @@ namespace ElPrado.Data
         /// <param name="commandTimeout"></param>
         /// <returns>Returns a count of records.</returns>
         public static int RecordCount<T>(this IDbConnection connection, object whereConditions,
-            IDbTransaction transaction = null, int? commandTimeout = null)
+            IDbTransaction? transaction = null, int? commandTimeout = null)
         {
             var currenttype = typeof(T);
             var name = GetTableName(currenttype);
@@ -775,7 +778,7 @@ namespace ElPrado.Data
         }
 
         private static void BuildWhere<TEntity>(StringBuilder sb, IEnumerable<PropertyInfo> idProps,
-            object whereConditions = null)
+            object? whereConditions = null)
         {
             var propertyInfos = idProps.ToArray();
             for (var i = 0; i < propertyInfos.Count(); i++)
@@ -1106,7 +1109,7 @@ namespace ElPrado.Data
                 }
                 else if (GetDialect() == Dialect.Firebird.ToString())
                 {
-                    tableName =  type.Name.ToUnderscoreCase().ToUpper();
+                    tableName = type.Name.ToUnderscoreCase().ToUpper();
                 }
                 else
                 {

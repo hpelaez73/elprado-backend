@@ -15,11 +15,11 @@ namespace ElPrado.Services.Services
 
         public DtoLogin? Login(int legajo, long dniCuit, string clave)
         {
-            ClientesRepository clientesRepository = new(transaccion);
+            ClientesRepository clientesRepository = new(Transaccion);
             Clientes? cliente = clientesRepository.Buscar(legajo, dniCuit, Utils.SHA1(clave));
             if (cliente != null)
             {
-                PropuestasRepository propuestasRepository = new(transaccion);
+                PropuestasRepository propuestasRepository = new(Transaccion);
                 Propuestas? propuesta = propuestasRepository.BuscarPropuesta(legajo);
                 if (propuesta != null)
                 {
@@ -31,7 +31,7 @@ namespace ElPrado.Services.Services
 
         public DtoLogin? Login(string alias, string clave)
         {
-            UsuariosRepository usuariosRepository = new(transaccion);
+            UsuariosRepository usuariosRepository = new(Transaccion);
 
             Usuarios? usuario = usuariosRepository.Buscar(alias, clave);
             return LogginMapper.MapToDto(usuario);
@@ -47,7 +47,7 @@ namespace ElPrado.Services.Services
 
             if (resultado.HayError) return resultado;
 
-            ClientesRepository clientesRepository = new(transaccion);
+            ClientesRepository clientesRepository = new(Transaccion);
             Clientes? cliente = clientesRepository.Buscar(altaCliente.Propuesta, altaCliente.DniCuit);
             if (cliente == null)
             {
@@ -61,11 +61,11 @@ namespace ElPrado.Services.Services
                 cliente.Email = altaCliente.Email.Trim();
                 clientesRepository.Modificar(cliente);
                 
-                transaccion.Commit();
+                Commit();
             }
             catch
             {
-                transaccion.Rollback();
+                Rollback();
                 throw;
             }
             return resultado;
@@ -75,7 +75,7 @@ namespace ElPrado.Services.Services
         {
             Resultados resultado = new();
 
-            ClientesRepository clientesRepository = new(transaccion);
+            ClientesRepository clientesRepository = new(Transaccion);
             Clientes? cliente = clientesRepository.Buscar(codCliente);
             if (cliente == null)
             {
@@ -91,11 +91,11 @@ namespace ElPrado.Services.Services
                 cliente.ClaveAcceso = string.Empty;
                 clientesRepository.Modificar(cliente);
 
-                transaccion.Commit();
+                Commit();
             }
             catch
             {
-                transaccion.Rollback();
+                Rollback();
                 throw;
             }
             return resultado;

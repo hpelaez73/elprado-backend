@@ -13,9 +13,9 @@ namespace ElPrado.Services.Services
         {
         }
 
-        protected override RepositoryBaseCrud<Clientes, DtoClientes> CrearRepositorio()
+        protected override RepositoryBaseCrud<Clientes, DtoClientes> CrearRepositorioCrud()
         {
-            return new ClientesRepository(transaccion);
+            return new ClientesRepository(Transaccion);
         }
     }
 }

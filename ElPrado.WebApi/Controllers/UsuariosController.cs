@@ -7,7 +7,7 @@ namespace ElPrado.WebApi.Controllers
 {
     public class UsuariosController : ControladorBaseCrud<Usuarios, DtoUsuarios>
     {
-        private UsuariosService usuariosService => (service as UsuariosService)!;
+        private UsuariosService usuariosService => (servicio as UsuariosService)!;
 
         public UsuariosController()
         {

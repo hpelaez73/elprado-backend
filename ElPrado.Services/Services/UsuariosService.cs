@@ -4,7 +4,6 @@ using ElPrado.Data.Models;
 using ElPrado.Data.Repositories;
 using ElPrado.Dto.Dtos;
 using ElPrado.Services.Mappers;
-using System.Runtime.Serialization.Formatters;
 
 namespace ElPrado.Services.Services
 {
@@ -18,7 +17,7 @@ namespace ElPrado.Services.Services
 
         protected override RepositoryBaseCrud<Usuarios, DtoUsuarios> CrearRepositorio()
         {
-            return new UsuariosRepository(transaccion);
+            return new UsuariosRepository(Transaccion);
         }
 
         public List<DtoMenus> BuscarMenu()

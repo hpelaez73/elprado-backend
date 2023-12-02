@@ -7,10 +7,15 @@ namespace ElPrado.Services.Services
 {
     public class ComprobantesService : ServiceBase
     {
-        private ComprobantesRepository comprobantesRepository;
+        private ComprobantesRepository comprobantesRepository => (repository as ComprobantesRepository)!;
+
         public ComprobantesService(Transaccion? transaccion) : base(transaccion)
         {
-            comprobantesRepository = new(base.transaccion);
+        }
+
+        protected override RepositoryBase CrearRepositorio()
+        {
+            return new ComprobantesRepository(Transaccion);
         }
 
         public IEnumerable<DtoComprobantesFacturasElectronicas> Facturas(int periodo)

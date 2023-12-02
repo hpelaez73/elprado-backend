@@ -6,17 +6,15 @@ namespace ElPrado.WebApi.Controllers
 {
     public class ComprobantesController : ControladorBase
     {
-        private ComprobantesService comprobantesService;
+        private ComprobantesService comprobantesService => (servicio as ComprobantesService)!;
 
         public ComprobantesController()
         {
-            comprobantesService = new(null);
         }
 
-        protected override void DisposeServicios()
+        protected override ServiceBase CrearServicio()
         {
-            comprobantesService.Dispose();
-            base.DisposeServicios();
+            return new ComprobantesService(null);
         }
 
         [HttpGet("PeriodosFacturacion")]

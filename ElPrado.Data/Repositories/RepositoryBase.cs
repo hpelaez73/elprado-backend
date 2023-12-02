@@ -1,10 +1,10 @@
-﻿using System.Data;
+﻿using ElPrado.Dto.Dtos;
+using System.Data;
 
 namespace ElPrado.Data.Repositories
 {
     public class RepositoryBase
     {
-        protected bool transaccionPropia = true;
         protected IDbConnection conexion;
         protected IDbTransaction transaccion;
 
@@ -12,6 +12,11 @@ namespace ElPrado.Data.Repositories
         {
             conexion = transaccion.GetConnection();
             this.transaccion = transaccion.GetTransaction();
+        }
+
+        public IEnumerable<dynamic> Listado(DtoOpcionesListados? opcionesListado)
+        {
+            return Enumerable.Empty<dynamic>();
         }
     }
 }

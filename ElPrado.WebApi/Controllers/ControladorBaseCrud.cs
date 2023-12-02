@@ -13,21 +13,20 @@ namespace ElPrado.WebApi.Controllers
         where TEntidad : Entidades
         where TDto : DtoBase
     {
-        protected ServiceBaseCrud<TEntidad, TDto> service;
+        protected ServiceBaseCrud<TEntidad, TDto> serviceCrud => (servicio as ServiceBaseCrud<TEntidad, TDto>)!;
 
         public ControladorBaseCrud()
         {
-            service = CrearServicio();
         }
 
-        protected virtual ServiceBaseCrud<TEntidad, TDto> CrearServicio()
+        protected override ServiceBase CrearServicio()
+        {
+            return CrearServicioCrud();
+        }
+
+        protected virtual ServiceBaseCrud<TEntidad, TDto> CrearServicioCrud()
         {
             return new(null);
-        }
-
-        protected override void DisposeServicios()
-        {
-            service.Dispose();
         }
 
         [HttpGet("{id}")]
@@ -37,7 +36,7 @@ namespace ElPrado.WebApi.Controllers
             {
                 ApiResponse<TDto> apiResponse = new()
                 {
-                    Data = service.Visualizar(id)
+                    Data = serviceCrud.Visualizar(id)
                 };
                 if (apiResponse.Data == null)
                 {
