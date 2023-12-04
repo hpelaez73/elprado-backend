@@ -25,6 +25,8 @@ namespace ElPrado.WebApi.Controllers
         {
             try
             {
+                Serilog.Log.Error("{Controlador}.Login({@alta})", this, alta);
+
                 using LoginService loginService = new(null);
                 ApiResponse<DtoLogin> apiResponse = new();
                 DtoLogin? login = loginService.Login(alta.Alias, alta.Clave);
