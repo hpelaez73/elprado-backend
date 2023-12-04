@@ -22,6 +22,7 @@ namespace ElPrado.WebApi.Controllers
         {
             try
             {
+                Serilog.Log.Error("{Controlador}.PeriodosFacturacion()");
                 ApiResponse<List<int>> apiResponse = new();
 
                 List<int> listPeriodos = comprobantesService.PeriodosFacturacion();
