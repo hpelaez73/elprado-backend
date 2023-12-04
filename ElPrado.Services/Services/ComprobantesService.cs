@@ -26,7 +26,7 @@ namespace ElPrado.Services.Services
         public List<int> PeriodosFacturacion()
         {
             DtoComprobantesPeriodo? periodo = comprobantesRepository.PeriodosFacturacion(ConfiguracionGeneralSesion.CodCliente);
-            if (periodo == null)
+            if (periodo == null || periodo.MinFecha == DateTime.MinValue)
             {
                 return new();
             }

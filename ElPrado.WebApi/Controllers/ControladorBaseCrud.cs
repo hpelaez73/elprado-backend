@@ -47,7 +47,7 @@ namespace ElPrado.WebApi.Controllers
             }
             catch (Exception ex)
             {
-                Serilog.Log.Error(ex, "{Controlador}.Get({id}): {Mensaje} {@Extras}", this, id, ex.Message);
+                Serilog.Log.Error(ex, "{Controlador}.Get({id}): {Mensaje} {@Extras}", this, id, ex.Message, extrasLog);
                 throw;
             }
         }

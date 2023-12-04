@@ -31,7 +31,7 @@ namespace ElPrado.WebApi.Controllers
             }
             catch (Exception ex)
             {
-                Serilog.Log.Error(ex, "{Controlador}.Menu(): {Mensaje} {@Extras}", this, ex.Message);
+                Serilog.Log.Error(ex, "{Controlador}.Menu(): {Mensaje} {@Extras}", this, ex.Message, extrasLog);
                 throw;
             }
         }
@@ -49,7 +49,7 @@ namespace ElPrado.WebApi.Controllers
             }
             catch (Exception ex)
             {
-                Serilog.Log.Error(ex, "{Controlador}.Panel(): {Mensaje} {@Extras}", this, ex.Message);
+                Serilog.Log.Error(ex, "{Controlador}.Panel(): {Mensaje} {@Extras}", this, ex.Message, extrasLog);
                 throw;
             }
         }

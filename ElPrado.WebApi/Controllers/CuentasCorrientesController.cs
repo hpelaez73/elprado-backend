@@ -36,7 +36,7 @@ namespace ElPrado.WebApi.Controllers
             }
             catch (Exception ex)
             {
-                Serilog.Log.Error(ex, "{Controlador}.PendientesMercadoPago(): {Mensaje} {@Extras}", this, ex.Message);
+                Serilog.Log.Error(ex, "{Controlador}.PendientesMercadoPago(): {Mensaje} {@Extras}", this, ex.Message, extrasLog);
                 throw;
             }
         }
@@ -58,7 +58,7 @@ namespace ElPrado.WebApi.Controllers
             }
             catch (Exception ex)
             {
-                Serilog.Log.Error(ex, "{Controlador}.SolicitudMercadoPago({@listCuotas}): {Mensaje} {@Extras}", this, listCuotas, ex.Message);
+                Serilog.Log.Error(ex, "{Controlador}.SolicitudMercadoPago({@listCuotas}): {Mensaje} {@Extras}", this, listCuotas, ex.Message, extrasLog);
                 throw;
             }
         }
@@ -75,7 +75,7 @@ namespace ElPrado.WebApi.Controllers
             }
             catch (Exception ex)
             {
-                Serilog.Log.Error(ex, "{Controlador}.NotificacionMercadoPago({topic}, {id}): {Mensaje} {@Extras}", this, topic, id, ex.Message);
+                Serilog.Log.Error(ex, "{Controlador}.NotificacionMercadoPago({topic}, {id}): {Mensaje} {@Extras}", this, topic, id, ex.Message, extrasLog);
                 throw;
             }
         }

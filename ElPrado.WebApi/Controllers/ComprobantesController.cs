@@ -22,7 +22,6 @@ namespace ElPrado.WebApi.Controllers
         {
             try
             {
-                Serilog.Log.Error("{Controlador}.PeriodosFacturacion()");
                 ApiResponse<List<int>> apiResponse = new();
 
                 List<int> listPeriodos = comprobantesService.PeriodosFacturacion();
@@ -36,7 +35,7 @@ namespace ElPrado.WebApi.Controllers
             }
             catch (Exception ex)
             {
-                Serilog.Log.Error(ex, "{Controlador}.PeriodosFacturacion(): {Mensaje} {@Extras}", this, ex.Message);
+                Serilog.Log.Error(ex, "{Controlador}.PeriodosFacturacion(): {Mensaje} {@Extras}", this, ex.Message, extrasLog);
                 throw;
             }
         }
@@ -54,7 +53,7 @@ namespace ElPrado.WebApi.Controllers
             }
             catch (Exception ex)
             {
-                Serilog.Log.Error(ex, "{Controlador}.Facturas({periodo}): {Mensaje} {@Extras}", this, periodo, ex.Message);
+                Serilog.Log.Error(ex, "{Controlador}.Facturas({periodo}): {Mensaje} {@Extras}", this, periodo, ex.Message, extrasLog);
                 throw;
             }
         }

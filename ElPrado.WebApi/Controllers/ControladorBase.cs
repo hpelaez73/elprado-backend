@@ -1,4 +1,5 @@
-﻿using ElPrado.Dto.Dtos;
+﻿using ElPrado.Core;
+using ElPrado.Dto.Dtos;
 using ElPrado.Services.Services;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
@@ -11,11 +12,18 @@ namespace ElPrado.WebApi.Controllers
     public class ControladorBase : ControllerBase, IDisposable
     {
         private bool disposed;
-        protected ServiceBase servicio; 
+        protected ServiceBase servicio;
+        protected ExtrasLog extrasLog;
 
         public ControladorBase()
         {
             servicio = CrearServicio();
+            extrasLog = new ExtrasLog
+            {
+                CodUsuario = ConfiguracionGeneralSesion.CodUsuario,
+                CodCliente = ConfiguracionGeneralSesion.CodCliente,
+                CodPropuesta = ConfiguracionGeneralSesion.CodPropuesta
+            };
         }
 
         protected virtual ServiceBase CrearServicio()
@@ -59,7 +67,7 @@ namespace ElPrado.WebApi.Controllers
             }
             catch (Exception ex)
             {
-                Serilog.Log.Error(ex, "{Controlador}.Listado({@opcionesListado}): {Mensaje} {@Extras}", this, opcionesListado, ex.Message);
+                Serilog.Log.Error(ex, "{Controlador}.Listado({@opcionesListado}): {Mensaje} {@Extras}", this, opcionesListado, ex.Message, extrasLog);
                 throw;
             }
         }
@@ -77,10 +85,17 @@ namespace ElPrado.WebApi.Controllers
             }
             catch (Exception ex)
             {
-                Serilog.Log.Error(ex, "{Controlador}.Listado(): {Mensaje} {@Extras}", this, ex.Message);
+                Serilog.Log.Error(ex, "{Controlador}.Listado(): {Mensaje} {@Extras}", this, ex.Message, extrasLog);
                 throw;
             }
         }
 
+    }
+
+    public class ExtrasLog
+    {
+        public int CodUsuario { get; set; }
+        public int CodCliente { get; set; }
+        public int CodPropuesta { get; set; }
     }
 }
