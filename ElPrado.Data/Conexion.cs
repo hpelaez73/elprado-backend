@@ -47,7 +47,9 @@ namespace ElPrado.Data
         public void Dispose()
         {
             if (transaccionActiva) transaccion.Commit();
+            conexion.Close();
             transaccion.Dispose();
+            conexion.Dispose();
         }
 
         public IDbConnection GetConnection()
