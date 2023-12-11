@@ -12,7 +12,8 @@ namespace ElPrado.Services.Mappers
             return new DtoLogin()
             {
                 CodUsuario = entidad.CodUsuario,
-                Nombre = entidad.Nombre
+                Nombre = entidad.Nombre,
+                EsAdmin = entidad.EsAdmin || entidad.SuperUsuario               
             };
         }
         public static DtoLogin? MapToDto(Clientes? entidad, Propuestas propuesta)
