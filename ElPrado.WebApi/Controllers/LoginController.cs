@@ -74,6 +74,33 @@ namespace ElPrado.WebApi.Controllers
             }
         }
 
+        [HttpPost("RenovarToken")]
+        public ActionResult<ApiResponse<DtoLogin>> RenovarToken([FromBody] DtoRefreshToken alta)
+        {
+            try
+            {
+                using LoginService loginService = new(null);
+                ApiResponse<DtoLogin> apiResponse = new();
+                DtoLogin? login = loginService.RenovarToken(alta.RefreshToken);
+                if (login != null)
+                {
+                    login.Token = BuildToken(login);
+                    apiResponse.Data = login;
+                    return apiResponse;
+                }
+                else
+                {
+                    apiResponse.Agregar("Refresh token inválido");
+                    return Unauthorized(apiResponse);
+                }
+            }
+            catch (Exception ex)
+            {
+                Serilog.Log.Error(ex, "{Controlador}.RenovarToken({@alta}): {Mensaje}", this, alta, ex.Message);
+                throw;
+            }
+        }
+
         [HttpPost("Registrar")]
         public ActionResult<ApiResponse<int>> RegistrarCliente([FromBody] DtoLoginClienteAlta altaCliente)
         {

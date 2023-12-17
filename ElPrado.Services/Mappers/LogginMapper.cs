@@ -5,10 +5,8 @@ namespace ElPrado.Services.Mappers
 {
     public static class LogginMapper
     {
-        public static DtoLogin? MapToDto(Usuarios? entidad)
+        public static DtoLogin MapToDto(Usuarios entidad)
         {
-            if (entidad == null) return null;
-
             return new DtoLogin()
             {
                 CodUsuario = entidad.CodUsuario,
@@ -16,10 +14,9 @@ namespace ElPrado.Services.Mappers
                 EsAdmin = entidad.EsAdmin || entidad.SuperUsuario               
             };
         }
-        public static DtoLogin? MapToDto(Clientes? entidad, Propuestas propuesta)
-        {
-            if (entidad == null) return null;
 
+        public static DtoLogin MapToDto(Clientes entidad, Propuestas propuesta)
+        {
             return new DtoLogin()
             {
                 CodCliente = entidad.CodCliente,

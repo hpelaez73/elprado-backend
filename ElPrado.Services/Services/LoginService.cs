@@ -4,6 +4,7 @@ using ElPrado.Data.Models;
 using ElPrado.Data.Repositories;
 using ElPrado.Dto.Dtos;
 using ElPrado.Services.Mappers;
+using System.Security.Cryptography;
 
 namespace ElPrado.Services.Services
 {
@@ -23,18 +24,61 @@ namespace ElPrado.Services.Services
                 Propuestas? propuesta = propuestasRepository.BuscarPropuesta(legajo);
                 if (propuesta != null)
                 {
-                    return LogginMapper.MapToDto(cliente, propuesta);
+                    return GenerarTokenCliente(cliente, propuesta);
                 }
+                return null;
             }
             return null;
+        }
+
+        private DtoLogin? GenerarTokenCliente(Clientes cliente, Propuestas propuesta)
+        {
+            DtoLogin dtoLogin = LogginMapper.MapToDto(cliente, propuesta);
+            dtoLogin.RefreshToken = GenerarRefreshToken();
+            GuardarRefreshToken(cliente.CodCliente, propuesta.CodPropuesta, null, dtoLogin.RefreshToken);
+            return dtoLogin;
         }
 
         public DtoLogin? Login(string alias, string clave)
         {
             UsuariosRepository usuariosRepository = new(Transaccion);
-
             Usuarios? usuario = usuariosRepository.Buscar(alias, clave);
-            return LogginMapper.MapToDto(usuario);
+            if (usuario != null)
+            {
+                return GenerarTokenUsuario(usuario);
+            }
+            return null;
+        }
+
+        private DtoLogin GenerarTokenUsuario(Usuarios usuario)
+        {
+            DtoLogin dtoLogin = LogginMapper.MapToDto(usuario);
+            dtoLogin.RefreshToken = GenerarRefreshToken();
+            GuardarRefreshToken(null, null, usuario.CodUsuario, dtoLogin.RefreshToken);
+            return dtoLogin;
+        }
+
+        public DtoLogin? RenovarToken(string token)
+        {
+            RefreshTokensRepository refreshTokensRepository = new(Transaccion);
+            RefreshTokens? refreshToken = refreshTokensRepository.BuscarTokenActivo(token);
+
+            if (refreshToken == null) return null;
+            if (refreshToken.CodCliente != null && refreshToken.CodPropuesta != null)
+            {
+                ClientesRepository clientesRepository = new(Transaccion);
+                PropuestasRepository propuestasRepository = new(Transaccion);
+                Clientes cliente = clientesRepository.Buscar(refreshToken.CodCliente.Value);
+                Propuestas propuesta = propuestasRepository.Buscar(refreshToken.CodPropuesta.Value);
+                return GenerarTokenCliente(cliente, propuesta);
+            }
+            else if (refreshToken.CodUsuario != null)
+            {
+                UsuariosRepository usuariosRepository = new(Transaccion);
+                Usuarios usuario = usuariosRepository.Buscar(refreshToken.CodUsuario.Value);
+                return GenerarTokenUsuario(usuario);
+            }
+            return null;
         }
 
         public Resultados Registrar(DtoLoginClienteAlta altaCliente)
@@ -99,6 +143,44 @@ namespace ElPrado.Services.Services
                 throw;
             }
             return resultado;
+        }
+
+        private string GenerarRefreshToken()
+        {
+            var tokenBytes = RandomNumberGenerator.GetBytes(64);
+            string token = Convert.ToBase64String(tokenBytes);
+
+            RefreshTokensRepository refreshTokensRepository = new(Transaccion);
+
+            if (refreshTokensRepository.ExisteToken(token))
+            {
+                return GenerarRefreshToken();
+            }
+            return token;
+        }
+
+        private void GuardarRefreshToken(int? codCliente, int? codPropuesta, int? codUsuario, string refreshtoken)
+        {
+            RefreshTokensRepository refreshTokensRepository = new(Transaccion);
+            RefreshTokens refreshToken = new()
+            {
+                CodCliente = codCliente,
+                CodPropuesta = codPropuesta,
+                CodUsuario = codUsuario,
+                Token = refreshtoken,
+                FechaExpiracion = DateTime.Today.AddDays(7)
+            };
+
+            try
+            {
+                refreshTokensRepository.Agregar(refreshToken);
+                Commit();
+            }
+            catch
+            {
+                Rollback();
+                throw;
+            }
         }
     }
 }

@@ -14,6 +14,11 @@ namespace ElPrado.Data.Repositories
             return conexion.Get<TEntidad>(id, transaccion);
         }
 
+        public void Agregar(TEntidad entidad)
+        {
+            conexion.Insert(entidad, transaccion);
+        }
+
         public void Modificar(TEntidad entidad)
         {
             conexion.Update(entidad, transaccion);
