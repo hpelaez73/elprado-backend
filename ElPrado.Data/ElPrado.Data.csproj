@@ -1,0 +1,19 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>net7.0</TargetFramework>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <Nullable>enable</Nullable>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Dapper" Version="2.1.24" />
+    <PackageReference Include="FirebirdSql.Data.FirebirdClient" Version="10.0.0" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\ElPrado.Core\ElPrado.Core.csproj" />
+    <ProjectReference Include="..\ElPrado.Dto\ElPrado.Dto.csproj" />
+  </ItemGroup>
+
+</Project>
