@@ -53,5 +53,41 @@ namespace ElPrado.WebApi.Controllers
                 throw;
             }
         }
+
+        [HttpPost("AnalizarSolicitudAutorizacion")]
+        public ActionResult<ApiResponse<DtoAutorizacionesSolicitudResp>> AnalizarSolicitudAutorizacion([FromBody] DtoAutorizacionesSolicitudReq solicitud)
+        {
+            try
+            {
+                ApiResponse<DtoAutorizacionesSolicitudResp> apiResponse = new()
+                {
+                  //  Data = usuariosService.AnalizarSolicitudAutorizacion(solicitud)
+                };
+                return apiResponse;
+            }
+            catch (Exception ex)
+            {
+                Serilog.Log.Error(ex, "{Controlador}.AnalizarSolicitudAutorizacion({@solicitud}): {Mensaje} {@Extras}", this, solicitud, ex.Message, extrasLog);
+                throw;
+            }
+        }
+
+        [HttpPost("GenerarAutorizacion")]
+        public ActionResult<ApiResponse<DtoAutorizacionesGeneracionResp>> GenerarAutorizacion([FromBody] DtoAutorizacionesGeneracionReq solicitud)
+        {
+            try
+            {
+                ApiResponse<DtoAutorizacionesGeneracionResp> apiResponse = new()
+                {
+                 //   Data = usuariosService.GenerarAutorizacion(solicitud)
+                };
+                return apiResponse;
+            }
+            catch (Exception ex)
+            {
+                Serilog.Log.Error(ex, "{Controlador}.GenerarAutorizacion({@solicitud}): {Mensaje} {@Extras}", this, solicitud, ex.Message, extrasLog);
+                throw;
+            }
+        }
     }
 }

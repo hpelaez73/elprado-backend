@@ -51,5 +51,31 @@ namespace ElPrado.Services.Services
 
             return PanelMapper.MapToDto(listMenusWeb);
         }
+
+        public Resultados<DtoAutorizacionesSolicitudResp> AnalizarSolicitudAutorizacion(DtoAutorizacionesSolicitudReq solicitud)
+        {
+            Resultados<DtoAutorizacionesSolicitudResp> resultado = new();
+            if (solicitud.Parte1.Trim() == string.Empty 
+                || solicitud.Parte2.Trim() == string.Empty
+                || solicitud.Parte3.Trim() == string.Empty) resultado.Agregar("La solicitud está incompleta");
+
+            if (resultado.HayError) return resultado;
+
+            VariosSeguridadRepository variosSeguridadRepository = new(Transaccion);
+            DtoAutorizacionesSolicitudResp solicitudResp = new()
+            {
+                Usuario = variosSeguridadRepository.TraducirClave(solicitud.Parte1.Trim(), true),
+                Proceso = variosSeguridadRepository.TraducirClave(solicitud.Parte2.Trim(), false)
+            };
+
+            if (solicitudResp.Usuario == string.Empty || solicitudResp.Proceso == string.Empty)
+            {
+                resultado.Agregar("El usuario o el proceso no existe");
+                return resultado;
+            }
+
+            resultado.Valor = solicitudResp;
+            return resultado;
+        }
     }
 }
