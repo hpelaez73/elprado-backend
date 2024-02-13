@@ -1,4 +1,5 @@
-﻿using ElPrado.Data.Models;
+﻿using ElPrado.Core;
+using ElPrado.Data.Models;
 using ElPrado.Dto.Dtos;
 using ElPrado.Services.Services;
 using Microsoft.AspNetCore.Mvc;
@@ -50,6 +51,50 @@ namespace ElPrado.WebApi.Controllers
             catch (Exception ex)
             {
                 Serilog.Log.Error(ex, "{Controlador}.Panel(): {Mensaje} {@Extras}", this, ex.Message, extrasLog);
+                throw;
+            }
+        }
+
+        [HttpPost("AnalizarSolicitudAutorizacion")]
+        public ActionResult<ApiResponse<DtoAutorizacionesSolicitudResp>> AnalizarSolicitudAutorizacion([FromBody] DtoAutorizacionesSolicitudReq solicitud)
+        {
+            try
+            {
+                ApiResponse<DtoAutorizacionesSolicitudResp> apiResponse = new();
+                Resultados<DtoAutorizacionesSolicitudResp> resultado = usuariosService.AnalizarSolicitudAutorizacion(solicitud);
+                if (resultado.HayError || resultado.Valor == null)
+                {
+                    apiResponse.Agregar(resultado);
+                    return BadRequest(apiResponse);
+                }
+                apiResponse.Data = resultado.Valor;
+                return apiResponse;
+            }
+            catch (Exception ex)
+            {
+                Serilog.Log.Error(ex, "{Controlador}.AnalizarSolicitudAutorizacion({@solicitud}): {Mensaje} {@Extras}", this, solicitud, ex.Message, extrasLog);
+                throw;
+            }
+        }
+
+        [HttpPost("GenerarAutorizacion")]
+        public ActionResult<ApiResponse<DtoAutorizacionesGeneracionResp>> GenerarAutorizacion([FromBody] DtoAutorizacionesGeneracionReq solicitud)
+        {
+            try
+            {
+                ApiResponse<DtoAutorizacionesGeneracionResp> apiResponse = new();
+                Resultados<DtoAutorizacionesGeneracionResp> resultado = usuariosService.GenerarAutorizacion(solicitud);
+                if (resultado.HayError || resultado.Valor == null)
+                {
+                    apiResponse.Agregar(resultado);
+                    return BadRequest(apiResponse);
+                }
+                apiResponse.Data = resultado.Valor;
+                return apiResponse;
+            }
+            catch (Exception ex)
+            {
+                Serilog.Log.Error(ex, "{Controlador}.GenerarAutorizacion({@solicitud}): {Mensaje} {@Extras}", this, solicitud, ex.Message, extrasLog);
                 throw;
             }
         }
