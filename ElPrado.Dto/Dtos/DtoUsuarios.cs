@@ -7,5 +7,7 @@
         public string Nombre { get; set; } = string.Empty;
         public string ClaveAcceso { get; set; } = string.Empty;
         public bool EsAdmin { get; set; }
+        public bool SuperUsuario { get; set; }
+        public bool PuedeAutorizar { get; set; }
     }
 }

@@ -64,8 +64,8 @@ namespace ElPrado.Services.Services
             VariosSeguridadRepository variosSeguridadRepository = new(Transaccion);
             DtoAutorizacionesSolicitudResp solicitudResp = new()
             {
-                Usuario = variosSeguridadRepository.TraducirClave(solicitud.Parte1.Trim(), true),
-                Proceso = variosSeguridadRepository.TraducirClave(solicitud.Parte2.Trim(), false)
+                Proceso = variosSeguridadRepository.TraducirClave(solicitud.Parte1.Trim(), false),
+                Usuario = variosSeguridadRepository.TraducirClave(solicitud.Parte2.Trim(), true)
             };
 
             if (solicitudResp.Usuario == string.Empty || solicitudResp.Proceso == string.Empty)
@@ -76,6 +76,76 @@ namespace ElPrado.Services.Services
 
             resultado.Valor = solicitudResp;
             return resultado;
+        }
+
+        public Resultados<DtoAutorizacionesGeneracionResp> GenerarAutorizacion(DtoAutorizacionesGeneracionReq solicitud)
+        {
+            Resultados<DtoAutorizacionesGeneracionResp> resultado = new();
+            if (solicitud.Parte1.Trim() == string.Empty
+                || solicitud.Parte2.Trim() == string.Empty
+                || solicitud.Parte3.Trim() == string.Empty) resultado.Agregar("La solicitud está incompleta");
+
+            if (solicitud.Clave.Trim() == string.Empty) resultado.Agregar("Falta ingresar la clave");
+
+            Usuarios? usuario = usuariosRepository.Buscar(ConfiguracionGeneralSesion.CodUsuario, solicitud.Clave);
+            if (usuario == null)
+            {
+                resultado.Agregar("La clave es incorrecta");
+                return resultado;
+            }
+
+            if (!usuario.PuedeAutorizar) resultado.Agregar("El usuario no esta autorizado a generar claves de autorización");
+
+            if (resultado.HayError) return resultado;
+
+            resultado.Valor = ArmarAutorizacion(solicitud);
+
+            return resultado;
+        }
+
+        private DtoAutorizacionesGeneracionResp ArmarAutorizacion(DtoAutorizacionesGeneracionReq solicitud)
+        {
+            string str1 = Ajustar(solicitud.Parte1.Trim());
+            string str2 = Ajustar(solicitud.Parte2.Trim());
+            string str3 = Ajustar(solicitud.Parte3.Trim());
+            string str4 = Ajustar(ConfiguracionGeneralSesion.CodUsuario.ToString());
+
+            string strRes = Unir(str1, str2);
+            strRes = Unir(strRes, str3);
+            strRes = Unir(strRes, str4);
+
+            int p = strRes.Length - 10;
+            return new()
+            {
+                Parte1 = strRes.Substring(p, 3),
+                Parte2 = strRes.Substring(p + 3, 3),
+                Parte3 = strRes.Substring(p + 6, 3)
+            };
+        }
+
+        private string Unir(string str1, string str2)
+        {
+            string resultado = string.Empty;
+            for (int i = 0; i < 10; i++)
+            {
+                int aux = (((str1[i] <= '9') ? Convert.ToInt32(str1[i]) - 48 : Convert.ToInt32(str1[i]) - 55)
+                    + ((str2[i] <= '9') ? Convert.ToInt32(str2[i]) - 48 : Convert.ToInt32(str2[i]) - 55)) * (i + 1);
+                while (aux >= 35)
+                {
+                    aux -= 35;
+                }
+                resultado += (aux <= 9) ? Convert.ToChar(aux + 48) : Convert.ToChar(aux + 55);
+            }
+            return resultado;
+        }
+
+        private string Ajustar(string texto)
+        {
+            while (texto.Length < 10)
+            {
+                texto += texto;
+            }
+            return texto[..10];
         }
     }
 }

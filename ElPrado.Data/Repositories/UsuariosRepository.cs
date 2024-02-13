@@ -16,6 +16,12 @@ namespace ElPrado.Data.Repositories
             return listUsuarios.Count > 0 ? listUsuarios[0] : null;
         }
 
+        public Usuarios? Buscar(int codUsuario, string clave)
+        {
+            List<Usuarios> listUsuarios = conexion.GetList<Usuarios>(new { CodUsuario = codUsuario, ClaveAcceso = clave }, transaccion).AsList();
+            return listUsuarios.Count > 0 ? listUsuarios[0] : null;
+        }
+
         public List<MenusWeb> BuscarMenuUsuario(int codUsuario, bool soloPanel)
         {
             string sql = "SELECT * FROM MENU_WEB(@codUsuario, @soloPanel)";
@@ -27,5 +33,6 @@ namespace ElPrado.Data.Repositories
             string sql = "SELECT * FROM MENU_WEB(NULL, @soloPanel)";
             return conexion.Query<MenusWeb>(sql, new { soloPanel }, transaccion).AsList();
         }
+
     }
 }

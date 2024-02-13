@@ -1,4 +1,5 @@
-﻿using ElPrado.Data.Models;
+﻿using ElPrado.Core;
+using ElPrado.Data.Models;
 using ElPrado.Dto.Dtos;
 using ElPrado.Services.Services;
 using Microsoft.AspNetCore.Mvc;
@@ -59,10 +60,14 @@ namespace ElPrado.WebApi.Controllers
         {
             try
             {
-                ApiResponse<DtoAutorizacionesSolicitudResp> apiResponse = new()
+                ApiResponse<DtoAutorizacionesSolicitudResp> apiResponse = new();
+                Resultados<DtoAutorizacionesSolicitudResp> resultado = usuariosService.AnalizarSolicitudAutorizacion(solicitud);
+                if (resultado.HayError || resultado.Valor == null)
                 {
-                  //  Data = usuariosService.AnalizarSolicitudAutorizacion(solicitud)
-                };
+                    apiResponse.Agregar(resultado);
+                    return BadRequest(apiResponse);
+                }
+                apiResponse.Data = resultado.Valor;
                 return apiResponse;
             }
             catch (Exception ex)
@@ -77,10 +82,14 @@ namespace ElPrado.WebApi.Controllers
         {
             try
             {
-                ApiResponse<DtoAutorizacionesGeneracionResp> apiResponse = new()
+                ApiResponse<DtoAutorizacionesGeneracionResp> apiResponse = new();
+                Resultados<DtoAutorizacionesGeneracionResp> resultado = usuariosService.GenerarAutorizacion(solicitud);
+                if (resultado.HayError || resultado.Valor == null)
                 {
-                 //   Data = usuariosService.GenerarAutorizacion(solicitud)
-                };
+                    apiResponse.Agregar(resultado);
+                    return BadRequest(apiResponse);
+                }
+                apiResponse.Data = resultado.Valor;
                 return apiResponse;
             }
             catch (Exception ex)
