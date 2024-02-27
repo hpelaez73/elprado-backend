@@ -23,7 +23,7 @@ deploy_master:
     #- ssh-keygen -f "/home/gitlab-runner/.ssh/known_hosts" -R 210.1.0.120 
     - ssh root@210.1.1.91 'systemctl stop sicoWeb.service'
     - ssh root@210.1.1.91 'rm -rf /app/*'
-    - scp -r *.*  root@210.1.1.91:/repo
+    - scp -r ./*  root@210.1.1.91:/repo
     - ssh root@210.1.1.91 'dotnet build  --runtime linux-x64'
     - ssh root@210.1.1.91 'cd /repo &&  dotnet publish -c release -r linux-x64 -o /app'
     #- ssh root@210.1.1.91 'cd /app && npm run build'
