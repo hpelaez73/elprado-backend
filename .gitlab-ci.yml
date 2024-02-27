@@ -18,7 +18,7 @@ build_develop:
 deploy_master:
   stage: deploy
   script:
-   - export SSHPASS=PASS 
+  # - export SSHPASS=PASS 
     #- sshpass -p 'root' scp -r deploy/* root@192.168.7.138:/app
     #- ssh-keygen -f "/home/gitlab-runner/.ssh/known_hosts" -R 210.1.0.120 
     - ssh root@210.1.1.91 'systemctl stop sicoWeb.service'
