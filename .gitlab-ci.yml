@@ -1,14 +1,33 @@
 stages:
   - build
-  
+  - deploy
+
 before_script:
   - docker info
 
 build_develop:
   stage: build
   script:
-    - docker build -t "elpradowebapi" .
+   - docker build -t "elpradowebapi" .
     - docker rm -f elpradowebapi || true
     - docker run --restart=always --net netpub --ip 210.1.0.64 -p 80:80 --name elpradowebapi -d -v /etc/timezone:/etc/timezone:ro -v /etc/localtime:/etc/localtime:ro --env ASPNETCORE_ENVIRONMENT=Staging elpradowebapi
   only:
     - develop
+
+
+deploy_master:
+  stage: deploy
+  script:
+   - export SSHPASS=PASS 
+    #- sshpass -p 'root' scp -r deploy/* root@192.168.7.138:/app
+    #- ssh-keygen -f "/home/gitlab-runner/.ssh/known_hosts" -R 210.1.0.120 
+    - ssh root@210.1.1.91 'systemctl stop sicoWeb.service'
+    - ssh root@210.1.1.91 ' rm -rf /app/*'
+    - scp -r *.*  root@210.1.1.91:/repo
+    - ssh root@210.1.1.91 'cd /repo &&  dotnet publish -c release -r linux-x64 -o /app'
+    #- ssh root@210.1.1.91 'cd /app && npm run build'
+    #- ssh root@210.1.1.91 'cd /app && npm start&'
+    #- ssh root@210.1.1.91 'cd /app && npm run dev'
+    - ssh root@210.1.1.91 'systemctl start sicoWeb.service'
+  only:
+    - master
