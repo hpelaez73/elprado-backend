@@ -31,5 +31,18 @@ namespace ElPrado.WebApi.Controllers
             }
         }
 
+        [HttpPost("ListadoInhumados")]
+        public ApiResponseListado<IEnumerable<dynamic>> ListadoInhumados([FromBody] DtoOpcionesListados opcionesListado)
+        {
+            try
+            {
+                return propuestasService.ListadoInhumados(opcionesListado);
+            }
+            catch (Exception ex)
+            {
+                Serilog.Log.Error(ex, "{Controlador}.ListadoInhumados({@opcionesListado}): {Mensaje} {@Extras}", this, opcionesListado, ex.Message, extrasLog);
+                throw;
+            }
+        }
     }
 }

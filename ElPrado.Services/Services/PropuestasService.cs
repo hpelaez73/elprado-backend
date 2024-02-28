@@ -21,5 +21,10 @@ namespace ElPrado.Services.Services
         {
             return propuestasRepository.ListadoTitulares(opcionesListado);
         }
+
+        public ApiResponseListado<IEnumerable<dynamic>> ListadoInhumados(DtoOpcionesListados opcionesListado)
+        {
+            return propuestasRepository.ListadoInhumados(opcionesListado);
+        }
     }
 }
