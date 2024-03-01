@@ -20,7 +20,7 @@ deploy_master:
   script:
   # - export SSHPASS=PASS 
     #- sshpass -p 'root' scp -r deploy/* root@192.168.7.138:/app
-    #- ssh-keygen -f "/home/gitlab-runner/.ssh/known_hosts" -R 210.1.0.120 
+    #- ssh-keygen -f "/home/gitlab-runner/.ssh/known_hosts" -R 210.1.0.120 qq
     - ssh root@210.1.1.91 'systemctl stop sicoWeb.service'
     - ssh root@210.1.1.91 'rm -rf /app/*'
     - ssh root@210.1.1.91 'rm -rf /repo/*'
