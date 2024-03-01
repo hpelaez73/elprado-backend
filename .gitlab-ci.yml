@@ -24,7 +24,7 @@ deploy_master:
     - ssh root@210.1.1.91 'systemctl stop sicoWeb.service'
     - ssh root@210.1.1.91 'rm -rf /app/*'
     - ssh root@210.1.1.91 'rm -rf /repo/*'
-    - scp -r ElPrado.Core/* ElPrado.Data/* ElPrado.Dto/* ElPrado.Services/* ElPrado.WebApi/* Dockerfile ElPradoWeb.sln  root@210.1.1.91:/repo
+    - scp -r ElPrado.Core/ ElPrado.Data/ ElPrado.Dto/ ElPrado.Services/ ElPrado.WebApi/ Dockerfile ElPradoWeb.sln  root@210.1.1.91:/repo
     - ssh root@210.1.1.91 'cd /repo &&  dotnet publish -c release -o /app'
     #- ssh root@210.1.1.91 'cd /app && npm run build'
     #- ssh root@210.1.1.91 'cd /app && npm start&'
