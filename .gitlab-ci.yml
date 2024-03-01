@@ -29,6 +29,6 @@ deploy_master:
     #- ssh root@210.1.1.91 'cd /app && npm run build'
     #- ssh root@210.1.1.91 'cd /app && npm start&'
     #- ssh root@210.1.1.91 'cd /app && npm run dev'
-    #- ssh root@210.1.1.91 'systemctl start sicoWeb.service'
+    - ssh root@210.1.1.91 'systemctl start sicoWeb.service'
   only:
     - master
