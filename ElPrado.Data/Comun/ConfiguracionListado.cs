@@ -25,6 +25,8 @@ namespace ElPrado.Data.Comun
         public bool PermiteFiltrar { get; set; }
         public bool PermiteOrdenar { get; set; } = false;
         public string CampoSql { get; set; } = string.Empty;
+        public string CampoSql2 { get; set; } = string.Empty;
+        public int CampoSqlOrden { get; set; }
         public bool OrdenDefault { get; set; } = false;
         public bool AscendenteDefault { get; set; } = true;
         public bool FiltroDefault { get; set; }

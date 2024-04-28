@@ -1,4 +1,5 @@
 ﻿using Dapper;
+using ElPrado.Core.Enums;
 using ElPrado.Data.Comun;
 using ElPrado.Data.Models;
 using ElPrado.Dto.Dtos;
@@ -33,6 +34,13 @@ namespace ElPrado.Data.Repositories
                         PermiteFiltrar = true,
                         PermiteOrdenar = false,
                         CampoSql = "CL.NRO_DOCUMENTO"
+                    },
+                    new CamposListado() {
+                        Campo = "incluirBaja",
+                        Etiqueta = "Incluir baja",
+                        TipoDato = TipoDatoListado.Boolean,
+                        PermiteFiltrar = true,
+                        PermiteOrdenar = false
                     }
                 }
             };
@@ -49,15 +57,25 @@ namespace ElPrado.Data.Repositories
                         PermiteFiltrar = true,
                         PermiteOrdenar = true,
                         OrdenDefault = true,
-                        CampoSql = "CL.NOMBRE"
+                        CampoSql = "COALESCE(CL.NOMBRE, I.NOMBRE_INHUMADO_NN)",
+                        CampoSql2 = "I.NOMBRE_INHUMADO",
+                        CampoSqlOrden = 1
                     },
                     new CamposListado() {
                         Campo = "nroDocumento",
                         Etiqueta = "Nro de documento",
                         TipoDato = TipoDatoListado.Texto,
+                        CampoSql = "CL.NRO_DOCUMENTO",
+                        CampoSql2 = "I.NUMERO_DOCUMENTO_INHUMADO",
                         PermiteFiltrar = true,
-                        PermiteOrdenar = false,
-                        CampoSql = "CL.NRO_DOCUMENTO"
+                        PermiteOrdenar = false
+                    },
+                    new CamposListado() {
+                        Campo = "incluirBaja",
+                        Etiqueta = "Incluir baja",
+                        TipoDato = TipoDatoListado.Boolean,
+                        PermiteFiltrar = true,
+                        PermiteOrdenar = false
                     }
                 }
             };
@@ -80,23 +98,60 @@ namespace ElPrado.Data.Repositories
                 return apiResponse;
             }
 
-            string sqlWhere = "WHERE P.FECHA_BAJA IS NULL AND ED.ACTIVA = 1" + funcionesListados.ParseSqlWhere(false);
-            string sqlFrom = @" FROM PROPUESTA P
+            string sqlWhere1 = string.Empty;
+            string sqlWhere2 = string.Empty;
+            if (opcionesListado.ListFiltros != null)
+            {
+                bool incluirBaja = false;
+                DtoCamposFiltroListado? campoFiltro = opcionesListado.ListFiltros.Find(x => x.Campo.Equals("incluirBaja", StringComparison.CurrentCultureIgnoreCase));
+                if (campoFiltro != null && !string.IsNullOrEmpty(campoFiltro.Valor) && campoFiltro.TipoComparacion == TipoComparacion.Igual)
+                {
+                    incluirBaja = campoFiltro.Valor.Equals("True", StringComparison.CurrentCultureIgnoreCase);
+                }
+                sqlWhere1 = (incluirBaja) ? " AND P.FECHA_BAJA IS NULL" : "";
+                sqlWhere2 = (incluirBaja) ? " AND P.FECHA_BAJA IS NULL" : "";
+                sqlWhere1 += funcionesListados.ParseSqlWhere();
+                sqlWhere2 += funcionesListados.ParseSqlWhere(2);
+            }
+
+            string sqlFrom1 = @"FROM PROPUESTA P
                                 INNER JOIN ESTADOS_DEUDAS ED ON ED.COD_ESTADO_DEUDA = P.COD_ESTADO_DEUDA
-                                INNER JOIN PROPUESTAS_TITULARES CC ON CC.COD_PROPUESTA = P.COD_PROPUESTA AND CC.FECHA_BAJA IS NULL
-                                INNER JOIN CLIENTES CL ON CL.COD_CLIENTE = CC.COD_CLIENTE
-                                LEFT OUTER JOIN PARCELA PA ON PA.COD_PARCELA = P.COD_PARCELA";
-            string sqlCant = $@"SELECT COUNT(*)
-                            {sqlFrom} 
-                            {sqlWhere}";
+                                INNER JOIN PARCELA PA ON PA.COD_PARCELA = P.COD_PARCELA
+                                INNER JOIN DET_INHUMADOS DI ON DI.COD_PARCELA = P.COD_PARCELA AND DI.COD_PROPUESTA = P.COD_PROPUESTA
+                                INNER JOIN INHUMADOS I ON I.COD_INHUMADO = DI.COD_INHUMADO
+                                LEFT OUTER JOIN CLIENTES CL ON CL.COD_CLIENTE = I.COD_CLIENTE_INHUMADO
+                                WHERE NOT EXISTS(SELECT 1 FROM INHUMACION IOLD WHERE IOLD.COD_INHUMADO_MIG = DI.COD_DET_INHUMADO AND IOLD.FECHA_CONTROL_MIG IS NULL)";
+            string sqlFrom2 = @"FROM PROPUESTA P
+                                INNER JOIN ESTADOS_DEUDAS ED ON ED.COD_ESTADO_DEUDA = P.COD_ESTADO_DEUDA
+                                INNER JOIN PARCELA PA ON PA.COD_PARCELA = P.COD_PARCELA
+                                INNER JOIN INHUMACION I ON I.COD_PARCELA = P.COD_PARCELA AND I.COD_PROPUESTA = P.COD_PROPUESTA
+                                WHERE I.FECHA_CONTROL_MIG IS NULL";
+            string sqlCant = $@"SELECT 
+                                  (SELECT COUNT(*) {sqlFrom1} {sqlWhere1})
+                                + (SELECT COUNT(*) {sqlFrom2} {sqlWhere2}) AS CANT
+                                FROM RDB$DATABASE";
             string sql = $@"SELECT {funcionesListados.ParseSqlPaginado(sqlCant, conexion, transaccion)}
-                            CL.NOMBRE, CL.NRO_DOCUMENTO, P.COD_PROPUESTA, P.LEGAJO AS PROPUESTA, PA.LEGAJO AS PARCELA
-                            {sqlFrom} 
-                            {sqlWhere}
-                            {funcionesListados.ParseSqlOrden()}";
+                            I.NOMBRE_INHUMADO, I.FECHA_INHUMACION, I.NRO_DOCUMENTO,
+                            I.COD_PROPUESTA, I.PROPUESTA, I.PARCELA,
+                            I.FECHA, I.FECHA_BAJA
+                            FROM (
+                            SELECT
+                            COALESCE(CL.NOMBRE, I.NOMBRE_INHUMADO_NN) AS NOMBRE_INHUMADO, DI.FECHA_INHUMACION, CL.NRO_DOCUMENTO,
+                            P.COD_PROPUESTA, P.LEGAJO AS PROPUESTA, PA.LEGAJO AS PARCELA,
+                            P.FECHA, P.FECHA_BAJA
+                            {sqlFrom1} 
+                            {sqlWhere1}
+                            UNION ALL
+                            SELECT I.NOMBRE_INHUMADO, CAST(I.FECHA_INHU_INHUMADO AS TIMESTAMP) AS FECHA_INHUMACION, I.NUMERO_DOCUMENTO_INHUMADO AS NRO_DOCUMENTO,
+                            P.COD_PROPUESTA, P.LEGAJO AS PROPUESTA, PA.LEGAJO AS PARCELA,
+                            P.FECHA, P.FECHA_BAJA
+                            {sqlFrom2}
+                            {sqlWhere2}
+                            {funcionesListados.ParseSqlOrden()}
+                            ) I";
 
             apiResponse.CantidadPaginas = funcionesListados.CantidadPaginas();
-            apiResponse.Data = conexion.Query<DtoPropuestas>(sql, null, transaccion);
+            apiResponse.Data = conexion.Query<DtoPropuestasInhumados>(sql, null, transaccion);
             return apiResponse;
         }
 
@@ -111,7 +166,7 @@ namespace ElPrado.Data.Repositories
                 return apiResponse;
             }
 
-            string sqlWhere = "WHERE P.FECHA_BAJA IS NULL AND ED.ACTIVA = 1" + funcionesListados.ParseSqlWhere(false);
+            string sqlWhere = "WHERE P.FECHA_BAJA IS NULL AND ED.ACTIVA = 1" + funcionesListados.ParseSqlWhere();
             string sqlFrom = @" FROM PROPUESTA P
                                 INNER JOIN ESTADOS_DEUDAS ED ON ED.COD_ESTADO_DEUDA = P.COD_ESTADO_DEUDA
                                 INNER JOIN PROPUESTAS_TITULARES CC ON CC.COD_PROPUESTA = P.COD_PROPUESTA AND CC.FECHA_BAJA IS NULL
@@ -121,13 +176,14 @@ namespace ElPrado.Data.Repositories
                             {sqlFrom} 
                             {sqlWhere}";
             string sql = $@"SELECT {funcionesListados.ParseSqlPaginado(sqlCant, conexion, transaccion)}
-                            CL.NOMBRE, CL.NRO_DOCUMENTO, P.COD_PROPUESTA, P.LEGAJO AS PROPUESTA, PA.LEGAJO AS PARCELA
+                            CL.NOMBRE, CL.NRO_DOCUMENTO, P.COD_PROPUESTA, P.LEGAJO AS PROPUESTA, PA.LEGAJO AS PARCELA,
+                            P.FECHA, P.FECHA_BAJA
                             {sqlFrom} 
                             {sqlWhere}
                             {funcionesListados.ParseSqlOrden()}";
 
             apiResponse.CantidadPaginas = funcionesListados.CantidadPaginas();
-            apiResponse.Data = conexion.Query<DtoPropuestas>(sql, null, transaccion);
+            apiResponse.Data = conexion.Query<DtoPropuestasTitulares>(sql, null, transaccion);
             return apiResponse;
         }
     }

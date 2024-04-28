@@ -4,6 +4,7 @@ using System.Text;
 using ElPrado.Core;
 using ElPrado.Core.Enums;
 using Dapper;
+using System.ComponentModel.Design;
 
 namespace ElPrado.Data.Comun
 {
@@ -79,7 +80,7 @@ namespace ElPrado.Data.Comun
             return cantidadPaginas;
         }
 
-        internal string ParseSqlWhere(bool incluirWhere)
+        internal string ParseSqlWhere(int orden = 1)
         {
             if (opcionesListados.ListFiltros == null || opcionesListados.ListFiltros.Count == 0)
             {
@@ -98,7 +99,8 @@ namespace ElPrado.Data.Comun
                 CamposListado? campo = configuracionListado.ListCampos.Find(x => x.Campo.ToLower() == item.Campo.ToLower());
                 if (campo == null) continue;
                 if (!campo.PermiteFiltrar) continue;
-                if (string.IsNullOrEmpty(campo.CampoSql)) continue;
+                if (orden == 1 && string.IsNullOrEmpty(campo.CampoSql)) continue;
+                if (orden == 2 && string.IsNullOrEmpty(campo.CampoSql2)) continue;
 
                 if ((campo.TipoDato == TipoDatoListado.Entero)
                     && !string.IsNullOrWhiteSpace(item.Valor) && !Regex.IsMatch(item.Valor, @"^\d+$")) continue;
@@ -106,7 +108,8 @@ namespace ElPrado.Data.Comun
                 // Comienzo a construir el Where
                 if (builder.Length > 0) builder.Append(" AND ");
 
-                builder.Append((campo.TipoDato == TipoDatoListado.Texto) ? $"UPPER(TRIM({campo.CampoSql}))" : campo.CampoSql);
+                if (orden == 2) builder.Append((campo.TipoDato == TipoDatoListado.Texto) ? $"UPPER(TRIM({campo.CampoSql2}))" : campo.CampoSql2);
+                else builder.Append((campo.TipoDato == TipoDatoListado.Texto) ? $"UPPER(TRIM({campo.CampoSql}))" : campo.CampoSql);
 
                 if (item.TipoComparacion.In(TipoComparacion.Contiene, TipoComparacion.ComienzaCon) && campo.TipoDato != TipoDatoListado.Texto)
                 {
@@ -168,7 +171,7 @@ namespace ElPrado.Data.Comun
             }
             if (builder.Length > 0)
             {
-                builder.Insert(0, ((incluirWhere) ? " WHERE " : " AND "));
+                builder.Insert(0, " AND ");
                 builder.Append(" ");
             }
             return builder.ToString();
@@ -196,7 +199,7 @@ namespace ElPrado.Data.Comun
                     if (campo != null)
                     {
                         if (builder.Length > 0) builder.Append(", ");
-                        builder.Append(campo.CampoSql + (item.Ascendente ? string.Empty : " DESC"));
+                        builder.Append((campo.CampoSqlOrden > 0 ? campo.CampoSqlOrden.ToString() : campo.CampoSql) + (item.Ascendente ? string.Empty : " DESC"));
                     }
                 }
             }
