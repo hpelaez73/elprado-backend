@@ -17,7 +17,9 @@ namespace ElPrado.Services.Services
             return new PropuestasRepository(Transaccion);
         }
 
-        public ApiResponseListado<IEnumerable<dynamic>> ListadoTitulares(DtoOpcionesListados? opcionesListado)
+        //public ApiResponse<DtoPropuestaConsultaResp>
+
+        public ApiResponseListado<IEnumerable<dynamic>> ListadoTitulares(DtoOpcionesListados opcionesListado)
         {
             return propuestasRepository.ListadoTitulares(opcionesListado);
         }
@@ -25,6 +27,11 @@ namespace ElPrado.Services.Services
         public ApiResponseListado<IEnumerable<dynamic>> ListadoInhumados(DtoOpcionesListados opcionesListado)
         {
             return propuestasRepository.ListadoInhumados(opcionesListado);
+        }
+
+        public ApiResponseListado<IEnumerable<dynamic>> ListadoBeneficiarios(DtoOpcionesListados opcionesListado)
+        {
+            return propuestasRepository.ListadoBeneficiarios(opcionesListado);
         }
     }
 }

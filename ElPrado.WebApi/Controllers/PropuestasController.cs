@@ -44,5 +44,19 @@ namespace ElPrado.WebApi.Controllers
                 throw;
             }
         }
+
+        [HttpPost("ListadoBeneficiarios")]
+        public ApiResponseListado<IEnumerable<dynamic>> ListadoBeneficiarios([FromBody] DtoOpcionesListados opcionesListado)
+        {
+            try
+            {
+                return propuestasService.ListadoBeneficiarios(opcionesListado);
+            }
+            catch (Exception ex)
+            {
+                Serilog.Log.Error(ex, "{Controlador}.ListadoBeneficiarios({@opcionesListado}): {Mensaje} {@Extras}", this, opcionesListado, ex.Message, extrasLog);
+                throw;
+            }
+        }
     }
 }

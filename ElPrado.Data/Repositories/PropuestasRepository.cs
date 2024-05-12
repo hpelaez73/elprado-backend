@@ -10,6 +10,7 @@ namespace ElPrado.Data.Repositories
     {
         private ConfiguracionListado configuracionListadoTitulares;
         private ConfiguracionListado configuracionListadoInhumados;
+        private ConfiguracionListado configuracionListadoBeneficiarios;
 
         public PropuestasRepository(Transaccion transaccion) : base(transaccion)
         {
@@ -79,6 +80,38 @@ namespace ElPrado.Data.Repositories
                     }
                 }
             };
+
+            configuracionListadoBeneficiarios = new()
+            {
+                ListCampos = new()
+                {
+                    new CamposListado()
+                    {
+                        Campo = "nombre",
+                        Etiqueta = "Nombre",
+                        TipoDato = TipoDatoListado.Texto,
+                        PermiteFiltrar = true,
+                        PermiteOrdenar = true,
+                        OrdenDefault = true,
+                        CampoSql = "CL.NOMBRE"
+                    },
+                    new CamposListado() {
+                        Campo = "nroDocumento",
+                        Etiqueta = "Nro de documento",
+                        TipoDato = TipoDatoListado.Texto,
+                        PermiteFiltrar = true,
+                        PermiteOrdenar = false,
+                        CampoSql = "CL.NRO_DOCUMENTO"
+                    },
+                    new CamposListado() {
+                        Campo = "incluirBaja",
+                        Etiqueta = "Incluir baja",
+                        TipoDato = TipoDatoListado.Boolean,
+                        PermiteFiltrar = true,
+                        PermiteOrdenar = false
+                    }
+                }
+            };
         }
 
         public Propuestas? BuscarPropuesta(int legajo)
@@ -89,14 +122,7 @@ namespace ElPrado.Data.Repositories
 
         public ApiResponseListado<IEnumerable<dynamic>> ListadoInhumados(DtoOpcionesListados opcionesListado)
         {
-            ApiResponseListado<IEnumerable<dynamic>> apiResponse = new();
-
-            FuncionesListados funcionesListados = new(configuracionListadoInhumados, opcionesListado);
-            if (funcionesListados.MostrarFiltros())
-            {
-                apiResponse.ListFiltros = funcionesListados.MapOpcionesListado();
-                return apiResponse;
-            }
+            FuncionesListados<DtoPropuestasInhumadosList> funcionesListados = new(configuracionListadoInhumados, opcionesListado);
 
             string sqlWhere1 = string.Empty;
             string sqlWhere2 = string.Empty;
@@ -150,23 +176,23 @@ namespace ElPrado.Data.Repositories
                             {funcionesListados.ParseSqlOrden()}
                             ) I";
 
-            apiResponse.CantidadPaginas = funcionesListados.CantidadPaginas();
-            apiResponse.Data = conexion.Query<DtoPropuestasInhumados>(sql, null, transaccion);
-            return apiResponse;
+            return funcionesListados.ApiResponse(sql, conexion, transaccion); ;
         }
 
-        public ApiResponseListado<IEnumerable<dynamic>> ListadoTitulares(DtoOpcionesListados? opcionesListado)
+        public ApiResponseListado<IEnumerable<dynamic>> ListadoTitulares(DtoOpcionesListados opcionesListado)
         {
-            ApiResponseListado<IEnumerable<dynamic>> apiResponse = new();
+            FuncionesListados<DtoPropuestasTitularesList> funcionesListados = new(configuracionListadoTitulares, opcionesListado);
 
-            FuncionesListados funcionesListados = new(configuracionListadoTitulares, opcionesListado);
-            if (funcionesListados.MostrarFiltros())
+            bool incluirBaja = false;
+            if (opcionesListado.ListFiltros != null)
             {
-                apiResponse.ListFiltros = funcionesListados.MapOpcionesListado();
-                return apiResponse;
+                DtoCamposFiltroListado? campoFiltro = opcionesListado.ListFiltros.Find(x => x.Campo.Equals("incluirBaja", StringComparison.CurrentCultureIgnoreCase));
+                if (campoFiltro != null && !string.IsNullOrEmpty(campoFiltro.Valor) && campoFiltro.TipoComparacion == TipoComparacion.Igual)
+                {
+                    incluirBaja = campoFiltro.Valor.Equals("True", StringComparison.CurrentCultureIgnoreCase);
+                }
             }
-
-            string sqlWhere = "WHERE P.FECHA_BAJA IS NULL AND ED.ACTIVA = 1" + funcionesListados.ParseSqlWhere();
+            string sqlWhere = ((incluirBaja) ? " WHERE P.FECHA_BAJA IS NULL" : " WHERE 1=1") + funcionesListados.ParseSqlWhere();
             string sqlFrom = @" FROM PROPUESTA P
                                 INNER JOIN ESTADOS_DEUDAS ED ON ED.COD_ESTADO_DEUDA = P.COD_ESTADO_DEUDA
                                 INNER JOIN PROPUESTAS_TITULARES CC ON CC.COD_PROPUESTA = P.COD_PROPUESTA AND CC.FECHA_BAJA IS NULL
@@ -182,9 +208,39 @@ namespace ElPrado.Data.Repositories
                             {sqlWhere}
                             {funcionesListados.ParseSqlOrden()}";
 
-            apiResponse.CantidadPaginas = funcionesListados.CantidadPaginas();
-            apiResponse.Data = conexion.Query<DtoPropuestasTitulares>(sql, null, transaccion);
-            return apiResponse;
+            return funcionesListados.ApiResponse(sql, conexion, transaccion);
+        }
+
+        public ApiResponseListado<IEnumerable<dynamic>> ListadoBeneficiarios(DtoOpcionesListados opcionesListado)
+        {
+            FuncionesListados<DtoPropuestasTitularesList> funcionesListados = new(configuracionListadoBeneficiarios, opcionesListado);
+
+            bool incluirBaja = false;
+            if (opcionesListado.ListFiltros != null)
+            {
+                DtoCamposFiltroListado? campoFiltro = opcionesListado.ListFiltros.Find(x => x.Campo.Equals("incluirBaja", StringComparison.CurrentCultureIgnoreCase));
+                if (campoFiltro != null && !string.IsNullOrEmpty(campoFiltro.Valor) && campoFiltro.TipoComparacion == TipoComparacion.Igual)
+                {
+                    incluirBaja = campoFiltro.Valor.Equals("True", StringComparison.CurrentCultureIgnoreCase);
+                }
+            }
+            string sqlWhere = "WHERE CL.COD_CLIENTE IS NOT NULL" + ((incluirBaja) ? " AND P.FECHA_BAJA IS NULL" : "") + funcionesListados.ParseSqlWhere();
+            string sqlFrom = @" FROM HIST_SERVICIOS_UTILIZADOS H
+                                INNER JOIN PROPUESTA P ON P.COD_PROPUESTA = H.COD_PROPUESTA
+                                LEFT OUTER JOIN PARCELA PA ON PA.COD_PARCELA = P.COD_PARCELA
+                                LEFT OUTER JOIN INHUMADOS I ON I.COD_INHUMADO = H.COD_INHUMADO
+                                LEFT OUTER JOIN CLIENTES CL ON CL.COD_CLIENTE = COALESCE(H.COD_CLIENTE_BENEFICIADO, I.COD_CLIENTE_INHUMADO)";
+            string sqlCant = $@"SELECT COUNT(*)
+                            {sqlFrom} 
+                            {sqlWhere}";
+            string sql = $@"SELECT {funcionesListados.ParseSqlPaginado(sqlCant, conexion, transaccion)}
+                            DISTINCT CL.NOMBRE, CL.NRO_DOCUMENTO, P.LEGAJO AS PROPUESTA, PA.LEGAJO AS PARCELA, H.COD_PROPUESTA,
+                            P.FECHA, P.FECHA_BAJA
+                            {sqlFrom} 
+                            {sqlWhere}
+                            {funcionesListados.ParseSqlOrden()}";
+
+            return funcionesListados.ApiResponse(sql, conexion, transaccion);
         }
     }
 }

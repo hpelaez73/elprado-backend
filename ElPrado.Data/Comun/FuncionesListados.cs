@@ -1,14 +1,14 @@
-﻿using ElPrado.Dto.Dtos;
-using System.Text.RegularExpressions;
-using System.Text;
+﻿using Dapper;
 using ElPrado.Core;
 using ElPrado.Core.Enums;
-using Dapper;
-using System.ComponentModel.Design;
+using ElPrado.Dto.Dtos;
+using System.Text;
+using System.Text.RegularExpressions;
+using System.Transactions;
 
 namespace ElPrado.Data.Comun
 {
-    internal class FuncionesListados
+    internal class FuncionesListados<TDtoList> where TDtoList : DtoBase
     {
         private ConfiguracionListado configuracionListado;
         private DtoOpcionesListados opcionesListados;
@@ -20,8 +20,21 @@ namespace ElPrado.Data.Comun
             configuracionListado = configuracion;
             opcionesListados = opciones ?? ArmarOpcionesDefault();
         }
+        internal ApiResponseListado<IEnumerable<dynamic>> ApiResponse(string sql, System.Data.IDbConnection conexion, System.Data.IDbTransaction transaccion)
+        {
+            ApiResponseListado<IEnumerable<dynamic>> apiResponse = new();
+            if (opcionesListados.MostrarFiltros)
+            {
+                apiResponse.ListFiltros = MapOpcionesListado();
+                return apiResponse;
+            }
+            apiResponse.CantidadPaginas = cantidadPaginas;
+            apiResponse.CantidadRegistros = cantidadRegistros;
+            apiResponse.Data = conexion.Query<TDtoList>(sql, null, transaccion);
+            return apiResponse;
+        }
 
-        internal List<DtoCamposListado> MapOpcionesListado()
+        private List<DtoCamposListado> MapOpcionesListado()
         {
             return configuracionListado.ListCampos.Select(
                 x => new DtoCamposListado()
@@ -35,10 +48,6 @@ namespace ElPrado.Data.Comun
                 }).ToList();
         }
 
-        internal bool MostrarFiltros()
-        {
-            return opcionesListados.MostrarFiltros;
-        }
         private DtoOpcionesListados ArmarOpcionesDefault()
         {
             DtoOpcionesListados opciones = new()
@@ -75,11 +84,6 @@ namespace ElPrado.Data.Comun
             return opciones;
         }
 
-        internal int CantidadPaginas()
-        {
-            return cantidadPaginas;
-        }
-
         internal string ParseSqlWhere(int orden = 1)
         {
             if (opcionesListados.ListFiltros == null || opcionesListados.ListFiltros.Count == 0)
@@ -89,11 +93,11 @@ namespace ElPrado.Data.Comun
             StringBuilder builder = new();
             foreach (DtoCamposFiltroListado item in opcionesListados.ListFiltros)
             {
-                if (!item.TipoComparacion.In(TipoComparacion.EnLista, TipoComparacion.EsNulo, TipoComparacion.EsNoNulo) 
+                if (!item.TipoComparacion.In(TipoComparacion.EnLista, TipoComparacion.EsNulo, TipoComparacion.EsNoNulo)
                     && string.IsNullOrWhiteSpace(item.Valor)) continue;
-                if ((item.TipoComparacion == TipoComparacion.Entre) 
+                if ((item.TipoComparacion == TipoComparacion.Entre)
                     && string.IsNullOrWhiteSpace(item.ValorHasta)) continue;
-                if ((item.TipoComparacion == TipoComparacion.EnLista) 
+                if ((item.TipoComparacion == TipoComparacion.EnLista)
                     && (item.ListValores == null || item.ListValores.Count == 0)) continue;
 
                 CamposListado? campo = configuracionListado.ListCampos.Find(x => x.Campo.ToLower() == item.Campo.ToLower());
