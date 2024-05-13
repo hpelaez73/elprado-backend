@@ -8,6 +8,7 @@ before_script:
 build_develop:
   stage: build
   script:
+  - docker stop elpradowebapi
    - docker rm elpradowebapi
    - docker rmi elpradowebapi
    - docker build -t "elpradowebapi" .
