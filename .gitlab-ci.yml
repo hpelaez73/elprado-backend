@@ -8,7 +8,7 @@ before_script:
 build_develop:
   stage: build
   script:
-   - docker build -t "elpradowebapi" .
+    - docker build -t "elpradowebapi" .
     - docker rm -f elpradowebapi || true
     - docker run --restart=always --net netpub --ip 210.1.0.64 -p 80:80 --name elpradowebapi -d -v /etc/timezone:/etc/timezone:ro -v /etc/localtime:/etc/localtime:ro --env ASPNETCORE_ENVIRONMENT=Staging elpradowebapi
   only:
