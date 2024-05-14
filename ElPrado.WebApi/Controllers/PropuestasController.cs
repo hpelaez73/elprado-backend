@@ -1,4 +1,5 @@
-﻿using ElPrado.Dto.Dtos;
+﻿using ElPrado.Core;
+using ElPrado.Dto.Dtos;
 using ElPrado.Services.Services;
 using Microsoft.AspNetCore.Mvc;
 
@@ -17,7 +18,30 @@ namespace ElPrado.WebApi.Controllers
             return new PropuestasService(null);
         }
 
-        [HttpPost("ListadoTitulares")]
+        [HttpGet("Detalle")]
+        public ActionResult<ApiResponse<DtoPropuestaDetalleResp>> Detalle([FromBody] DtoPropuestaDetalleReq dtoPropuesta)
+        {
+            try
+            {
+                ApiResponse<DtoPropuestaDetalleResp> apiResponse = new();
+                Resultados<DtoPropuestaDetalleResp> resultado = propuestasService.Detalle(dtoPropuesta);
+                if (resultado.HayError || resultado.Valor == null)
+                {
+                    apiResponse.Agregar(resultado);
+                    return BadRequest(apiResponse);
+                }
+                apiResponse.Data = resultado.Valor;
+                return apiResponse;
+            }
+            catch (Exception ex)
+            {
+                Serilog.Log.Error(ex, "{Controlador}.Detalle({@dtoPropuesta}): {Mensaje} {@Extras}", this, dtoPropuesta, ex.Message, extrasLog);
+                throw;
+            }
+
+        }
+
+        [HttpGet("ListadoTitulares")]
         public ApiResponseListado<IEnumerable<dynamic>> ListadoTitulares([FromBody] DtoOpcionesListados opcionesListado)
         {
             try
@@ -31,7 +55,7 @@ namespace ElPrado.WebApi.Controllers
             }
         }
 
-        [HttpPost("ListadoInhumados")]
+        [HttpGet("ListadoInhumados")]
         public ApiResponseListado<IEnumerable<dynamic>> ListadoInhumados([FromBody] DtoOpcionesListados opcionesListado)
         {
             try
@@ -45,7 +69,7 @@ namespace ElPrado.WebApi.Controllers
             }
         }
 
-        [HttpPost("ListadoBeneficiarios")]
+        [HttpGet("ListadoBeneficiarios")]
         public ApiResponseListado<IEnumerable<dynamic>> ListadoBeneficiarios([FromBody] DtoOpcionesListados opcionesListado)
         {
             try

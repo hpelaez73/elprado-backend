@@ -1,6 +1,13 @@
 ﻿namespace ElPrado.Dto.Dtos
 {
-    public class DtoPropuestaConsultaResp
+    public class DtoPropuestaDetalleReq
+    {
+        public int? Propuesta { get; set; }
+        public string? Parcela { get; set; }
+        public bool IncluirBaja { get; set; }
+    }
+
+    public class DtoPropuestaDetalleResp
     {
         // Datos de la propuesta
         public int CodPropuesta { get; set; }
