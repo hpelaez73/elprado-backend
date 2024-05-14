@@ -41,7 +41,7 @@ namespace ElPrado.WebApi.Controllers
 
         }
 
-        [HttpGet("ListadoTitulares")]
+        [HttpPost("ListadoTitulares")]
         public ApiResponseListado<IEnumerable<dynamic>> ListadoTitulares([FromBody] DtoOpcionesListados opcionesListado)
         {
             try
@@ -55,7 +55,7 @@ namespace ElPrado.WebApi.Controllers
             }
         }
 
-        [HttpGet("ListadoInhumados")]
+        [HttpPost("ListadoInhumados")]
         public ApiResponseListado<IEnumerable<dynamic>> ListadoInhumados([FromBody] DtoOpcionesListados opcionesListado)
         {
             try
@@ -69,7 +69,7 @@ namespace ElPrado.WebApi.Controllers
             }
         }
 
-        [HttpGet("ListadoBeneficiarios")]
+        [HttpPost("ListadoBeneficiarios")]
         public ApiResponseListado<IEnumerable<dynamic>> ListadoBeneficiarios([FromBody] DtoOpcionesListados opcionesListado)
         {
             try
