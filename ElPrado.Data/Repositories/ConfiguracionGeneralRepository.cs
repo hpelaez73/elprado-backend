@@ -30,6 +30,23 @@ namespace ElPrado.Data.Repositories
             return BuscarValorString(MacrosConfiguraciones.MercadoPagoNotificationUrl);
         }
 
+        public string BuscarInformacionCobranza1()
+        {
+            return BuscarValorString(MacrosConfiguraciones.InformacionCobranza1);
+        }
+        public string BuscarInformacionCobranza2()
+        {
+            return BuscarValorString(MacrosConfiguraciones.InformacionCobranza2);
+        }
+        public string BuscarInformacionCobranza3()
+        {
+            return BuscarValorString(MacrosConfiguraciones.InformacionCobranza3);
+        }
+        public string BuscarUrlFacturasPdf()
+        {
+            return BuscarValorString(MacrosConfiguraciones.UrlFacturasPdf);
+        }
+
         private string BuscarValorString(string macro)
         {
             List<ConfiguracionGeneral> listConfiguracionGeneral = conexion.GetList<ConfiguracionGeneral>(new { Macro = macro }, transaccion).AsList();
@@ -39,10 +56,18 @@ namespace ElPrado.Data.Repositories
 
     internal static class MacrosConfiguraciones
     {
+        // MercadoPago
         public const string MercadoPagoAccessToken = "MP_ACC_TOK";
         public const string MercadoPagoBackUrlsSuccess = "MP_BU_SUCC";
         public const string MercadoPagoBackUrlsFailure = "MP_BU_FAIL";
         public const string MercadoPagoBackUrlsPending = "MP_BU_PEND";
         public const string MercadoPagoNotificationUrl = "MP_NOT_URL";
+
+        // Cobranza
+        public const string InformacionCobranza1 = "INFO_COBR1";
+        public const string InformacionCobranza2 = "INFO_COBR2";
+        public const string InformacionCobranza3 = "INFO_COBR3";
+        public const string UrlFacturasPdf = "URL_FACTUR";
+        
     }
 }

@@ -1,4 +1,7 @@
 ﻿using Dapper;
+using ElPrado.Core.Domains;
+using ElPrado.Core.Enums;
+using ElPrado.Data.Comun;
 using ElPrado.Data.Models;
 using ElPrado.Dto.Dtos;
 
@@ -6,8 +9,52 @@ namespace ElPrado.Data.Repositories
 {
     public class ComprobantesRepository : RepositoryBaseEntidad<Comprobantes>
     {
+        private ConfiguracionListado configuracionListadoFacturasEnviar;
+
         public ComprobantesRepository(Transaccion transaccion) : base(transaccion)
         {
+            configuracionListadoFacturasEnviar = new()
+            {
+                ListCampos = new()
+                {
+                    new CamposListado()
+                    {
+                        Campo = "propuesta",
+                        Etiqueta = "Propuesta",
+                        TipoDato = TipoDatoListado.Entero,
+                        PermiteFiltrar = true,
+                        PermiteOrdenar = true,
+                        OrdenDefault = true,
+                        CampoSql = "P.LEGAJO"
+                    },
+                    new CamposListado()
+                    {
+                        Campo = "fecha",
+                        Etiqueta = "Fecha",
+                        TipoDato = TipoDatoListado.Fecha,
+                        PermiteFiltrar = true,
+                        PermiteOrdenar = true,
+                        OrdenDefault = true,
+                        CampoSql = "C.FECHA"
+                    },
+                    new CamposListado()
+                    {
+                        Campo = "soloNuevo",
+                        Etiqueta = "Solo nuevo",
+                        TipoDato = TipoDatoListado.Boolean,
+                        PermiteFiltrar = true,
+                        PermiteOrdenar = false
+                    },
+                    new CamposListado()
+                    {
+                        Campo = "posteriorSolicitud",
+                        Etiqueta = "Posterior a la solicitud",
+                        TipoDato = TipoDatoListado.Boolean,
+                        PermiteFiltrar = true,
+                        PermiteOrdenar = false
+                    }
+                }
+            };
         }
 
         public IEnumerable<DtoComprobantesFacturasElectronicas> Facturas(int codCliente, DateTime fechaDesde, DateTime fechaHasta)
@@ -20,6 +67,55 @@ namespace ElPrado.Data.Repositories
         {
             string sql = "SELECT * FROM GET_PERIODOS_FACTURAS_AFIP(@codCliente)";
             return conexion.QuerySingleOrDefault<DtoComprobantesPeriodo?>(sql, new { codCliente }, transaccion);
+        }
+
+        public ApiResponseListado<IEnumerable<dynamic>> ListadoFacturasEnviar(DtoOpcionesListados opcionesListado)
+        {
+            FuncionesListados<DtoFacturasEnviarList> funcionesListados = new(configuracionListadoFacturasEnviar, opcionesListado);
+
+            string sqlWhere = $@"WHERE C.AFIP_CAE IS NOT NULL AND S.FECHA_CANCELACION IS NULL
+                                AND S.POR_WHATSAPP = 1 AND CL.TELEFONO_MOVIL IS NOT NULL
+                                AND T.ES_FACTURA_ELECTRONICA = 1 AND TC.TIPO_COMPROBANTE = '{TipoComprobanteDomain.Factura}'";
+            if (opcionesListado.ListFiltros != null)
+            {
+                DtoCamposFiltroListado? campoFiltro = opcionesListado.ListFiltros.Find(x => x.Campo.Equals("soloNuevo", StringComparison.CurrentCultureIgnoreCase));
+                if (campoFiltro != null && !string.IsNullOrEmpty(campoFiltro.Valor) && campoFiltro.TipoComparacion == TipoComparacion.Igual)
+                {
+                    sqlWhere += @"  AND NOT EXISTS (SELECT 1 FROM HIST_ENVIOS_FACTURAS H
+                                    WHERE H.COD_CLIENTE = S.COD_CLIENTE AND H.COD_TALONARIO = C.COD_TALONARIO AND H.NRO_COMPROBANTE = C.NRO_COMPROBANTE)";
+                }
+                campoFiltro = opcionesListado.ListFiltros.Find(x => x.Campo.Equals("posteriorSolicitud", StringComparison.CurrentCultureIgnoreCase));
+                if (campoFiltro != null && !string.IsNullOrEmpty(campoFiltro.Valor) && campoFiltro.TipoComparacion == TipoComparacion.Igual)
+                {
+                    sqlWhere += @"  AND C.FECHA >= S.FECHA_PEDIDO";
+                }
+            }
+            sqlWhere += funcionesListados.ParseSqlWhere();
+
+            string sqlFrom = @" FROM SOLICITUDES_ENVIOS_FACTURAS S
+                                INNER JOIN CLIENTES CL ON CL.COD_CLIENTE = S.COD_CLIENTE
+                                INNER JOIN COMPROBANTES C ON C.COD_PROPUESTA = S.COD_PROPUESTA AND C.COD_TALONARIO BETWEEN 101 AND 106
+                                INNER JOIN PROPUESTA P ON P.COD_PROPUESTA = S.COD_PROPUESTA
+                                INNER JOIN TALONARIOS T ON T.COD_TALONARIO = C.COD_TALONARIO
+                                INNER JOIN TIPOS_COMPROBANTES TC ON TC.COD_TIPO_COMPROBANTE = C.COD_TIPO_COMPROBANTE";
+            string sqlCant = $@"SELECT COUNT(*)
+                            {sqlFrom} 
+                            {sqlWhere}";
+            string sql = $@"SELECT {funcionesListados.ParseSqlPaginado(sqlCant, conexion, transaccion)}
+                            P.LEGAJO AS PROPUESTA, C.NRO_COMPROBANTE, C.COD_TALONARIO, P.COD_PROPUESTA, 
+                            CL.TELEFONO_MOVIL, CL.NOMBRE AS CLIENTE, C.FECHA, CL.COD_CLIENTE
+                            {sqlFrom} 
+                            {sqlWhere}
+                            {funcionesListados.ParseSqlOrden()}";
+
+            return funcionesListados.ApiResponse(sql, conexion, transaccion);
+        }
+
+        public void RegistrarEnvio(int codCliente, int codTalonario, string nroComprobante, string medioEnvio, int codUsuario)
+        {
+            string sql = @" INSERT INTO HIST_ENVIOS_FACTURAS (FECHA_ENVIO, POR_WHATSAPP, COD_USUARIO, COD_CLIENTE, COD_TALONARIO, NRO_COMPROBANTE, MEDIO_ENVIO)
+                            VALUES (CURRENT_TIMESTAMP, 1, @codUsuario, @codCliente, @codTalonario, @nroComprobante, @medioEnvio)";
+            conexion.Execute(sql, new { codUsuario, codCliente, codTalonario, nroComprobante, medioEnvio }, transaccion);
         }
     }
 }

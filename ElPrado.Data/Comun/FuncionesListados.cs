@@ -214,6 +214,8 @@ namespace ElPrado.Data.Comun
 
         internal string ParseSqlPaginado(string sqlCant, System.Data.IDbConnection conexion, System.Data.IDbTransaction transaccion)
         {
+            if (opcionesListados.MostrarFiltros) return string.Empty;
+
             opcionesListados.FilasPagina = (opcionesListados.FilasPagina == 0) ? 10 : opcionesListados.FilasPagina;
             if (opcionesListados.Pagina <= 1 && !opcionesListados.SinPaginado)
             {

@@ -1,4 +1,5 @@
-﻿using ElPrado.Dto.Dtos;
+﻿using ElPrado.Core;
+using ElPrado.Dto.Dtos;
 using ElPrado.Services.Services;
 using Microsoft.AspNetCore.Mvc;
 
@@ -57,5 +58,44 @@ namespace ElPrado.WebApi.Controllers
                 throw;
             }
         }
+
+        #region Envio de facturas
+        [HttpPost("ListadoFacturasEnviar")]
+        public ApiResponseListado<IEnumerable<dynamic>> ListadoFacturasEnviar([FromBody] DtoOpcionesListados opcionesListado)
+        {
+            try
+            {
+                return comprobantesService.ListadoFacturasEnviar(opcionesListado);
+            }
+            catch (Exception ex)
+            {
+                Serilog.Log.Error(ex, "{Controlador}.ListadoFacturasEnviar({@opcionesListado}): {Mensaje} {@Extras}", this, opcionesListado, ex.Message, extrasLog);
+                throw;
+            }
+        }
+
+        [HttpPost("RegistrarEnvio")]
+        public ActionResult<ApiResponse<int>> RegistrarEnvio([FromBody] DtoRegistrarEnvioReq solicitud)
+        {
+            try
+            {
+                ApiResponse<int> apiResponse = new();
+                Resultados resultado = comprobantesService.RegistrarEnvio(solicitud);
+                if (resultado.HayError)
+                {
+                    apiResponse.Agregar(resultado);
+                    return BadRequest(apiResponse);
+                }
+                apiResponse.Message = "Envio registrado";
+                return apiResponse;
+            }
+            catch (Exception ex)
+            {
+                Serilog.Log.Error(ex, "{Controlador}.RegistrarEnvio({@solicitud}): {Mensaje} {@Extras}", this, solicitud, ex.Message, extrasLog);
+                throw;
+            }
+        }
+
+        #endregion
     }
 }

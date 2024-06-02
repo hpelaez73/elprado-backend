@@ -87,6 +87,15 @@ namespace ElPrado.Services.Services
 
             if (solicitud.Clave.Trim() == string.Empty) resultado.Agregar("Falta ingresar la clave");
 
+            DtoAutorizacionesSolicitudReq solicitudReq = new()
+            {
+                Parte1 = solicitud.Parte1,
+                Parte2 = solicitud.Parte2,
+                Parte3 = solicitud.Parte3
+            };
+            Resultados<DtoAutorizacionesSolicitudResp> resultadoInfo = AnalizarSolicitudAutorizacion(solicitudReq);
+            if (resultadoInfo.HayError) resultado.Agregar(resultadoInfo);
+
             Usuarios? usuario = usuariosRepository.Buscar(ConfiguracionGeneralSesion.CodUsuario, solicitud.Clave);
             if (usuario == null)
             {

@@ -1,4 +1,5 @@
 ﻿using System.ComponentModel.DataAnnotations;
+using System.Text.RegularExpressions;
 
 namespace ElPrado.Core
 {
@@ -15,6 +16,21 @@ namespace ElPrado.Core
         {
             if (string.IsNullOrEmpty(email)) return false;
             return new EmailAddressAttribute().IsValid(email.Trim());
+        }
+
+        public static string ExtraerDigitos(string texto)
+        {
+            // Utiliza una expresión regular para encontrar todos los dígitos en el texto
+            MatchCollection matches = Regex.Matches(texto, @"\d");
+
+            // Concatena todos los dígitos encontrados en una nueva cadena
+            string resultado = "";
+            foreach (Match match in matches)
+            {
+                resultado += match.Value;
+            }
+
+            return resultado;
         }
     }
 }
