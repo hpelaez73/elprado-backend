@@ -103,7 +103,9 @@ namespace ElPrado.Data.Repositories
                             {sqlWhere}";
             string sql = $@"SELECT {funcionesListados.ParseSqlPaginado(sqlCant, conexion, transaccion)}
                             P.LEGAJO AS PROPUESTA, C.NRO_COMPROBANTE, C.COD_TALONARIO, P.COD_PROPUESTA, 
-                            CL.TELEFONO_MOVIL, CL.NOMBRE AS CLIENTE, C.FECHA, CL.COD_CLIENTE
+                            CL.TELEFONO_MOVIL, CL.NOMBRE AS CLIENTE, C.FECHA, CL.COD_CLIENTE,
+                            (SELECT MAX(H.FECHA_ENVIO) FROM HIST_ENVIOS_FACTURAS H
+                            WHERE H.COD_CLIENTE = S.COD_CLIENTE AND H.COD_TALONARIO = C.COD_TALONARIO AND H.NRO_COMPROBANTE = C.NRO_COMPROBANTE) AS ULTIMO_ENVIO
                             {sqlFrom} 
                             {sqlWhere}
                             {funcionesListados.ParseSqlOrden()}";

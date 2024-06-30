@@ -28,6 +28,7 @@
         public string Cliente { get; set; } = string.Empty;
         public string TelefonoMovil { get; set; } = string.Empty;
         public string LinkWhatsApp { get; set; } = string.Empty;
+        public DateTime? UltimoEnvio { get; set; }
         public int CodTalonario { get; set; }
         public int CodCliente { get; set; }
         public int CodPropuesta { get; set; }
