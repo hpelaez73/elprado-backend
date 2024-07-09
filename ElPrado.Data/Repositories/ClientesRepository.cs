@@ -44,5 +44,11 @@ namespace ElPrado.Data.Repositories
                 AND P.LEGAJO = @legajo)";
             return conexion.QuerySingleOrDefault<Clientes?>(sql, new { dniCuit, legajo }, transaccion);
         }
+
+        public List<DtoClientesPropuestas> BuscarTitulares(int codPropuesta)
+        {
+            string sql = "SELECT * FROM GET_DATOS_TITULARES(@codPropuesta)";
+            return conexion.Query<DtoClientesPropuestas>(sql, new { codPropuesta }, transaccion).ToList();
+        }
     }
 }

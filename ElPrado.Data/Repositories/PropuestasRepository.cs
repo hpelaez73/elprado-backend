@@ -125,7 +125,7 @@ namespace ElPrado.Data.Repositories
             string sql = @" SELECT FIRST 1 P.*
                             FROM PROPUESTA P
                             INNER JOIN PARCELA PA ON PA.COD_PARCELA = P.COD_PARCELA
-                            WHERE (P.FECHA_BAJA IS NULL OR :INCL_BAJA = @incluirBaja)
+                            WHERE (P.FECHA_BAJA IS NULL OR 1 = @incluirBaja)
                             AND PA.LEGAJO = @parcela
                             ORDER BY P.FECHA_BAJA DESC NULLS FIRST";
             return conexion.QuerySingleOrDefault<Propuestas>(sql, new { parcela, incluirBaja }, transaccion);
@@ -133,12 +133,7 @@ namespace ElPrado.Data.Repositories
 
         public DtoPropuestaDetalleResp? BuscarPropuestaDetalle(int codPropuesta)
         {
-            string sql = @" SELECT P.COD_PROPUESTA, P.LEGAJO AS PROPUESTA, P.FECHA, P.FECHA_BAJA, P.COD_ESTADO_DEUDA,
-                            (SELECT TP.NOMBRE FROM TIPOS_PROPUESTAS TP WHERE TP.COD_TIPO_PROPUESTA = P.COD_TIPO_PROPUESTA) AS TIPO_PROPUESTA,
-                            (SELECT ED.ESTADO FROM ESTADOS_DEUDAS ED WHERE ED.COD_ESTADO_DEUDA = P.COD_ESTADO_DEUDA) AS ESTADO_DEUDA,
-                            (SELECT ED.MUESTRA_MENSAJE_ALERTA FROM ESTADOS_DEUDAS ED WHERE ED.COD_ESTADO_DEUDA = P.COD_ESTADO_DEUDA) AS MUESTRA_MENSAJE_ALERTA
-                            FROM PROPUESTA P
-                            WHERE P.COD_PROPUESTA = :codPropuesta";
+            string sql = @" SELECT * FROM GET_CONSULTA_PROPUESTA(@codPropuesta) P";
             return conexion.QuerySingleOrDefault<DtoPropuestaDetalleResp>(sql, new { codPropuesta }, transaccion);
         }
 

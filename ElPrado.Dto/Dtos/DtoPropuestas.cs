@@ -15,9 +15,9 @@
         public string TipoPropuesta { get; set; } = string.Empty;
         public DateTime Fecha { get; set; }
         public DateTime? FechaBaja { get; set; }
-        public int CodEstadoDeuda { get; set; }
         public string EstadoDeuda { get; set; } = string.Empty;
         public bool MuestraMensajeAlerta { get; set; }
+        public string MensajeAlerta { get; set; } = string.Empty;
 
         // Datos de la parcela
         public int? CodParcela { get; set; }
@@ -25,13 +25,14 @@
         public string Manzana { get; set; } = string.Empty;
         public string EstadoParcela { get; set; } = string.Empty;
         public DtoCoordenadas? Coordenada { get; set; }
-        public List<DtoZonasParcelasCombo>? ListZonasParcelas { get; set; }
+        public List<string>? ListZonasParcelas { get; set; }
         public List<DtoParcelasDetallesLugares>? ListDetalleLugares { get; set; }
 
         // Datos de los inhumados
-
+        public List<DtoInhumadosPropuestas>? ListInhumados { get; set; }
 
         // Datos de los titulares
+        public List<DtoClientesPropuestas>? ListTitulares { get; set; }
     }
 
     public class DtoPropuestasTitularesList : DtoBase

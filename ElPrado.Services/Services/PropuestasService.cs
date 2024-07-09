@@ -55,6 +55,20 @@ namespace ElPrado.Services.Services
 
             DtoPropuestaDetalleResp? propuestaDetalle = propuestasRepository.BuscarPropuestaDetalle(propuesta.CodPropuesta);
 
+            if (propuestaDetalle != null && propuestaDetalle.CodParcela != null)
+            {
+                ParcelasRepository parcelasRepository = new(Transaccion);
+                propuestaDetalle.Coordenada = parcelasRepository.BuscarCoordenadas(propuestaDetalle.CodParcela.Value);
+                propuestaDetalle.ListZonasParcelas = parcelasRepository.BuscarZonasParcelas(propuestaDetalle.CodParcela.Value);
+                propuestaDetalle.ListDetalleLugares = parcelasRepository.BuscarDetalleLugares(propuestaDetalle.CodParcela.Value, propuestaDetalle.CodPropuesta);
+
+                InhumadosRepository inhumadosRepository = new(Transaccion);
+                propuestaDetalle.ListInhumados = inhumadosRepository.BuscarInhumados(propuestaDetalle.CodPropuesta, propuestaDetalle.CodParcela.Value);
+
+                ClientesRepository clientesRepository = new(Transaccion);
+                propuestaDetalle.ListTitulares = clientesRepository.BuscarTitulares(propuestaDetalle.CodPropuesta);
+            }
+
             resultado.Valor = propuestaDetalle;
 
             return resultado;
