@@ -57,8 +57,9 @@ namespace ElPrado.Services.Services
 
             if (propuestaDetalle != null && propuestaDetalle.CodParcela != null)
             {
+                propuestaDetalle.ListPropuestasAsociadas = propuestasRepository.BuscarPropuestasAsociadas(propuestaDetalle.CodPropuesta, dtoPropuesta.IncluirBaja);
+
                 ParcelasRepository parcelasRepository = new(Transaccion);
-                propuestaDetalle.Coordenada = parcelasRepository.BuscarCoordenadas(propuestaDetalle.CodParcela.Value);
                 propuestaDetalle.ListZonasParcelas = parcelasRepository.BuscarZonasParcelas(propuestaDetalle.CodParcela.Value);
                 propuestaDetalle.ListDetalleLugares = parcelasRepository.BuscarDetalleLugares(propuestaDetalle.CodParcela.Value, propuestaDetalle.CodPropuesta);
 

@@ -10,6 +10,12 @@ namespace ElPrado.Data.Repositories
         {
         }
 
+        public DtoInhumacion? BuscarInhumacion(int id)
+        {
+            string sql = "SELECT * FROM GET_DATOS_INHUMADO(@id)";
+            return conexion.QuerySingleOrDefault<DtoInhumacion>(sql, new { id }, transaccion);
+        }
+
         public List<DtoInhumadosPropuestas> BuscarInhumados(int codPropuesta, int codParcela)
         {
             string sql = "SELECT * FROM GET_DATOS_INHUMADOS(@codPropuesta, @codParcela)";

@@ -137,6 +137,12 @@ namespace ElPrado.Data.Repositories
             return conexion.QuerySingleOrDefault<DtoPropuestaDetalleResp>(sql, new { codPropuesta }, transaccion);
         }
 
+        public List<DtoPropuestasAsociadas>? BuscarPropuestasAsociadas(int codPropuesta, bool incluirBajas)
+        {
+            string sql = "SELECT * FROM GET_DATOS_PROPUESTAS_ASOCIADAS(@codPropuesta, @incluirBajas)";
+            return conexion.Query<DtoPropuestasAsociadas>(sql, new { codPropuesta, incluirBajas }, transaccion).ToList();
+        }
+
         public ApiResponseListado<IEnumerable<dynamic>> ListadoInhumados(DtoOpcionesListados opcionesListado)
         {
             FuncionesListados<DtoPropuestasInhumadosList> funcionesListados = new(configuracionListadoInhumados, opcionesListado);

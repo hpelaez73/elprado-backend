@@ -18,7 +18,7 @@ namespace ElPrado.WebApi.Controllers
             return new PropuestasService(null);
         }
 
-        [HttpGet("Detalle")]
+        [HttpPost("Detalle")]
         public ActionResult<ApiResponse<DtoPropuestaDetalleResp>> Detalle([FromBody] DtoPropuestaDetalleReq dtoPropuesta)
         {
             try

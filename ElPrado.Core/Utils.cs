@@ -1,5 +1,6 @@
 ﻿using System.ComponentModel.DataAnnotations;
 using System.Text.RegularExpressions;
+using static System.Runtime.InteropServices.JavaScript.JSType;
 
 namespace ElPrado.Core
 {
@@ -16,6 +17,16 @@ namespace ElPrado.Core
         {
             if (string.IsNullOrEmpty(email)) return false;
             return new EmailAddressAttribute().IsValid(email.Trim());
+        }
+
+        public static bool EsTelefonoValido(string nroTelefono)
+        {
+            if (string.IsNullOrEmpty(nroTelefono)) return false;
+            // Expresión regular para validar números de teléfono de Argentina
+            string patron = @"^\d{10}$";
+
+            Regex regex = new Regex(patron);
+            return regex.IsMatch(nroTelefono);
         }
 
         public static string ExtraerDigitos(string texto)

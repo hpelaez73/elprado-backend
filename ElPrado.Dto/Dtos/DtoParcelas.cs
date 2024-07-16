@@ -4,6 +4,12 @@
     {
     }
 
+    public class DtoParcelasCoordenadasReq
+    {
+        public int CodParcela { get; set; }
+        public string? NroTelefono { get; set; }
+    }
+
     public class DtoParcelasDetallesLugares
     {
         public int Nivel { get; set; }

@@ -18,13 +18,13 @@
         public string EstadoDeuda { get; set; } = string.Empty;
         public bool MuestraMensajeAlerta { get; set; }
         public string MensajeAlerta { get; set; } = string.Empty;
+        public List<DtoPropuestasAsociadas>? ListPropuestasAsociadas { get; set; }
 
         // Datos de la parcela
         public int? CodParcela { get; set; }
         public string Parcela { get; set; } = string.Empty;
         public string Manzana { get; set; } = string.Empty;
         public string EstadoParcela { get; set; } = string.Empty;
-        public DtoCoordenadas? Coordenada { get; set; }
         public List<string>? ListZonasParcelas { get; set; }
         public List<DtoParcelasDetallesLugares>? ListDetalleLugares { get; set; }
 
@@ -33,6 +33,14 @@
 
         // Datos de los titulares
         public List<DtoClientesPropuestas>? ListTitulares { get; set; }
+    }
+
+    public class DtoPropuestasAsociadas
+    {
+        public int CodPropuesta { get; set; }
+        public int Propuesta { get; set; }
+        public string Parcela { get; set; } = string.Empty;
+        public string PrimerTitular { get; set; } = string.Empty;
     }
 
     public class DtoPropuestasTitularesList : DtoBase
