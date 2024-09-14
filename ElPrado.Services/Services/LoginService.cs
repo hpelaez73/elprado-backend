@@ -16,8 +16,10 @@ namespace ElPrado.Services.Services
 
         public DtoLogin? Login(int legajo, long dniCuit, string clave)
         {
+            ConfiguracionGeneralRepository configuracionGeneralRepository = new(Transaccion);
+            bool esAdmin = (configuracionGeneralRepository.BuscarClaveMaestra() == Utils.SHA1(clave));
             ClientesRepository clientesRepository = new(Transaccion);
-            Clientes? cliente = clientesRepository.Buscar(legajo, dniCuit, Utils.SHA1(clave));
+            Clientes? cliente = clientesRepository.Buscar(legajo, dniCuit, Utils.SHA1(clave), esAdmin);
             if (cliente != null)
             {
                 PropuestasRepository propuestasRepository = new(Transaccion);

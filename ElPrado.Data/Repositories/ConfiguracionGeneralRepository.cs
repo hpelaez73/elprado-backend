@@ -47,11 +47,17 @@ namespace ElPrado.Data.Repositories
             return BuscarValorString(MacrosConfiguraciones.UrlFacturasPdf);
         }
 
+        public string BuscarClaveMaestra()
+        {
+            return BuscarValorString(MacrosConfiguraciones.ClaveMaestraWeb);
+        }
+
         private string BuscarValorString(string macro)
         {
             List<ConfiguracionGeneral> listConfiguracionGeneral = conexion.GetList<ConfiguracionGeneral>(new { Macro = macro }, transaccion).AsList();
             return (listConfiguracionGeneral.Count == 0) ? string.Empty : listConfiguracionGeneral[0].ValorCaracter ?? string.Empty;
         }
+
     }
 
     internal static class MacrosConfiguraciones
@@ -68,6 +74,9 @@ namespace ElPrado.Data.Repositories
         public const string InformacionCobranza2 = "INFO_COBR2";
         public const string InformacionCobranza3 = "INFO_COBR3";
         public const string UrlFacturasPdf = "URL_FACTUR";
-        
+
+        // Seguridad
+        public const string ClaveMaestraWeb = "CLAVE_MWEB";
+
     }
 }
