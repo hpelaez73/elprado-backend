@@ -23,4 +23,11 @@
         public int Cuota { get; set; }
         public int Pago { get; set; }
     }
+
+    public class DtoSolicitudMercadoPago
+    {
+        public int CodCliente { get; set; }
+        public DateTime VencimientoLink { get; set; }
+        public List<DtoCuotasMercadoPago> ListCuotas { get; set; } = new();
+    }
 }

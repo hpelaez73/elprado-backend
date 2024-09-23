@@ -17,7 +17,7 @@ namespace ElPrado.Services.Services
             return new InhumadosRepository(Transaccion);
         }
 
-        public DtoInhumacion BuscarInhumacion(int id)
+        public DtoInhumacion? BuscarInhumacion(int id)
         {
             return inhumadosRepository.BuscarInhumacion(id);
         }

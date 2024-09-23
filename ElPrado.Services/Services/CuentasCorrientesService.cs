@@ -1,5 +1,6 @@
 ﻿using ElPrado.Core;
 using ElPrado.Data;
+using ElPrado.Data.Models;
 using ElPrado.Data.Repositories;
 using ElPrado.Dto.Dtos;
 
@@ -18,22 +19,25 @@ namespace ElPrado.Services.Services
             return new CuentasCorrientesRepository(Transaccion);
         }
 
-        public Resultados<List<DtoCuentasCorrientes>> PendientesMercadoPago()
+        public Resultados<List<DtoCuentasCorrientes>> PendientesMercadoPago(int codCliente)
         {
             Resultados<List<DtoCuentasCorrientes>> resultado = new();
 
             DateTime fechaDia = DateTime.Today.AddMonths(-6).AddDays(1 - DateTime.Today.Day);
-            List<DtoCuentasCorrientes> listCuotas = cuentasCorrientesRepository.ConsultaDeudaMercadoPago(ConfiguracionGeneralSesion.CodCliente, fechaDia);
+            List<DtoCuentasCorrientes> listCuotas = cuentasCorrientesRepository.ConsultaDeudaMercadoPago(codCliente, fechaDia);
 
-            if (listCuotas != null && listCuotas.Count > 0)
+            if (ConfiguracionGeneralSesion.CodUsuario == 0)
             {
-                if (listCuotas.Exists(x => !x.MedioCobroHabilitado))
+                if (listCuotas != null && listCuotas.Count > 0)
                 {
-                    resultado.Agregar("Algunas cuotas no están habilitadas para pagar por este medio. Consulte a la administración");
-                }
-                if (listCuotas.Exists(x => x.ConDeudaGrande))
-                {
-                    resultado.Agregar("Algunas cuotas superan la fecha permitida para pagar por este medio. Consulte a la administración");
+                    if (listCuotas.Exists(x => !x.MedioCobroHabilitado))
+                    {
+                        resultado.Agregar("Algunas cuotas no están habilitadas para pagar por este medio. Consulte a la administración");
+                    }
+                    if (listCuotas.Exists(x => x.ConDeudaGrande))
+                    {
+                        resultado.Agregar("Algunas cuotas superan la fecha permitida para pagar por este medio. Consulte a la administración");
+                    }
                 }
             }
             resultado.Valor = listCuotas;
@@ -42,10 +46,32 @@ namespace ElPrado.Services.Services
 
         public Resultados<string> SolicitudMercadoPago(List<DtoCuotasMercadoPago> listCuotas)
         {
+            Resultados<string> resultado = GenerarSolicitudMercadoPago(listCuotas, ConfiguracionGeneralSesion.CodCliente, null);
+            
+            return resultado;
+        }
+
+        public Resultados<string> SolicitudMercadoPagoLink(DtoSolicitudMercadoPago dtoSolicitud)
+        {
+            Resultados<string> resultado = GenerarSolicitudMercadoPago(dtoSolicitud.ListCuotas, dtoSolicitud.CodCliente, dtoSolicitud.VencimientoLink);
+
+            return resultado;
+        }
+
+        private Resultados<string> GenerarSolicitudMercadoPago(List<DtoCuotasMercadoPago> listCuotas, int codCliente, DateTime? fechaVencimiento)
+        {
             Resultados<string> resultado = new();
             if (listCuotas.Count == 0) resultado.Agregar("No hay cuotas seleccionadas");
 
-            Resultados<List<DtoCuentasCorrientes>> resultadoPendientes = PendientesMercadoPago();
+            if (ConfiguracionGeneralSesion.CodUsuario != 0)
+            {
+                if (fechaVencimiento == null) resultado.Agregar("Falta ingresar la fecha de vencimiento del link");
+                else if (fechaVencimiento <= DateTime.Today) resultado.Agregar("La fecha de vencimiento del link debe ser posterior a hoy");
+                
+                if (resultado.HayError) return resultado;
+            }
+
+            Resultados<List<DtoCuentasCorrientes>> resultadoPendientes = PendientesMercadoPago(codCliente);
             if (resultadoPendientes.HayError) resultado.Agregar(resultadoPendientes);
             if (resultadoPendientes.Valor == null || resultadoPendientes.Valor.Count == 0)
             {
@@ -83,7 +109,7 @@ namespace ElPrado.Services.Services
             {
                 using MercadoPagoService mercadoPagoService = new(Transaccion);
 
-                resultado = mercadoPagoService.ArmarPago(listCuotasSolicitud, null);
+                resultado = mercadoPagoService.ArmarPago(listCuotasSolicitud, codCliente, fechaVencimiento);
 
                 if (resultado.EstaOK) Commit();
                 else Rollback();
@@ -115,5 +141,6 @@ namespace ElPrado.Services.Services
             }
             return true;
         }
+
     }
 }

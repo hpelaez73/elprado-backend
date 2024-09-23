@@ -24,14 +24,14 @@ namespace ElPrado.Services.Services
             return new MercadoPagoRepository(Transaccion);
         }
 
-        public Resultados<string> ArmarPago(List<DtoCuentasCorrientes> listCuotas, DateTime? fechaVencimiento)
+        public Resultados<string> ArmarPago(List<DtoCuentasCorrientes> listCuotas, int codCliente, DateTime? fechaVencimiento)
         {
             Resultados<string> resultado = new();
 
             ConfiguracionGeneralRepository configuracionGeneralRepository = new(Transaccion);
             ClientesRepository clientesRepository = new(Transaccion);
 
-            Clientes? cliente = clientesRepository.Buscar(ConfiguracionGeneralSesion.CodCliente);
+            Clientes? cliente = clientesRepository.Buscar(codCliente);
             if (cliente == null)
             {
                 resultado.Agregar("El cliente no existe");
@@ -45,7 +45,8 @@ namespace ElPrado.Services.Services
                 if (string.IsNullOrEmpty(MercadoPagoConfig.AccessToken)) resultado.Agregar("Falta configurar el acceso a Mercado Pago");
             }
 
-            string externalReference = string.Empty;
+            int codPreferencia = mercadoPagoRepository.ProximoCodigo("PREFERENCIAS_MERCADOPAGO");
+
             PreferenceRequest preferenceReq = new()
             {
                 Items = new List<PreferenceItemRequest>(),
@@ -57,7 +58,7 @@ namespace ElPrado.Services.Services
 
             foreach (DtoCuentasCorrientes item in listCuotas)
             {
-                externalReference += item.Propuesta + "|" + item.Tipo + "|" + item.Codigo.ToString() + "|" + item.Cuota.ToString() + "|" + item.Pago.ToString() + "!!";
+                //externalReference += item.Propuesta + "|" + item.Tipo + "|" + item.Codigo.ToString() + "|" + item.Cuota.ToString() + "|" + item.Pago.ToString() + "!!";
                 preferenceReq.Items.Add(
                     new()
                     {
@@ -70,7 +71,7 @@ namespace ElPrado.Services.Services
                     }
                 );
             }
-            externalReference += "**" + cliente.CodCliente.ToString();
+            //externalReference += "**" + cliente.CodCliente.ToString();
 
             preferenceReq.Payer = new()
             {
@@ -105,7 +106,7 @@ namespace ElPrado.Services.Services
             };
             preferenceReq.BinaryMode = true;
             preferenceReq.AutoReturn = "approved";
-            preferenceReq.ExternalReference = externalReference;
+            preferenceReq.ExternalReference = codPreferencia.ToString();
             preferenceReq.BackUrls = new()
             {
                 Success = configuracionGeneralRepository.BuscarMercadoPagoBackUrlsSuccess(),
@@ -114,7 +115,9 @@ namespace ElPrado.Services.Services
             };
 
             if (fechaVencimiento != null)
-                preferenceReq.DateOfExpiration = fechaVencimiento;
+            {
+                preferenceReq.DateOfExpiration = fechaVencimiento.Value.AddHours(23);
+            }
 
             // Create the preference using the client
             PreferenceClient client = new();
@@ -122,15 +125,43 @@ namespace ElPrado.Services.Services
 
             PreferenciasMercadopago preferenciasMercadopago = new()
             {
+                CodPreferenciaMercadopago = codPreferencia,
                 IdPreferencia = preference.Id,
+                CodCliente = codCliente,
                 FechaCreacion = DateTime.Now,
-                FechaVencimiento = fechaVencimiento,
-                Referencia = externalReference
+                FechaVencimiento = fechaVencimiento
             };
 
             try
             {
                 mercadoPagoRepository.Agregar(preferenciasMercadopago);
+                foreach (DtoCuentasCorrientes dtoCuenta in listCuotas)
+                {
+                    if (dtoCuenta.Tipo == "CR")
+                    {
+                        DetPreferenciasMercadopagoCr detPreferenciasMercadopagoCr = new()
+                        {
+                            CodPreferenciaMercadopago = codPreferencia,
+                            CodCredito = dtoCuenta.Codigo,
+                            Cuota = dtoCuenta.Cuota,
+                            Pago = dtoCuenta.Pago,
+                            Importe = dtoCuenta.Total
+                        };
+                        mercadoPagoRepository.Agregar(detPreferenciasMercadopagoCr);
+                    }
+                    else
+                    {
+                        DetPreferenciasMercadopagoCp detPreferenciasMercadopagoCp = new()
+                        {
+                            CodPreferenciaMercadopago = codPreferencia,
+                            CodConfiguracion = dtoCuenta.Codigo,
+                            Cuota = dtoCuenta.Cuota,
+                            Pago = dtoCuenta.Pago,
+                            Importe = dtoCuenta.Total
+                        };
+                        mercadoPagoRepository.Agregar(detPreferenciasMercadopagoCp);
+                    }
+                }
                 Commit();
                 resultado.Valor = preference.InitPoint;
             }
@@ -165,7 +196,7 @@ namespace ElPrado.Services.Services
                 Payment pago = client.Get(id);
                 if (pago.Status != null && pago.Status != PaymentStatus.Rejected)
                 {
-                    mercadoPagoRepository.ImputarPago(id, pago.ExternalReference, pago.DateApproved ?? DateTime.Today);
+                    mercadoPagoRepository.ImputarPago(id, Convert.ToInt32(pago.ExternalReference), pago.DateApproved ?? DateTime.Today);
                     Commit();
 
                     return true;
