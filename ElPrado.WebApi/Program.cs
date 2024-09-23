@@ -1,7 +1,6 @@
 using ElPrado.Core;
 using ElPrado.WebApi.MiddleWares;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
-using Microsoft.AspNetCore.DataProtection;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
 using Serilog;
@@ -82,9 +81,6 @@ builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
 
 ConfiguracionGeneralSesion.StrConexion = builder.Configuration.GetConnectionString("DefaultConnection") ?? strConexionLocal;
 ConfiguracionGeneralSesion.AllowedOrigins = allowedOrigin;
-
-builder.Services.AddDataProtection()
-        .DisableAutomaticKeyGeneration();
 
 var app = builder.Build();
 
