@@ -53,6 +53,7 @@
         public DateTime Fecha { get; set; }
         public DateTime? FechaBaja { get; set; }
     }
+
     public class DtoPropuestasInhumadosList : DtoBase
     {
         public int CodPropuesta { get; set; }

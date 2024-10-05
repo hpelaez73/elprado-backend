@@ -18,6 +18,28 @@ namespace ElPrado.WebApi.Controllers
             return new PropuestasService(null);
         }
 
+        [HttpPost("Titulares")]
+        public ActionResult<ApiResponse<List<DtoClientesPropuestas>>> Titulares([FromBody] DtoPropuestaDetalleReq dtoPropuesta)
+        {
+            try
+            {
+                ApiResponse<List<DtoClientesPropuestas>> apiResponse = new();
+                Resultados<List<DtoClientesPropuestas>> resultado = propuestasService.Titulares(dtoPropuesta);
+                if (resultado.HayError || resultado.Valor == null)
+                {
+                    apiResponse.Agregar(resultado);
+                    return BadRequest(apiResponse);
+                }
+                apiResponse.Data = resultado.Valor;
+                return apiResponse;
+            }
+            catch (Exception ex)
+            {
+                Serilog.Log.Error(ex, "{Controlador}.Titulares({@dtoPropuesta}): {Mensaje} {@Extras}", this, dtoPropuesta, ex.Message, extrasLog);
+                throw;
+            }
+        }
+
         [HttpPost("Detalle")]
         public ActionResult<ApiResponse<DtoPropuestaDetalleResp>> Detalle([FromBody] DtoPropuestaDetalleReq dtoPropuesta)
         {
