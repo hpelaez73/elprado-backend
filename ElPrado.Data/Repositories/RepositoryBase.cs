@@ -34,8 +34,8 @@ namespace ElPrado.Data.Repositories
 
             string generador = conexion.QuerySingle<string>(sql, new { nombreTabla }, transaccion);
 
-            sql = "SELECT GEN_ID(@generador, 1) AS VALOR FROM RDB$DATABASE";
-            return conexion.QuerySingleOrDefault<int>(sql, new { generador }, transaccion);
+            sql = $"SELECT GEN_ID({generador}, 1) AS VALOR FROM RDB$DATABASE";
+            return conexion.QuerySingleOrDefault<int>(sql, null, transaccion);
         }
     }
 }

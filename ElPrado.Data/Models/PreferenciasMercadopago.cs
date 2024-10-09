@@ -2,7 +2,6 @@
 {
     public class PreferenciasMercadopago : Entidades
     {
-        [Key]
         public int CodPreferenciaMercadopago { get; set; }
         public string IdPreferencia { get; set; } = string.Empty;
         public int CodCliente { get; set; }
@@ -11,7 +10,7 @@
         public long? IdPago { get; set; }
     }
 
-    public class DetPreferenciasMercadopagoCr
+    public class DetPreferenciasMercadopagoCr : Entidades
     {
         public int CodPreferenciaMercadopago { get; set; }
         public int CodCredito { get; set; }
@@ -20,7 +19,7 @@
         public double Importe { get; set; }
     }
 
-    public class DetPreferenciasMercadopagoCp
+    public class DetPreferenciasMercadopagoCp : Entidades
     {
         public int CodPreferenciaMercadopago { get; set; }
         public int CodConfiguracion { get; set; }

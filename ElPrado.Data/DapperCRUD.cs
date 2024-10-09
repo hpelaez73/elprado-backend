@@ -424,7 +424,15 @@ namespace ElPrado.Data
             {
                 if (GetDialect() == Dialect.Firebird.ToString())
                 {
-                    sb.AppendFormat(" RETURNING {0} AS ID", GetColumnName(idProps.First()));
+                    string nombreId = GetColumnName(idProps.First());
+                    if (nombreId != "ID")
+                    {
+                        sb.AppendFormat(" RETURNING {0} AS ID", GetColumnName(idProps.First()));
+                    }
+                    else
+                    {
+                        sb.AppendFormat(" RETURNING 0 AS ID");
+                    }
                 }
                 else
                 {
@@ -642,7 +650,7 @@ namespace ElPrado.Data
         /// <param name="transaction"></param>
         /// <param name="commandTimeout"></param>
         /// <returns>The number of records affected</returns>
-        public static int DeleteList<T>(this IDbConnection connection, string conditions, object parameters = null,
+        public static int DeleteList<T>(this IDbConnection connection, string conditions, object? parameters = null,
             IDbTransaction? transaction = null, int? commandTimeout = null)
         {
             var masterSb = new StringBuilder();

@@ -226,7 +226,7 @@ namespace ElPrado.Data.Repositories
                             {sqlWhere}";
             string sql = $@"SELECT {funcionesListados.ParseSqlPaginado(sqlCant, conexion, transaccion)}
                             CL.NOMBRE, CL.NRO_DOCUMENTO, P.COD_PROPUESTA, P.LEGAJO AS PROPUESTA, PA.LEGAJO AS PARCELA,
-                            P.FECHA, P.FECHA_BAJA
+                            P.FECHA, P.FECHA_BAJA, CL.COD_CLIENTE
                             {sqlFrom} 
                             {sqlWhere}
                             {funcionesListados.ParseSqlOrden()}";

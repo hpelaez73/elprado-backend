@@ -52,6 +52,7 @@
         public string Parcela { get; set; } = string.Empty;
         public DateTime Fecha { get; set; }
         public DateTime? FechaBaja { get; set; }
+        public int CodCliente { get; set; }
     }
 
     public class DtoPropuestasInhumadosList : DtoBase
