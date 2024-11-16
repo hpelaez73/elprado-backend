@@ -110,6 +110,7 @@ namespace ElPrado.Services.Services
                 using MercadoPagoService mercadoPagoService = new(Transaccion);
 
                 resultado = mercadoPagoService.ArmarPago(listCuotasSolicitud, codCliente, fechaVencimiento);
+                RegistrarLog("Se generó una solicitud MP para cod_cliente: " + codCliente.ToString());
 
                 if (resultado.EstaOK) Commit();
                 else Rollback();

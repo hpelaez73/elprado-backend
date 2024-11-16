@@ -50,5 +50,11 @@ namespace ElPrado.Data.Repositories
             string sql = "SELECT * FROM GET_DATOS_TITULARES(@codPropuesta)";
             return conexion.Query<DtoClientesPropuestas>(sql, new { codPropuesta }, transaccion).ToList();
         }
+
+        public List<DtoClientesPropuestasFacturasPagos>? BuscarTitularesFacturasPagos(int codPropuesta)
+        {
+            string sql = "SELECT * FROM GET_DATOS_TITULARES_FACT_PAGOS(@codPropuesta)";
+            return conexion.Query<DtoClientesPropuestasFacturasPagos>(sql, new { codPropuesta }, transaccion).ToList();
+        }
     }
 }

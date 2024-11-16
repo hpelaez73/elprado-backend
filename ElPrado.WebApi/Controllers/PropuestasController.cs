@@ -63,6 +63,52 @@ namespace ElPrado.WebApi.Controllers
 
         }
 
+        [HttpPost("DetalleContratos")]
+        public ActionResult<ApiResponse<DtoPropuestaDetalleContratosResp>> DetalleContratos([FromBody] DtoPropuestaDetalleReq dtoPropuesta)
+        {
+            try
+            {
+                ApiResponse<DtoPropuestaDetalleContratosResp> apiResponse = new();
+                Resultados<DtoPropuestaDetalleContratosResp> resultado = propuestasService.DetalleContratos(dtoPropuesta);
+                if (resultado.HayError || resultado.Valor == null)
+                {
+                    apiResponse.Agregar(resultado);
+                    return BadRequest(apiResponse);
+                }
+                apiResponse.Data = resultado.Valor;
+                return apiResponse;
+            }
+            catch (Exception ex)
+            {
+                Serilog.Log.Error(ex, "{Controlador}.DetalleContratos({@dtoPropuesta}): {Mensaje} {@Extras}", this, dtoPropuesta, ex.Message, extrasLog);
+                throw;
+            }
+
+        }
+
+        [HttpPost("DetalleHistorialTitulares")]
+        public ActionResult<ApiResponse<List<DtoClientesPropuestasHistorial>>> DetalleHistorialTitulares([FromBody] DtoPropuestaDetalleReq dtoPropuesta)
+        {
+            try
+            {
+                ApiResponse<List<DtoClientesPropuestasHistorial>> apiResponse = new();
+                Resultados<List<DtoClientesPropuestasHistorial>> resultado = propuestasService.DetalleHistorialTitulares(dtoPropuesta);
+                if (resultado.HayError || resultado.Valor == null)
+                {
+                    apiResponse.Agregar(resultado);
+                    return BadRequest(apiResponse);
+                }
+                apiResponse.Data = resultado.Valor;
+                return apiResponse;
+            }
+            catch (Exception ex)
+            {
+                Serilog.Log.Error(ex, "{Controlador}.DetalleHistorialTitulares({@dtoPropuesta}): {Mensaje} {@Extras}", this, dtoPropuesta, ex.Message, extrasLog);
+                throw;
+            }
+
+        }
+
         [HttpPost("ListadoTitulares")]
         public ApiResponseListado<IEnumerable<dynamic>> ListadoTitulares([FromBody] DtoOpcionesListados opcionesListado)
         {

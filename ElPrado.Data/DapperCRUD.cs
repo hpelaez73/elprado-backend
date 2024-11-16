@@ -1,4 +1,6 @@
-﻿using Dapper;
+﻿// Basado en https://github.com/ericdc1/Dapper.SimpleCRUD/blob/master/Dapper.SimpleCRUD/SimpleCRUD.cs
+
+using Dapper;
 using Microsoft.CSharp.RuntimeBinder;
 using System.Collections.Concurrent;
 using System.Data;
@@ -20,14 +22,11 @@ namespace ElPrado.Data
         private static string _getIdentitySql = string.Empty;
         private static string _getPagedListSql = string.Empty;
 
-        private static readonly ConcurrentDictionary<Type, string>
-            TableNames = new ConcurrentDictionary<Type, string>();
+        private static readonly ConcurrentDictionary<Type, string> TableNames = new ConcurrentDictionary<Type, string>();
 
-        private static readonly ConcurrentDictionary<string, string> ColumnNames =
-            new ConcurrentDictionary<string, string>();
+        private static readonly ConcurrentDictionary<string, string> ColumnNames = new ConcurrentDictionary<string, string>();
 
-        private static readonly ConcurrentDictionary<string, string> StringBuilderCacheDict =
-            new ConcurrentDictionary<string, string>();
+        private static readonly ConcurrentDictionary<string, string> StringBuilderCacheDict = new ConcurrentDictionary<string, string>();
 
         private static bool StringBuilderCacheEnabled = true;
 
@@ -43,7 +42,7 @@ namespace ElPrado.Data
         private static void StringBuilderCache(StringBuilder sb, string cacheKey,
             Action<StringBuilder> stringBuilderAction)
         {
-            if (StringBuilderCacheEnabled && StringBuilderCacheDict.TryGetValue(cacheKey, out string value))
+            if (StringBuilderCacheEnabled && StringBuilderCacheDict.TryGetValue(cacheKey, out string? value))
             {
                 sb.Append(value);
                 return;

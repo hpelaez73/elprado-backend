@@ -50,23 +50,67 @@ namespace ElPrado.Services.Services
             Propuestas propuesta = resPropuesta.Valor;
             DtoPropuestaDetalleResp? propuestaDetalle = propuestasRepository.BuscarPropuestaDetalle(propuesta.CodPropuesta);
 
-            if (propuestaDetalle != null && propuestaDetalle.CodParcela != null)
+            if (propuestaDetalle != null)
             {
                 propuestaDetalle.ListPropuestasAsociadas = propuestasRepository.BuscarPropuestasAsociadas(propuestaDetalle.CodPropuesta, dtoPropuesta.IncluirBaja);
 
-                ParcelasRepository parcelasRepository = new(Transaccion);
-                propuestaDetalle.ListZonasParcelas = parcelasRepository.BuscarZonasParcelas(propuestaDetalle.CodParcela.Value);
-                propuestaDetalle.ListDetalleLugares = parcelasRepository.BuscarDetalleLugares(propuestaDetalle.CodParcela.Value, propuestaDetalle.CodPropuesta);
+                if (propuestaDetalle.CodParcela != null)
+                {
+                    ParcelasRepository parcelasRepository = new(Transaccion);
+                    propuestaDetalle.ListZonasParcelas = parcelasRepository.BuscarZonasParcelas(propuestaDetalle.CodParcela.Value);
+                    propuestaDetalle.ListDetalleLugares = parcelasRepository.BuscarDetalleLugares(propuestaDetalle.CodParcela.Value, propuestaDetalle.CodPropuesta);
 
-                InhumadosRepository inhumadosRepository = new(Transaccion);
-                propuestaDetalle.ListInhumados = inhumadosRepository.BuscarInhumados(propuestaDetalle.CodPropuesta, propuestaDetalle.CodParcela.Value);
-
-                ClientesRepository clientesRepository = new(Transaccion);
-                propuestaDetalle.ListTitulares = clientesRepository.BuscarTitulares(propuestaDetalle.CodPropuesta);
+                    InhumadosRepository inhumadosRepository = new(Transaccion);
+                    propuestaDetalle.ListInhumados = inhumadosRepository.BuscarInhumados(propuestaDetalle.CodPropuesta, propuestaDetalle.CodParcela.Value);
+                }
             }
 
             resultado.Valor = propuestaDetalle;
 
+            return resultado;
+        }
+
+        public Resultados<DtoPropuestaDetalleContratosResp> DetalleContratos(DtoPropuestaDetalleReq dtoPropuesta)
+        {
+            Resultados<DtoPropuestaDetalleContratosResp> resultado = new();
+
+            Resultados<Propuestas> resPropuesta = BuscarPropuesta(dtoPropuesta);
+            if (resPropuesta.HayError || resPropuesta.Valor is null)
+            {
+                resultado.Agregar(resPropuesta);
+                return resultado;
+            }
+            Propuestas propuesta = resPropuesta.Valor;
+
+            DtoPropuestaDetalleContratosResp propuestaDetalle = new();
+
+            ContratosRepository contratosRepository = new(Transaccion);
+            propuestaDetalle.ListContratos = contratosRepository.BuscarContratos(propuesta.CodPropuesta, dtoPropuesta.IncluirBaja);
+
+            PlanesVentasRepository planesVentasRepository = new(Transaccion);
+            propuestaDetalle.ListPlanesVentas = planesVentasRepository.BuscarPlanesVentas(propuesta.CodPropuesta, dtoPropuesta.IncluirBaja);
+
+            ClientesRepository clientesRepository = new(Transaccion);
+            propuestaDetalle.ListTitulares = clientesRepository.BuscarTitulares(propuesta.CodPropuesta);
+            propuestaDetalle.ListTitularesFacturasPagos = clientesRepository.BuscarTitularesFacturasPagos(propuesta.CodPropuesta);
+
+            resultado.Valor = propuestaDetalle;
+            return resultado;
+        }
+
+        public Resultados<List<DtoClientesPropuestasHistorial>> DetalleHistorialTitulares(DtoPropuestaDetalleReq dtoPropuesta)
+        {
+            Resultados<List<DtoClientesPropuestasHistorial>> resultado = new();
+
+            Resultados<Propuestas> resPropuesta = BuscarPropuesta(dtoPropuesta);
+            if (resPropuesta.HayError || resPropuesta.Valor is null)
+            {
+                resultado.Agregar(resPropuesta);
+                return resultado;
+            }
+            Propuestas propuesta = resPropuesta.Valor;
+
+            resultado.Valor = propuestasRepository.DetalleHistorialTitulares(propuesta.CodPropuesta);
             return resultado;
         }
 
@@ -108,5 +152,6 @@ namespace ElPrado.Services.Services
         {
             return propuestasRepository.ListadoBeneficiarios(opcionesListado);
         }
+
     }
 }

@@ -9,7 +9,7 @@ namespace ElPrado.Services.Services
     public class ComprobantesService : ServiceBase
     {
         private ComprobantesRepository comprobantesRepository => (repository as ComprobantesRepository)!;
-        private ConfiguracionGeneralRepository configuracionGeneralRepository;
+        private readonly ConfiguracionGeneralRepository configuracionGeneralRepository;
 
         public ComprobantesService(Transaccion? transaccion) : base(transaccion)
         {
@@ -67,7 +67,6 @@ namespace ElPrado.Services.Services
 
         private string ArmarLinkWs(string telefonoMovil, string cliente, string nroComprobante, DateTime fecha, int propuesta)
         {
-            telefonoMovil = "3416953193";
             string strTexto = $"Estimado/a%20*{cliente.Replace(" ", "%20")}*%20:%0A%0A" +
                 $"Puede%20descargar%20su%20Factura%20Electronica%20desde:%20{configuracionGeneralRepository.BuscarUrlFacturasPdf()}/{fecha.Year}/{nroComprobante}-{propuesta.ToString().PadLeft(10, '0')}.pdf%0A%0A"+
                 $"Ante%20cualquier%20duda%20contactenos%20a%20los%20siguientes%20numeros:%0A" +
@@ -89,6 +88,7 @@ namespace ElPrado.Services.Services
             try
             {
                 comprobantesRepository.RegistrarEnvio(solicitud.CodCliente, solicitud.CodTalonario, solicitud.NroComprobante, solicitud.TelefonoMovil, ConfiguracionGeneralSesion.CodUsuario);
+                RegistrarLog("Envío de facturas a cod_cliente:" + solicitud.CodCliente.ToString());
                 Commit();
             }
             catch
