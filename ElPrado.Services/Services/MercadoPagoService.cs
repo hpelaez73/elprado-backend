@@ -8,6 +8,7 @@ using MercadoPago.Client.Preference;
 using MercadoPago.Config;
 using MercadoPago.Resource.Payment;
 using MercadoPago.Resource.Preference;
+using System.Linq;
 
 namespace ElPrado.Services.Services
 {
@@ -27,6 +28,11 @@ namespace ElPrado.Services.Services
         public Resultados<string> ArmarPago(List<DtoCuentasCorrientes> listCuotas, int codCliente, DateTime? fechaVencimiento)
         {
             Resultados<string> resultado = new();
+            if (ConfiguracionGeneralSesion.StrConexion.Contains("elprado_dev"))
+            {
+                resultado.Valor = "https://www.mercadopago.com.ar/checkout/v1/redirect?pref_id=320850108-799d6a20-4a9c-49d1-91d2-7f953ed8a113";
+                return resultado;
+            }
 
             ConfiguracionGeneralRepository configuracionGeneralRepository = new(Transaccion);
             ClientesRepository clientesRepository = new(Transaccion);
