@@ -32,6 +32,8 @@ namespace ElPrado.Services.Services
             ConfiguracionGeneralRepository configuracionGeneralRepository = new(Transaccion);
             ClientesRepository clientesRepository = new(Transaccion);
 
+            bool esTesting = ConfiguracionGeneralSesion.StrConexion.Contains("elprado_dev");
+
             Clientes? cliente = clientesRepository.Buscar(codCliente);
             if (cliente == null)
             {
@@ -40,7 +42,7 @@ namespace ElPrado.Services.Services
             }
 
             // Agrega credenciales
-            if (string.IsNullOrEmpty(MercadoPagoConfig.AccessToken))
+            if (!esTesting && string.IsNullOrEmpty(MercadoPagoConfig.AccessToken))
             {
                 MercadoPagoConfig.AccessToken = configuracionGeneralRepository.BuscarMercadoPagoAccessToken();
                 if (string.IsNullOrEmpty(MercadoPagoConfig.AccessToken)) resultado.Agregar("Falta configurar el acceso a Mercado Pago");
@@ -122,7 +124,7 @@ namespace ElPrado.Services.Services
 
             // Create the preference using the client
             Preference preference;
-            if (ConfiguracionGeneralSesion.StrConexion.Contains("elprado_dev"))
+            if (esTesting)
             {
                 preference = new()
                 {
