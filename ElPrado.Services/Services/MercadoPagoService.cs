@@ -28,11 +28,6 @@ namespace ElPrado.Services.Services
         public Resultados<string> ArmarPago(List<DtoCuentasCorrientes> listCuotas, int codCliente, DateTime? fechaVencimiento)
         {
             Resultados<string> resultado = new();
-            if (ConfiguracionGeneralSesion.StrConexion.Contains("elprado_dev"))
-            {
-                resultado.Valor = "https://www.mercadopago.com.ar/checkout/v1/redirect?pref_id=320850108-799d6a20-4a9c-49d1-91d2-7f953ed8a113";
-                return resultado;
-            }
 
             ConfiguracionGeneralRepository configuracionGeneralRepository = new(Transaccion);
             ClientesRepository clientesRepository = new(Transaccion);
@@ -126,8 +121,20 @@ namespace ElPrado.Services.Services
             }
 
             // Create the preference using the client
-            PreferenceClient client = new();
-            Preference preference = client.Create(preferenceReq);
+            Preference preference;
+            if (ConfiguracionGeneralSesion.StrConexion.Contains("elprado_dev"))
+            {
+                preference = new()
+                {
+                    Id = DateTime.Now.ToString(),
+                    InitPoint = "https://www.mercadopago.com.ar/checkout/v1/redirect?pref_id=320850108-799d6a20-4a9c-49d1-91d2-7f953ed8a113"
+                };
+            }
+            else
+            {
+                PreferenceClient client = new();
+                preference = client.Create(preferenceReq);
+            }
 
             PreferenciasMercadopago preferenciasMercadopago = new()
             {
