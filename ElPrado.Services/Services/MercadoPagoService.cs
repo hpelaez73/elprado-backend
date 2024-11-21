@@ -25,7 +25,7 @@ namespace ElPrado.Services.Services
             return new MercadoPagoRepository(Transaccion);
         }
 
-        public Resultados<string> ArmarPago(List<DtoCuentasCorrientes> listCuotas, int codCliente, DateTime? fechaVencimiento)
+        internal Resultados<string> ArmarPago(List<DtoCuentasCorrientes> listCuotas, int codCliente, DateTime? fechaVencimiento)
         {
             Resultados<string> resultado = new();
 
@@ -147,44 +147,35 @@ namespace ElPrado.Services.Services
                 FechaVencimiento = fechaVencimiento
             };
 
-            try
+            mercadoPagoRepository.Agregar(preferenciasMercadopago);
+            foreach (DtoCuentasCorrientes dtoCuenta in listCuotas)
             {
-                mercadoPagoRepository.Agregar(preferenciasMercadopago);
-                foreach (DtoCuentasCorrientes dtoCuenta in listCuotas)
+                if (dtoCuenta.Tipo == "CR")
                 {
-                    if (dtoCuenta.Tipo == "CR")
+                    DetPreferenciasMercadopagoCr detPreferenciasMercadopagoCr = new()
                     {
-                        DetPreferenciasMercadopagoCr detPreferenciasMercadopagoCr = new()
-                        {
-                            CodPreferenciaMercadopago = codPreferencia,
-                            CodCredito = dtoCuenta.Codigo,
-                            Cuota = dtoCuenta.Cuota,
-                            Pago = dtoCuenta.Pago,
-                            Importe = dtoCuenta.Total
-                        };
-                        mercadoPagoRepository.Agregar(detPreferenciasMercadopagoCr);
-                    }
-                    else
-                    {
-                        DetPreferenciasMercadopagoCp detPreferenciasMercadopagoCp = new()
-                        {
-                            CodPreferenciaMercadopago = codPreferencia,
-                            CodConfiguracion = dtoCuenta.Codigo,
-                            Cuota = dtoCuenta.Cuota,
-                            Pago = dtoCuenta.Pago,
-                            Importe = dtoCuenta.Total
-                        };
-                        mercadoPagoRepository.Agregar(detPreferenciasMercadopagoCp);
-                    }
+                        CodPreferenciaMercadopago = codPreferencia,
+                        CodCredito = dtoCuenta.Codigo,
+                        Cuota = dtoCuenta.Cuota,
+                        Pago = dtoCuenta.Pago,
+                        Importe = dtoCuenta.Total
+                    };
+                    mercadoPagoRepository.Agregar(detPreferenciasMercadopagoCr);
                 }
-                Commit();
-                resultado.Valor = preference.InitPoint;
+                else
+                {
+                    DetPreferenciasMercadopagoCp detPreferenciasMercadopagoCp = new()
+                    {
+                        CodPreferenciaMercadopago = codPreferencia,
+                        CodConfiguracion = dtoCuenta.Codigo,
+                        Cuota = dtoCuenta.Cuota,
+                        Pago = dtoCuenta.Pago,
+                        Importe = dtoCuenta.Total
+                    };
+                    mercadoPagoRepository.Agregar(detPreferenciasMercadopagoCp);
+                }
             }
-            catch
-            {
-                Rollback();
-                throw;
-            }
+            resultado.Valor = preference.InitPoint;
 
             return resultado;
         }
