@@ -11,24 +11,24 @@ namespace ElPrado.Data.Repositories
 
         public void Agregar(PreferenciasMercadopago preferenciasMercadopago)
         {
-            conexion.Insert(preferenciasMercadopago, transaccion);
+            connection.Insert(preferenciasMercadopago, transaction);
         }
 
         public void Agregar(DetPreferenciasMercadopagoCr detPreferenciasMercadopagoCr)
         {
-            conexion.Insert(detPreferenciasMercadopagoCr, transaccion);
+            connection.Insert(detPreferenciasMercadopagoCr, transaction);
         }
 
         public void Agregar(DetPreferenciasMercadopagoCp detPreferenciasMercadopagoCp)
         {
-            conexion.Insert(detPreferenciasMercadopagoCp, transaccion);
+            connection.Insert(detPreferenciasMercadopagoCp, transaction);
         }
 
         public void ImputarPago(long id, int codReference, DateTime fechaPago)
         {
             string sql = "EXECUTE PROCEDURE IMPUTAR_MERCADOPAGO(@id, @codReference, @fechaPago)";
 
-            conexion.Execute(sql, new {id, codReference, fechaPago}, transaccion);
+            connection.Execute(sql, new {id, codReference, fechaPago}, transaction);
         }
     }
 }

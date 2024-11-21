@@ -54,7 +54,7 @@ namespace ElPrado.Data.Repositories
 
         private string BuscarValorString(string macro)
         {
-            List<ConfiguracionGeneral> listConfiguracionGeneral = conexion.GetList<ConfiguracionGeneral>(new { Macro = macro }, transaccion).AsList();
+            List<ConfiguracionGeneral> listConfiguracionGeneral = connection.GetList<ConfiguracionGeneral>(new { Macro = macro }, transaction).AsList();
             return (listConfiguracionGeneral.Count == 0) ? string.Empty : listConfiguracionGeneral[0].ValorCaracter ?? string.Empty;
         }
 

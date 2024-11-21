@@ -11,17 +11,17 @@ namespace ElPrado.Data.Repositories
 
         public TEntidad Buscar(int id)
         {
-            return conexion.Get<TEntidad>(id, transaccion);
+            return connection.Get<TEntidad>(id, transaction);
         }
 
         public void Agregar(TEntidad entidad)
         {
-            conexion.Insert(entidad, transaccion);
+            connection.Insert(entidad, transaction);
         }
 
         public void Modificar(TEntidad entidad)
         {
-            conexion.Update(entidad, transaccion);
+            connection.Update(entidad, transaction);
         }
     }
 }

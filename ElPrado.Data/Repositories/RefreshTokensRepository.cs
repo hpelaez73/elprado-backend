@@ -15,7 +15,7 @@ namespace ElPrado.Data.Repositories
                             FROM REFRESH_TOKENS R
                             WHERE R.TOKEN = @token
                             AND R.FECHA_EXPIRACION >= CURRENT_DATE";
-            return conexion.QuerySingleOrDefault<RefreshTokens?>(sql, new { token }, transaccion);
+            return connection.QuerySingleOrDefault<RefreshTokens?>(sql, new { token }, transaction);
         }
 
         public bool ExisteToken(string token)

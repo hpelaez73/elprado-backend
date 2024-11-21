@@ -13,7 +13,7 @@ namespace ElPrado.Data.Repositories
         public List<DtoPlanesVentasPropuestas> BuscarPlanesVentas(int codPropuesta, bool incluirBaja)
         {
             string sql = "SELECT * FROM GET_DATOS_DET_PLANES_VENTAS(@codPropuesta, @incluirBaja)";
-            return conexion.Query<DtoPlanesVentasPropuestas>(sql, new { codPropuesta, incluirBaja }, transaccion).ToList();
+            return connection.Query<DtoPlanesVentasPropuestas>(sql, new { codPropuesta, incluirBaja }, transaction).ToList();
         }
     }
 }
