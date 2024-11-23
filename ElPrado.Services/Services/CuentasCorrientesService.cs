@@ -105,8 +105,8 @@ namespace ElPrado.Services.Services
 
             if (resultado.HayError) return resultado;
 
-            try
-            {
+//            try
+//            {
                 using MercadoPagoService mercadoPagoService = new(Transaccion);
 
                 resultado = mercadoPagoService.ArmarPago(listCuotasSolicitud, codCliente, fechaVencimiento);
@@ -114,12 +114,12 @@ namespace ElPrado.Services.Services
 
                 if (resultado.EstaOK) Commit();
                 else Rollback();
-            }
-            catch
-            {
-                Rollback();
-                throw;
-            }
+//            }
+//            catch
+//            {
+//                Rollback();
+//                throw;
+//            }
             return resultado;
         }
 

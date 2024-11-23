@@ -8,7 +8,6 @@ using MercadoPago.Client.Preference;
 using MercadoPago.Config;
 using MercadoPago.Resource.Payment;
 using MercadoPago.Resource.Preference;
-using System.Linq;
 
 namespace ElPrado.Services.Services
 {
@@ -123,25 +122,20 @@ namespace ElPrado.Services.Services
             }
 
             // Create the preference using the client
-            Preference preference;
-            if (esTesting)
-            {
-                preference = new()
-                {
-                    Id = DateTime.Now.ToString(),
-                    InitPoint = "https://www.mercadopago.com.ar/checkout/v1/redirect?pref_id=320850108-799d6a20-4a9c-49d1-91d2-7f953ed8a113"
-                };
-            }
-            else
+            string idPreferencia = DateTime.Now.ToString();
+            string initPoint = "https://www.mercadopago.com.ar/checkout/v1/redirect?pref_id=320850108-799d6a20-4a9c-49d1-91d2-7f953ed8a113";
+            if (!esTesting)
             {
                 PreferenceClient client = new();
-                preference = client.Create(preferenceReq);
+                Preference preference = client.Create(preferenceReq);
+                idPreferencia = preference.Id;
+                initPoint = preference.InitPoint;
             }
 
             PreferenciasMercadopago preferenciasMercadopago = new()
             {
                 CodPreferenciaMercadopago = codPreferencia,
-                IdPreferencia = preference.Id,
+                IdPreferencia = idPreferencia,
                 CodCliente = codCliente,
                 FechaCreacion = DateTime.Now,
                 FechaVencimiento = fechaVencimiento
@@ -175,7 +169,7 @@ namespace ElPrado.Services.Services
                     mercadoPagoRepository.Agregar(detPreferenciasMercadopagoCp);
                 }
             }
-            resultado.Valor = preference.InitPoint;
+            resultado.Valor = initPoint;
 
             return resultado;
         }
