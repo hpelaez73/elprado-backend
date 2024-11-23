@@ -30,9 +30,21 @@
 
         // Datos de los inhumados
         public List<DtoInhumadosPropuestas>? ListInhumados { get; set; }
+    }
+
+    public class DtoPropuestaDetalleContratosResp
+    {
+        // Datos de los contratos
+        public List<DtoContratosPropuestas>? ListContratos { get; set; }
+
+        // Datos de los detalles de planes de ventas
+        public List<DtoPlanesVentasPropuestas>? ListPlanesVentas { get; set; }
 
         // Datos de los titulares
         public List<DtoClientesPropuestas>? ListTitulares { get; set; }
+
+        // Datos de los titulares que pagan
+        public List<DtoClientesPropuestasFacturasPagos>? ListTitularesFacturasPagos { get; set; }
     }
 
     public class DtoPropuestasAsociadas
@@ -52,7 +64,9 @@
         public string Parcela { get; set; } = string.Empty;
         public DateTime Fecha { get; set; }
         public DateTime? FechaBaja { get; set; }
+        public int CodCliente { get; set; }
     }
+
     public class DtoPropuestasInhumadosList : DtoBase
     {
         public int CodPropuesta { get; set; }

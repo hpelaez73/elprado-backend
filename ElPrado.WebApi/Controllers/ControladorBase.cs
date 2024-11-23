@@ -22,7 +22,8 @@ namespace ElPrado.WebApi.Controllers
             {
                 CodUsuario = ConfiguracionGeneralSesion.CodUsuario,
                 CodCliente = ConfiguracionGeneralSesion.CodCliente,
-                CodPropuesta = ConfiguracionGeneralSesion.CodPropuesta
+                CodPropuesta = ConfiguracionGeneralSesion.CodPropuesta,
+                Environment = Environment.GetEnvironmentVariable("ASPNETCORE_ENVIRONMENT")
             };
         }
 
@@ -97,5 +98,6 @@ namespace ElPrado.WebApi.Controllers
         public int CodUsuario { get; set; }
         public int CodCliente { get; set; }
         public int CodPropuesta { get; set; }
+        public string? Environment { get; set; }
     }
 }

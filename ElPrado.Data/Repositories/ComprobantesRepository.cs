@@ -60,13 +60,13 @@ namespace ElPrado.Data.Repositories
         public IEnumerable<DtoComprobantesFacturasElectronicas> Facturas(int codCliente, DateTime fechaDesde, DateTime fechaHasta)
         {
             string sql = "SELECT * FROM GET_FACTURAS_AFIP(@codCliente, @fechaDesde, @fechaHasta)";
-            return conexion.Query<DtoComprobantesFacturasElectronicas>(sql, new { codCliente , fechaDesde, fechaHasta }, transaccion);
+            return connection.Query<DtoComprobantesFacturasElectronicas>(sql, new { codCliente , fechaDesde, fechaHasta }, transaction);
         }
 
         public DtoComprobantesPeriodo? PeriodosFacturacion(int codCliente)
         {
             string sql = "SELECT * FROM GET_PERIODOS_FACTURAS_AFIP(@codCliente)";
-            return conexion.QuerySingleOrDefault<DtoComprobantesPeriodo?>(sql, new { codCliente }, transaccion);
+            return connection.QuerySingleOrDefault<DtoComprobantesPeriodo?>(sql, new { codCliente }, transaction);
         }
 
         public ApiResponseListado<IEnumerable<dynamic>> ListadoFacturasEnviar(DtoOpcionesListados opcionesListado)
@@ -101,7 +101,7 @@ namespace ElPrado.Data.Repositories
             string sqlCant = $@"SELECT COUNT(*)
                             {sqlFrom} 
                             {sqlWhere}";
-            string sql = $@"SELECT {funcionesListados.ParseSqlPaginado(sqlCant, conexion, transaccion)}
+            string sql = $@"SELECT {funcionesListados.ParseSqlPaginado(sqlCant, connection, transaction)}
                             P.LEGAJO AS PROPUESTA, C.NRO_COMPROBANTE, C.COD_TALONARIO, P.COD_PROPUESTA, 
                             CL.TELEFONO_MOVIL, CL.NOMBRE AS CLIENTE, C.FECHA, CL.COD_CLIENTE,
                             (SELECT MAX(H.FECHA_ENVIO) FROM HIST_ENVIOS_FACTURAS H
@@ -110,14 +110,14 @@ namespace ElPrado.Data.Repositories
                             {sqlWhere}
                             {funcionesListados.ParseSqlOrden()}";
 
-            return funcionesListados.ApiResponse(sql, conexion, transaccion);
+            return funcionesListados.ApiResponse(sql, connection, transaction);
         }
 
         public void RegistrarEnvio(int codCliente, int codTalonario, string nroComprobante, string medioEnvio, int codUsuario)
         {
             string sql = @" INSERT INTO HIST_ENVIOS_FACTURAS (FECHA_ENVIO, POR_WHATSAPP, COD_USUARIO, COD_CLIENTE, COD_TALONARIO, NRO_COMPROBANTE, MEDIO_ENVIO)
                             VALUES (CURRENT_TIMESTAMP, 1, @codUsuario, @codCliente, @codTalonario, @nroComprobante, @medioEnvio)";
-            conexion.Execute(sql, new { codUsuario, codCliente, codTalonario, nroComprobante, medioEnvio }, transaccion);
+            connection.Execute(sql, new { codUsuario, codCliente, codTalonario, nroComprobante, medioEnvio }, transaction);
         }
     }
 }

@@ -8,6 +8,7 @@ using System.Security.Cryptography;
 
 namespace ElPrado.Services.Services
 {
+    [Descripcion("Acceso al sistema por parte de un usuario")]
     public class LoginService : ServiceBase
     {
         public LoginService(Transaccion? transaccion) : base(transaccion)
@@ -26,14 +27,26 @@ namespace ElPrado.Services.Services
                 Propuestas? propuesta = propuestasRepository.BuscarPropuesta(legajo);
                 if (propuesta != null)
                 {
-                    return GenerarTokenCliente(cliente, propuesta);
+                    try
+                    {
+                        RegistrarLogCliente("Acceso desde la web", cliente.CodCliente);
+                        DtoLogin dtoLogin = GenerarTokenCliente(cliente, propuesta);
+                        
+                        Commit();
+                        return dtoLogin;
+                    }
+                    catch
+                    {
+                        Rollback();
+                        throw;
+                    }
                 }
                 return null;
             }
             return null;
         }
 
-        private DtoLogin? GenerarTokenCliente(Clientes cliente, Propuestas propuesta)
+        private DtoLogin GenerarTokenCliente(Clientes cliente, Propuestas propuesta)
         {
             DtoLogin dtoLogin = LogginMapper.MapToDto(cliente, propuesta);
             dtoLogin.RefreshToken = GenerarRefreshToken();
@@ -47,7 +60,19 @@ namespace ElPrado.Services.Services
             Usuarios? usuario = usuariosRepository.Buscar(alias, clave);
             if (usuario != null)
             {
-                return GenerarTokenUsuario(usuario);
+                try
+                { 
+                    RegistrarLogUsuario("Acceso desde la web", usuario.CodUsuario);
+                    DtoLogin dtoLogin = GenerarTokenUsuario(usuario);
+
+                    Commit();
+                    return dtoLogin;
+                }
+                catch
+                {
+                    Rollback();
+                    throw;
+                }
             }
             return null;
         }
@@ -173,16 +198,7 @@ namespace ElPrado.Services.Services
                 FechaExpiracion = DateTime.Today.AddDays(7)
             };
 
-            try
-            {
-                refreshTokensRepository.Agregar(refreshToken);
-                Commit();
-            }
-            catch
-            {
-                Rollback();
-                throw;
-            }
+            refreshTokensRepository.Agregar(refreshToken);
         }
     }
 }

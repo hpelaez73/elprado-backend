@@ -21,7 +21,7 @@ namespace ElPrado.WebApi.Controllers
             };
             if (ConfiguracionGeneralSesion.AllowedOrigins != null)
                 values.AddRange(ConfiguracionGeneralSesion.AllowedOrigins);
-            values.Add("Version: 16/07/2024");
+            values.Add("Version: 21/11/2024 20:42");
             return values;
         }
     }

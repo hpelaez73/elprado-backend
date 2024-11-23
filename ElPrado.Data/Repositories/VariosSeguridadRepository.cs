@@ -11,7 +11,7 @@ namespace ElPrado.Data.Repositories
         public string TraducirClave(string clave, bool esUsuario)
         {
             string sql = "SELECT T.VALOR FROM TRADUCIR_CLAVE(@clave, @esUsuario) T";
-            return conexion.QuerySingle<string>(sql, new { clave, esUsuario }, transaccion);
+            return connection.QuerySingle<string>(sql, new { clave, esUsuario }, transaction);
         }
     }
 }

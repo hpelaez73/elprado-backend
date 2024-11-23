@@ -20,7 +20,7 @@ namespace ElPrado.Data.Comun
             configuracionListado = configuracion;
             opcionesListados = opciones ?? ArmarOpcionesDefault();
         }
-        internal ApiResponseListado<IEnumerable<dynamic>> ApiResponse(string sql, System.Data.IDbConnection conexion, System.Data.IDbTransaction transaccion)
+        internal ApiResponseListado<IEnumerable<dynamic>> ApiResponse(string sql, System.Data.IDbConnection connection, System.Data.IDbTransaction transaction)
         {
             ApiResponseListado<IEnumerable<dynamic>> apiResponse = new();
             if (opcionesListados.MostrarFiltros)
@@ -30,7 +30,7 @@ namespace ElPrado.Data.Comun
             }
             apiResponse.CantidadPaginas = cantidadPaginas;
             apiResponse.CantidadRegistros = cantidadRegistros;
-            apiResponse.Data = conexion.Query<TDtoList>(sql, null, transaccion);
+            apiResponse.Data = connection.Query<TDtoList>(sql, null, transaction);
             return apiResponse;
         }
 
@@ -212,14 +212,14 @@ namespace ElPrado.Data.Comun
             return builder.ToString();
         }
 
-        internal string ParseSqlPaginado(string sqlCant, System.Data.IDbConnection conexion, System.Data.IDbTransaction transaccion)
+        internal string ParseSqlPaginado(string sqlCant, System.Data.IDbConnection connection, System.Data.IDbTransaction transaction)
         {
             if (opcionesListados.MostrarFiltros) return string.Empty;
 
             opcionesListados.FilasPagina = (opcionesListados.FilasPagina == 0) ? 10 : opcionesListados.FilasPagina;
             if (opcionesListados.Pagina <= 1 && !opcionesListados.SinPaginado)
             {
-                cantidadRegistros = conexion.QuerySingleOrDefault<int>(sqlCant, null, transaccion);
+                cantidadRegistros = connection.QuerySingleOrDefault<int>(sqlCant, null, transaction);
                 cantidadPaginas = cantidadRegistros % opcionesListados.FilasPagina == 0 ? cantidadRegistros / opcionesListados.FilasPagina : cantidadRegistros / opcionesListados.FilasPagina + 1;
             }
 

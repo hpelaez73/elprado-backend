@@ -7,13 +7,23 @@ namespace ElPrado.Data.Repositories
     public class ClientesRepository : RepositoryBaseCrud<Clientes, DtoClientes>
     {
         public ClientesRepository(Transaccion transaccion) : base(transaccion)
-        {
+        {            
         }
 
         public override DtoClientes? Visualizar(int id)
         {
-            string sql = "SELECT * FROM CLIENTES C WHERE C.COD_CLIENTE = @id";
-            return conexion.QuerySingleOrDefault<DtoClientes>(sql, new { id }, transaccion); 
+            string sql = "SELECT * FROM GET_DATOS_CLIENTE(@id)";
+            DtoClientes? cliente = connection.QuerySingleOrDefault<DtoClientes>(sql, new { id }, transaction);
+
+            if (cliente != null)
+            {
+                DomiciliosRepository domiciliosRepository = new(transaccion);
+                if (cliente.CodDomicilioParticular != null) cliente.DomicilioParticular = domiciliosRepository.Visualizar(cliente.CodDomicilioParticular.Value);
+                if (cliente.CodDomicilioLaboral != null) cliente.DomicilioLaboral = domiciliosRepository.Visualizar(cliente.CodDomicilioLaboral.Value);
+                if (cliente.CodDomicilioCobranza != null) cliente.DomicilioCobranza = domiciliosRepository.Visualizar(cliente.CodDomicilioCobranza.Value);
+            }
+
+            return cliente;
         }
 
         public Clientes? Buscar(int legajo, long dniCuit, string clave, bool esAdmin)
@@ -28,7 +38,7 @@ namespace ElPrado.Data.Repositories
                 INNER JOIN ESTADOS_DEUDAS ED ON ED.COD_ESTADO_DEUDA = P.COD_ESTADO_DEUDA
                 WHERE PT.FECHA_BAJA IS NULL AND P.FECHA_BAJA IS NULL AND ED.ACTIVA = 1
                 AND P.LEGAJO = @legajo)";
-            return conexion.QuerySingleOrDefault<Clientes?>(sql, new { dniCuit, clave, legajo, esAdmin }, transaccion);
+            return connection.QuerySingleOrDefault<Clientes?>(sql, new { dniCuit, clave, legajo, esAdmin }, transaction);
         }
 
         public Clientes? Buscar(int legajo, long dniCuit)
@@ -42,13 +52,19 @@ namespace ElPrado.Data.Repositories
                 INNER JOIN ESTADOS_DEUDAS ED ON ED.COD_ESTADO_DEUDA = P.COD_ESTADO_DEUDA
                 WHERE PT.FECHA_BAJA IS NULL AND P.FECHA_BAJA IS NULL AND ED.ACTIVA = 1
                 AND P.LEGAJO = @legajo)";
-            return conexion.QuerySingleOrDefault<Clientes?>(sql, new { dniCuit, legajo }, transaccion);
+            return connection.QuerySingleOrDefault<Clientes?>(sql, new { dniCuit, legajo }, transaction);
         }
 
         public List<DtoClientesPropuestas> BuscarTitulares(int codPropuesta)
         {
             string sql = "SELECT * FROM GET_DATOS_TITULARES(@codPropuesta)";
-            return conexion.Query<DtoClientesPropuestas>(sql, new { codPropuesta }, transaccion).ToList();
+            return connection.Query<DtoClientesPropuestas>(sql, new { codPropuesta }, transaction).ToList();
+        }
+
+        public List<DtoClientesPropuestasFacturasPagos>? BuscarTitularesFacturasPagos(int codPropuesta)
+        {
+            string sql = "SELECT * FROM GET_DATOS_TITULARES_FACT_PAGOS(@codPropuesta)";
+            return connection.Query<DtoClientesPropuestasFacturasPagos>(sql, new { codPropuesta }, transaction).ToList();
         }
     }
 }

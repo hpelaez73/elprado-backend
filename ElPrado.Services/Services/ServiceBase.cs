@@ -1,4 +1,6 @@
-﻿using ElPrado.Data;
+﻿using ElPrado.Core;
+using ElPrado.Data;
+using ElPrado.Data.Models;
 using ElPrado.Data.Repositories;
 using ElPrado.Dto.Dtos;
 
@@ -9,7 +11,9 @@ namespace ElPrado.Services.Services
         private bool disposed = false;
         protected RepositoryBase repository;
 
-        private Transaccion transaccion;
+        private readonly LogsService? logsService;
+
+        private readonly Transaccion transaccion;
         protected bool transaccionPropia;
         protected Transaccion Transaccion { get => transaccion; }
 
@@ -18,6 +22,10 @@ namespace ElPrado.Services.Services
             transaccionPropia = transaccion == null;
             this.transaccion = transaccion ?? new();
             repository = CrearRepositorio();
+            if (this is not LogsService)
+            {
+                logsService = new(this.transaccion, this);
+            }
         }
 
         protected virtual RepositoryBase CrearRepositorio()
@@ -62,6 +70,22 @@ namespace ElPrado.Services.Services
         public IEnumerable<dynamic> Listado(DtoOpcionesListados? opcionesListado)
         {
             return repository.Listado(opcionesListado);
+        }
+
+        protected void RegistrarLogUsuario(string log, int codUsuario)
+        {
+            logsService?.RegistrarUsuario(log, codUsuario);
+        }
+
+        protected void RegistrarLogCliente(string log, int codCliente)
+        {
+            logsService?.RegistrarCliente(log, codCliente);
+        }
+
+        protected void RegistrarLog(string log)
+        {
+            if (ConfiguracionGeneralSesion.CodUsuario > 0) RegistrarLogUsuario(log, ConfiguracionGeneralSesion.CodUsuario);
+            else if (ConfiguracionGeneralSesion.CodCliente > 0) RegistrarLogCliente(log, ConfiguracionGeneralSesion.CodCliente);
         }
     }
 }

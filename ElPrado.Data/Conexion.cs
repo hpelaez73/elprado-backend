@@ -24,6 +24,7 @@ namespace ElPrado.Data
         private IDbConnection conexion;
         private IDbTransaction transaccion;
         private bool transaccionActiva = false;
+        private Guid identificador = Guid.NewGuid();
 
         public Transaccion()
         {
