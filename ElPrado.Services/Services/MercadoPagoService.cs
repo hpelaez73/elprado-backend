@@ -196,6 +196,12 @@ namespace ElPrado.Services.Services
                 Payment pago = client.Get(id);
                 if (pago.Status != null && pago.Status != PaymentStatus.Rejected)
                 {
+                    DateTime fechaLimite = new(2024, 11, 24);
+                    if (id <= 93875437169 && pago.DateApproved != null && pago.DateApproved <= fechaLimite)
+                    {
+                        return true; // Para el caso de los reenvios viejos de MP
+                    }
+
                     mercadoPagoRepository.ImputarPago(id, Convert.ToInt32(pago.ExternalReference), pago.DateApproved ?? DateTime.Today);
                     Commit();
 

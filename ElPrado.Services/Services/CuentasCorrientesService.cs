@@ -1,6 +1,5 @@
 ﻿using ElPrado.Core;
 using ElPrado.Data;
-using ElPrado.Data.Models;
 using ElPrado.Data.Repositories;
 using ElPrado.Dto.Dtos;
 
@@ -47,7 +46,7 @@ namespace ElPrado.Services.Services
         public Resultados<string> SolicitudMercadoPago(List<DtoCuotasMercadoPago> listCuotas)
         {
             Resultados<string> resultado = GenerarSolicitudMercadoPago(listCuotas, ConfiguracionGeneralSesion.CodCliente, null);
-            
+
             return resultado;
         }
 
@@ -67,7 +66,7 @@ namespace ElPrado.Services.Services
             {
                 if (fechaVencimiento == null) resultado.Agregar("Falta ingresar la fecha de vencimiento del link");
                 else if (fechaVencimiento <= DateTime.Today) resultado.Agregar("La fecha de vencimiento del link debe ser posterior a hoy");
-                
+
                 if (resultado.HayError) return resultado;
             }
 
@@ -105,21 +104,21 @@ namespace ElPrado.Services.Services
 
             if (resultado.HayError) return resultado;
 
-//            try
-//            {
-                using MercadoPagoService mercadoPagoService = new(Transaccion);
+            //            try
+            //            {
+            using MercadoPagoService mercadoPagoService = new(Transaccion);
 
-                resultado = mercadoPagoService.ArmarPago(listCuotasSolicitud, codCliente, fechaVencimiento);
-                RegistrarLog("Se generó una solicitud MP para cod_cliente: " + codCliente.ToString());
+            resultado = mercadoPagoService.ArmarPago(listCuotasSolicitud, codCliente, fechaVencimiento);
+            RegistrarLog("Se generó una solicitud MP para cod_cliente: " + codCliente.ToString());
 
-                if (resultado.EstaOK) Commit();
-                else Rollback();
-//            }
-//            catch
-//            {
-//                Rollback();
-//                throw;
-//            }
+            if (resultado.EstaOK) Commit();
+            else Rollback();
+            //            }
+            //            catch
+            //            {
+            //                Rollback();
+            //                throw;
+            //            }
             return resultado;
         }
 
