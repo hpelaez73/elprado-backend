@@ -24,11 +24,11 @@ namespace ElPrado.Data.Repositories
             connection.Insert(detPreferenciasMercadopagoCp, transaction);
         }
 
-        public void ImputarPago(long id, int codReference, DateTime fechaPago)
+        public void ImputarPago(long id, int codReference, string referenciaExterna, DateTime fechaPago)
         {
-            string sql = "EXECUTE PROCEDURE IMPUTAR_MERCADOPAGO(@id, @codReference, @fechaPago)";
+            string sql = "EXECUTE PROCEDURE IMPUTAR_MERCADOPAGO(@id, @codReference, @referenciaExterna, @fechaPago)";
 
-            connection.Execute(sql, new {id, codReference, fechaPago}, transaction);
+            connection.Execute(sql, new {id, codReference, referenciaExterna, fechaPago }, transaction);
         }
     }
 }

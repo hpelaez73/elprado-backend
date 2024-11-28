@@ -174,7 +174,7 @@ namespace ElPrado.Services.Services
             return resultado;
         }
 
-        public bool ImputarPago(long id)
+        internal bool ImputarPago(long id)
         {
             ConfiguracionGeneralRepository configuracionGeneralRepository = new(Transaccion);
             // Agrega credenciales
@@ -190,28 +190,16 @@ namespace ElPrado.Services.Services
                 return true;
             }
 
-            try
+            PaymentClient client = new();
+            Payment pago = client.Get(id);
+            if (pago.Status != null && pago.Status != PaymentStatus.Rejected)
             {
-                PaymentClient client = new();
-                Payment pago = client.Get(id);
-                if (pago.Status != null && pago.Status != PaymentStatus.Rejected)
-                {
-                    DateTime fechaLimite = new(2024, 11, 24);
-                    if (id <= 93875437169 && pago.DateApproved != null && pago.DateApproved <= fechaLimite)
-                    {
-                        return true; // Para el caso de los reenvios viejos de MP
-                    }
+                string referenciaExterna = pago.ExternalReference;
+                if (int.TryParse(referenciaExterna, out int codPreferencia)) referenciaExterna = string.Empty;
 
-                    mercadoPagoRepository.ImputarPago(id, Convert.ToInt32(pago.ExternalReference), pago.DateApproved ?? DateTime.Today);
-                    Commit();
+                mercadoPagoRepository.ImputarPago(id, codPreferencia, referenciaExterna, pago.DateApproved ?? DateTime.Today);
 
-                    return true;
-                }
-            }
-            catch
-            {
-                Rollback();
-                throw;
+                return true;
             }
             return false;
         }
