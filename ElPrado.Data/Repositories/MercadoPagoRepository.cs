@@ -24,6 +24,13 @@ namespace ElPrado.Data.Repositories
             connection.Insert(detPreferenciasMercadopagoCp, transaction);
         }
 
+        public void CrearPreferencia(string referenciaExterna)
+        {
+            string sql = "EXECUTE PROCEDURE GUARDAR_PREFERENCIA_MERCADOPAGO(@idPreferencia, @referenciaExterna, NULL)";
+            string idPreferencia = referenciaExterna.Length > 100 ? referenciaExterna[..99] : referenciaExterna;
+            connection.Execute(sql, new { idPreferencia, referenciaExterna }, transaction);
+        }
+
         public void ImputarPago(long id, int codReference, string referenciaExterna, DateTime fechaPago)
         {
             string sql = "EXECUTE PROCEDURE IMPUTAR_MERCADOPAGO(@id, @codReference, @referenciaExterna, @fechaPago)";

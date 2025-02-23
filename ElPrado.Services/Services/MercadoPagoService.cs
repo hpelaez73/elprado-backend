@@ -196,6 +196,13 @@ namespace ElPrado.Services.Services
             {
                 string referenciaExterna = pago.ExternalReference;
                 if (int.TryParse(referenciaExterna, out int codPreferencia)) referenciaExterna = string.Empty;
+                else
+                {
+                    // si la preferencia se cargo con el metodo viejo creo la preferencia
+                    mercadoPagoRepository.CrearPreferencia(referenciaExterna);
+                }
+                        
+
 
                 mercadoPagoRepository.ImputarPago(id, codPreferencia, referenciaExterna, pago.DateApproved ?? DateTime.Today);
 

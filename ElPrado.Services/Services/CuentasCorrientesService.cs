@@ -126,19 +126,19 @@ namespace ElPrado.Services.Services
         {
             if (topic != "payment") return false;
 
-            try
-            {
+            //try
+            //{
                 using MercadoPagoService mercadoPagoService = new(Transaccion);
 
                 mercadoPagoService.ImputarPago(id);
 
                 Commit();
-            }
-            catch
-            {
-                Rollback();
-                throw;
-            }
+            //}
+            //catch
+            //{
+                //Rollback();
+                //throw;
+            //}
             return true;
         }
 

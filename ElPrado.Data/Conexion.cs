@@ -41,7 +41,7 @@ namespace ElPrado.Data
 
         public void Rollback()
         {
-            transaccion.Rollback();
+            if (transaccionActiva) transaccion.Rollback();
             transaccionActiva = false;
         }
 

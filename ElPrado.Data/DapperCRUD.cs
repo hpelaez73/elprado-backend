@@ -1362,7 +1362,7 @@ internal static class TypeExtension
 
     public static string CacheKey(this IEnumerable<PropertyInfo> props)
     {
-        return string.Join(",", props.Select(p => p.DeclaringType.FullName + "." + p.Name).ToArray());
+        return string.Join(",", props.Select(p => $"{p.DeclaringType.FullName}.{p.Name}").ToArray());
     }
 
 }
