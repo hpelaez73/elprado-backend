@@ -112,7 +112,7 @@ namespace ElPrado.Services.Services
             RegistrarLog("Se generó una solicitud MP para cod_cliente: " + codCliente.ToString());
 
             if (resultado.EstaOK) Commit();
-            else Rollback();
+            //else Rollback();
             //            }
             //            catch
             //            {
