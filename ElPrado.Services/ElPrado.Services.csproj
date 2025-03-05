@@ -7,6 +7,10 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <None Remove="Services\MercadoPagoService.cs.bak" />
+  </ItemGroup>
+
+  <ItemGroup>
     <PackageReference Include="mercadopago-sdk" Version="2.4.2" />
   </ItemGroup>
 

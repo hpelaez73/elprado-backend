@@ -3,11 +3,6 @@ using ElPrado.Data;
 using ElPrado.Data.Models;
 using ElPrado.Data.Repositories;
 using ElPrado.Dto.Dtos;
-using MercadoPago.Client.Payment;
-using MercadoPago.Client.Preference;
-using MercadoPago.Config;
-using MercadoPago.Resource.Payment;
-using MercadoPago.Resource.Preference;
 
 namespace ElPrado.Services.Services
 {
@@ -33,109 +28,43 @@ namespace ElPrado.Services.Services
 
             bool esTesting = ConfiguracionGeneralSesion.StrConexion.Contains("elprado_dev");
 
-            Clientes? cliente = clientesRepository.Buscar(codCliente);
-            if (cliente == null)
+            DtoClientes? dtoCliente = clientesRepository.Visualizar(codCliente);
+            if (dtoCliente == null)
             {
                 resultado.Agregar("El cliente no existe");
                 return resultado;
             }
 
-            // Agrega credenciales
-            if (!esTesting && string.IsNullOrEmpty(MercadoPagoConfig.AccessToken))
+            DtoMercadoPago dtoMercadoPago = new()
             {
-                MercadoPagoConfig.AccessToken = configuracionGeneralRepository.BuscarMercadoPagoAccessToken();
-                if (string.IsNullOrEmpty(MercadoPagoConfig.AccessToken)) resultado.Agregar("Falta configurar el acceso a Mercado Pago");
-            }
-
-            int codPreferencia = mercadoPagoRepository.ProximoCodigo("PREFERENCIAS_MERCADOPAGO");
-
-            PreferenceRequest preferenceReq = new()
-            {
-                Items = new List<PreferenceItemRequest>(),
-                NotificationUrl = configuracionGeneralRepository.BuscarMercadoPagoNotificationUrl()
+                CodPreferencia = mercadoPagoRepository.ProximoCodigo("PREFERENCIAS_MERCADOPAGO"),
+                AccessToken = configuracionGeneralRepository.BuscarMercadoPagoAccessToken(),
+                NotificationUrl = configuracionGeneralRepository.BuscarMercadoPagoNotificationUrl(),
+                BackUrlsSuccess = configuracionGeneralRepository.BuscarMercadoPagoBackUrlsSuccess(),
+                BackUrlsFailure = configuracionGeneralRepository.BuscarMercadoPagoBackUrlsFailure(),
+                BackUrlsPending = configuracionGeneralRepository.BuscarMercadoPagoBackUrlsPending()
             };
-            if (string.IsNullOrEmpty(preferenceReq.NotificationUrl)) resultado.Agregar("Falta configurar la Url de notificación de Mercado Pago");
+            if (string.IsNullOrEmpty(dtoMercadoPago.AccessToken)) resultado.Agregar("Falta configurar el acceso a Mercado Pago");
+            if (string.IsNullOrEmpty(dtoMercadoPago.NotificationUrl)) resultado.Agregar("Falta configurar la Url de notificación de Mercado Pago");
 
             if (resultado.HayError) return resultado;
 
-            foreach (DtoCuentasCorrientes item in listCuotas)
+            DtoPreferencia dtoPreferencia = new();
+            if (esTesting)
             {
-                //externalReference += item.Propuesta + "|" + item.Tipo + "|" + item.Codigo.ToString() + "|" + item.Cuota.ToString() + "|" + item.Pago.ToString() + "!!";
-                preferenceReq.Items.Add(
-                    new()
-                    {
-                        Id = item.Propuesta.ToString(),
-                        Title = item.Propuesta + " - " + item.Categoria,
-                        Description = "Periodo " + item.FechaCuota.ToString("MM/yyyy"),
-                        Quantity = 1,
-                        CurrencyId = "ARS",
-                        UnitPrice = (decimal)item.Total
-                    }
-                );
+                dtoPreferencia.Id = DateTime.Now.ToString();
+                dtoPreferencia.InitPoint = "https://www.mercadopago.com.ar/checkout/v1/redirect?pref_id=320850108-799d6a20-4a9c-49d1-91d2-7f953ed8a113";
             }
-            //externalReference += "**" + cliente.CodCliente.ToString();
-
-            preferenceReq.Payer = new()
+            else
             {
-                Name = cliente.Nombre,
-                Email = cliente.Email,
-                Phone = new()
-                {
-                    AreaCode = "",
-                    Number = cliente.Telefono
-                },
-                Identification = new()
-                {
-                    Type = cliente.TipoDocumento,
-                    Number = cliente.NroDocumento.ToString()
-                }
-            };
-
-            preferenceReq.PaymentMethods = new()
-            {
-                ExcludedPaymentTypes = new List<PreferencePaymentTypeRequest>
-                {
-                    new ()
-                    {
-                        Id = "ticket"
-                    },
-                    new ()
-                    {
-                        Id = "atm"
-                    }
-                },
-                Installments = 1
-            };
-            preferenceReq.BinaryMode = true;
-            preferenceReq.AutoReturn = "approved";
-            preferenceReq.ExternalReference = codPreferencia.ToString();
-            preferenceReq.BackUrls = new()
-            {
-                Success = configuracionGeneralRepository.BuscarMercadoPagoBackUrlsSuccess(),
-                Failure = configuracionGeneralRepository.BuscarMercadoPagoBackUrlsFailure(),
-                Pending = configuracionGeneralRepository.BuscarMercadoPagoBackUrlsPending()
-            };
-
-            if (fechaVencimiento != null)
-            {
-                preferenceReq.DateOfExpiration = fechaVencimiento.Value.AddHours(23);
-            }
-
-            // Create the preference using the client
-            string idPreferencia = DateTime.Now.ToString();
-            string initPoint = "https://www.mercadopago.com.ar/checkout/v1/redirect?pref_id=320850108-799d6a20-4a9c-49d1-91d2-7f953ed8a113";
-            if (!esTesting)
-            {
-                PreferenceClient client = new();
-                Preference preference = client.Create(preferenceReq);
-                idPreferencia = preference.Id;
-                initPoint = preference.InitPoint;
+                MercadoPagoApiService mpService = new(dtoMercadoPago.AccessToken);
+                dtoPreferencia = mpService.CrearPreferencia(listCuotas, dtoCliente, dtoMercadoPago, fechaVencimiento);
             }
 
             PreferenciasMercadopago preferenciasMercadopago = new()
             {
-                CodPreferenciaMercadopago = codPreferencia,
-                IdPreferencia = idPreferencia,
+                CodPreferenciaMercadopago = dtoMercadoPago.CodPreferencia,
+                IdPreferencia = dtoPreferencia.Id,
                 CodCliente = codCliente,
                 FechaCreacion = DateTime.Now,
                 FechaVencimiento = fechaVencimiento
@@ -148,7 +77,7 @@ namespace ElPrado.Services.Services
                 {
                     DetPreferenciasMercadopagoCr detPreferenciasMercadopagoCr = new()
                     {
-                        CodPreferenciaMercadopago = codPreferencia,
+                        CodPreferenciaMercadopago = dtoMercadoPago.CodPreferencia,
                         CodCredito = dtoCuenta.Codigo,
                         Cuota = dtoCuenta.Cuota,
                         Pago = dtoCuenta.Pago,
@@ -160,7 +89,7 @@ namespace ElPrado.Services.Services
                 {
                     DetPreferenciasMercadopagoCp detPreferenciasMercadopagoCp = new()
                     {
-                        CodPreferenciaMercadopago = codPreferencia,
+                        CodPreferenciaMercadopago = dtoMercadoPago.CodPreferencia,
                         CodConfiguracion = dtoCuenta.Codigo,
                         Cuota = dtoCuenta.Cuota,
                         Pago = dtoCuenta.Pago,
@@ -169,7 +98,7 @@ namespace ElPrado.Services.Services
                     mercadoPagoRepository.Agregar(detPreferenciasMercadopagoCp);
                 }
             }
-            resultado.Valor = initPoint;
+            resultado.Valor = dtoPreferencia.InitPoint;
 
             return resultado;
         }
@@ -177,12 +106,8 @@ namespace ElPrado.Services.Services
         internal bool ImputarPago(long id)
         {
             ConfiguracionGeneralRepository configuracionGeneralRepository = new(Transaccion);
-            // Agrega credenciales
-            if (string.IsNullOrEmpty(MercadoPagoConfig.AccessToken))
-            {
-                MercadoPagoConfig.AccessToken = configuracionGeneralRepository.BuscarMercadoPagoAccessToken();
-                if (string.IsNullOrEmpty(MercadoPagoConfig.AccessToken)) return false;
-            }
+            string accessToken = configuracionGeneralRepository.BuscarMercadoPagoAccessToken();
+            if (string.IsNullOrEmpty(accessToken)) return false;
 
             if (id == 123456)
             {
@@ -190,22 +115,12 @@ namespace ElPrado.Services.Services
                 return true;
             }
 
-            PaymentClient client = new();
-            Payment pago = client.Get(id);
-            if (pago.Status != null && pago.Status != PaymentStatus.Rejected)
+            MercadoPagoApiService mpService = new(accessToken);
+            DtoPayment dtoPayment = mpService.BuscarPago(id);
+
+            if (dtoPayment.PagoAprobado)
             {
-                string referenciaExterna = pago.ExternalReference;
-                if (int.TryParse(referenciaExterna, out int codPreferencia)) referenciaExterna = string.Empty;
-                else
-                {
-                    // si la preferencia se cargo con el metodo viejo creo la preferencia
-                    mercadoPagoRepository.CrearPreferencia(referenciaExterna);
-                }
-                        
-
-
-                mercadoPagoRepository.ImputarPago(id, codPreferencia, referenciaExterna, pago.DateApproved ?? DateTime.Today);
-
+                mercadoPagoRepository.ImputarPago(id, dtoPayment.CodPreferencia, dtoPayment.ReferenciaExterna, dtoPayment.FechaPago);
                 return true;
             }
             return false;
