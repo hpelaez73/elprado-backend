@@ -118,6 +118,12 @@ namespace ElPrado.Services.Services
             MercadoPagoApiService mpService = new(accessToken);
             DtoPayment dtoPayment = mpService.BuscarPago(id);
 
+            if (dtoPayment.ReferenciaExterna == "Venta presencial")
+            {
+                // Si es una venta presencial, no se hace nada
+                return true;
+            }
+
             if (dtoPayment.PagoAprobado)
             {
                 mercadoPagoRepository.ImputarPago(id, dtoPayment.CodPreferencia, dtoPayment.ReferenciaExterna, dtoPayment.FechaPago);
