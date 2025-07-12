@@ -40,7 +40,7 @@ namespace ElPrado.Services.Services
                 }
                 listMenusWeb.RemoveAll(x => x.Nivel == i);
             }
-            return MenusMapper.MapToDto(listMenusWeb);
+            return MenusMapper.MapToDto(listMenusWeb, ConfiguracionGeneralSesion.CodUsuario > 0);
         }
 
         public List<DtoPanel> BuscarPanel()
@@ -49,7 +49,7 @@ namespace ElPrado.Services.Services
                 ? usuariosRepository.BuscarMenuUsuario(ConfiguracionGeneralSesion.CodUsuario, true)
                 : usuariosRepository.BuscarMenuCliente(true);
 
-            return PanelMapper.MapToDto(listMenusWeb);
+            return PanelMapper.MapToDto(listMenusWeb, ConfiguracionGeneralSesion.CodUsuario > 0);
         }
 
         public Resultados<DtoAutorizacionesSolicitudResp> AnalizarSolicitudAutorizacion(DtoAutorizacionesSolicitudReq solicitud)
