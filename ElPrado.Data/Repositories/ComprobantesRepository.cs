@@ -57,6 +57,20 @@ namespace ElPrado.Data.Repositories
             };
         }
 
+        public DtoComprobantes? Visualizar(int codTalonario, string nroComprobante)
+        {
+            string sql = "SELECT * FROM GET_DATOS_COMPROBANTE(@codTalonario, @nroComprobante)";
+            DtoComprobantes? comprobante = connection.QuerySingleOrDefault<DtoComprobantes>(sql, new { codTalonario, nroComprobante }, transaction);
+
+            if (comprobante != null)
+            {
+                sql = "SELECT * FROM GET_DATOS_COMPROBANTE_DETALLE(@codTalonario, @nroComprobante)";
+                comprobante.Detalles = connection.Query<DtoComprobantesDetalles>(sql, new { codTalonario, nroComprobante }, transaction).ToList();
+            }
+
+            return comprobante;
+        }
+
         public IEnumerable<DtoComprobantesFacturasElectronicas> Facturas(int codCliente, DateTime fechaDesde, DateTime fechaHasta)
         {
             string sql = "SELECT * FROM GET_FACTURAS_AFIP(@codCliente, @fechaDesde, @fechaHasta)";
@@ -119,5 +133,6 @@ namespace ElPrado.Data.Repositories
                             VALUES (CURRENT_TIMESTAMP, 1, @codUsuario, @codCliente, @codTalonario, @nroComprobante, @medioEnvio)";
             connection.Execute(sql, new { codUsuario, codCliente, codTalonario, nroComprobante, medioEnvio }, transaction);
         }
+
     }
 }

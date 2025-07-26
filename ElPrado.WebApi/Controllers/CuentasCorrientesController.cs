@@ -123,5 +123,42 @@ namespace ElPrado.WebApi.Controllers
                 throw;
             }
         }
+
+        [HttpPost("ResumenCuentas")]
+        public ActionResult<ApiResponse<List<DtoCuentasCorrientesResumen>>> ResumenCuentas([FromBody] DtoCuentasCorrientesResumenReq dtoCuentas)
+        {
+            try
+            {
+                ApiResponse<List<DtoCuentasCorrientesResumen>> apiResponse = new();
+                Resultados<List<DtoCuentasCorrientesResumen>> resultado = cuentasCorrientesService.ResumenCuentas(dtoCuentas);
+                if (resultado.HayError || resultado.Valor == null)
+                {
+                    apiResponse.Agregar(resultado);
+                    return BadRequest(apiResponse);
+                }
+                apiResponse.Data = resultado.Valor;
+                return apiResponse;
+            }
+            catch (Exception ex)
+            {
+                Serilog.Log.Error(ex, "{Controlador}.ResumenCuentas({@dtoCuentas}): {Mensaje} {@Extras}", this, dtoCuentas, ex.Message, extrasLog);
+                throw;
+            }
+        }
+
+        [HttpPost("ListadoResumenCuotas")]
+        public ApiResponseListado<IEnumerable<dynamic>> ListadoResumenCuotas([FromBody] DtoOpcionesListados opcionesListado)
+        {
+            try
+            {
+                return cuentasCorrientesService.ListadoResumenCuotas(opcionesListado);
+            }
+            catch (Exception ex)
+            {
+                Serilog.Log.Error(ex, "{Controlador}.ListadoResumenCuotas({@opcionesListado}): {Mensaje} {@Extras}", this, opcionesListado, ex.Message, extrasLog);
+                throw;
+            }
+        }
+
     }
 }

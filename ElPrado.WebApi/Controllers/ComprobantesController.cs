@@ -1,4 +1,5 @@
 ﻿using ElPrado.Core;
+using ElPrado.Dto;
 using ElPrado.Dto.Dtos;
 using ElPrado.Services.Services;
 using Microsoft.AspNetCore.Mvc;
@@ -17,6 +18,29 @@ namespace ElPrado.WebApi.Controllers
         {
             return new ComprobantesService(null);
         }
+
+        [HttpPost("Visualizar")]
+        public ActionResult<ApiResponse<DtoComprobantes>> Visualizar([FromBody] DtoComprobanteReq dtoComprobante)
+        {
+            try
+            {
+                ApiResponse<DtoComprobantes> apiResponse = new();
+                DtoComprobantes? comprobante = comprobantesService.Visualizar(dtoComprobante.CodTalonario, dtoComprobante.NroComprobante);
+                if (comprobante == null)
+                {
+                    apiResponse.Agregar("No se encontró el comprobante");
+                    return NotFound(apiResponse);
+                }
+                apiResponse.Data = comprobante;
+                return apiResponse;
+            }
+            catch (Exception ex)
+            {
+                Serilog.Log.Error(ex, "{Controlador}.Visualizar({@dtoComprobante}): {Mensaje} {@Extras}", this, dtoComprobante, ex.Message, extrasLog);
+                throw;
+            }
+        }
+
 
         [HttpGet("PeriodosFacturacion")]
         public ActionResult<ApiResponse<List<int>>> PeriodosFacturacion()

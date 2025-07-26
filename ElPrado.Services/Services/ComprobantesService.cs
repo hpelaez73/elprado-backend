@@ -21,6 +21,11 @@ namespace ElPrado.Services.Services
             return new ComprobantesRepository(Transaccion);
         }
 
+        public DtoComprobantes? Visualizar(int codTalonario, string nroComprobante)
+        {
+            return comprobantesRepository.Visualizar(codTalonario, nroComprobante);
+        }
+
         public IEnumerable<DtoComprobantesFacturasElectronicas> Facturas(int periodo)
         {
             return comprobantesRepository.Facturas(ConfiguracionGeneralSesion.CodCliente, new DateTime(periodo, 1, 1), new DateTime(periodo, 12, 31));

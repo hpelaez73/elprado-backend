@@ -205,7 +205,7 @@ namespace ElPrado.Data.Repositories
                             {funcionesListados.ParseSqlOrden()}
                             ) I";
 
-            return funcionesListados.ApiResponse(sql, connection, transaction); ;
+            return funcionesListados.ApiResponse(sql, connection, transaction);
         }
 
         public ApiResponseListado<IEnumerable<dynamic>> ListadoTitulares(DtoOpcionesListados opcionesListado)

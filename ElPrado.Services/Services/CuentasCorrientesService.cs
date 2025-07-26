@@ -1,5 +1,6 @@
 ﻿using ElPrado.Core;
 using ElPrado.Data;
+using ElPrado.Data.Models;
 using ElPrado.Data.Repositories;
 using ElPrado.Dto.Dtos;
 
@@ -142,5 +143,20 @@ namespace ElPrado.Services.Services
             return true;
         }
 
+        public Resultados<List<DtoCuentasCorrientesResumen>> ResumenCuentas(DtoCuentasCorrientesResumenReq dtoCuentas)
+        {
+            Resultados<List<DtoCuentasCorrientesResumen>> resultado = new()
+            {
+                Valor = cuentasCorrientesRepository.ResumenCuentas(
+                    dtoCuentas.CodPropuesta, dtoCuentas.MostrarBaja, dtoCuentas.MostrarInactiva,
+                    dtoCuentas.FechaInteres, dtoCuentas.FechaHasta)
+            };
+            return resultado;
+        }
+
+        public ApiResponseListado<IEnumerable<dynamic>> ListadoResumenCuotas(DtoOpcionesListados opcionesListado)
+        {
+            return cuentasCorrientesRepository.ListadoResumenCuotas(opcionesListado);
+        }
     }
 }
