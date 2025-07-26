@@ -1,23 +1,19 @@
 FROM mcr.microsoft.com/dotnet/sdk:7.0 AS build
 WORKDIR /src
 
+EXPOSE 80
+
+#copiar archivos del proyecto
 COPY . .
-
-# Limpiar caché (opcional, pero útil)
-RUN dotnet nuget locals all --clear
-
-# Restaurar dependencias
 RUN dotnet restore
 
-# Publicar
 RUN dotnet publish -c Release -o /app
-
-# Imagen final más liviana
-FROM mcr.microsoft.com/dotnet/aspnet:7.0 AS runtime
+    
+#Build image
+FROM mcr.microsoft.com/dotnet/sdk:7.0
 WORKDIR /app
-
-COPY --from=build /app .
 
 EXPOSE 80
 
+COPY --from=build /app .
 ENTRYPOINT ["dotnet", "ElPrado.WebApi.dll", "--environment=Staging"]
