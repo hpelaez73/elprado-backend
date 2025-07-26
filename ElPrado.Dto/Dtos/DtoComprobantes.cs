@@ -11,6 +11,7 @@
         public DateTime Fecha { get; set; }
         public string TipoComprobante { get; set; } = string.Empty;
         public string Talonario { get; set; } = string.Empty;
+        public string NroComprobante { get; set; } = string.Empty;
         public string TipoDocumento { get; set; } = string.Empty;
         public string Cliente { get; set; } = string.Empty;
         public int? NroDocumento { get; set; }
