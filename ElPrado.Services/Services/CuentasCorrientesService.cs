@@ -149,7 +149,8 @@ namespace ElPrado.Services.Services
             {
                 Valor = cuentasCorrientesRepository.ResumenCuentas(
                     dtoCuentas.CodPropuesta, dtoCuentas.MostrarBaja, dtoCuentas.MostrarInactiva,
-                    dtoCuentas.FechaInteres, dtoCuentas.FechaHasta)
+                    dtoCuentas.FechaInteres ?? DateUtils.FinDeMes(DateTime.Today.AddMonths(-1)), 
+                    dtoCuentas.FechaHasta ?? DateUtils.FinDeMes())
             };
             return resultado;
         }
