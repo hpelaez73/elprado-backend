@@ -12,13 +12,16 @@ namespace ElPrado.Data.Repositories
 
         public Usuarios? Buscar(string alias, string clave)
         {
-            List<Usuarios> listUsuarios = connection.GetList<Usuarios>(new { Alias = alias, ClaveAcceso = clave }, transaction).AsList();
+            // Uso interpolación para soportar el uso de ñ y acentos en los alias y claves
+            string sql = $"SELECT * FROM USUARIOS WHERE ALIAS = '{alias}' AND CLAVE_ACCESO = '{clave}'";
+            List<Usuarios> listUsuarios = connection.Query<Usuarios>(sql, null, transaction).AsList();
             return listUsuarios.Count > 0 ? listUsuarios[0] : null;
         }
 
         public Usuarios? Buscar(int codUsuario, string clave)
         {
-            List<Usuarios> listUsuarios = connection.GetList<Usuarios>(new { CodUsuario = codUsuario, ClaveAcceso = clave }, transaction).AsList();
+            string sql = $"SELECT * FROM USUARIOS WHERE COD_USUARIO = {codUsuario} AND CLAVE_ACCESO = '{clave}'";
+            List<Usuarios> listUsuarios = connection.Query<Usuarios>(sql, null, transaction).AsList();
             return listUsuarios.Count > 0 ? listUsuarios[0] : null;
         }
 
