@@ -85,6 +85,7 @@
         public double Interes { get; set; }
         public double Descuento { get; set; }
         public double Punitorio { get; set; }
+        public double DescuentoRecargo { get; set; }
         public bool Anulado { get; set; }
         public bool Inactivo { get; set; }
         public int? CodMovimientoFondo { get; set; }
