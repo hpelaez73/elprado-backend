@@ -36,7 +36,7 @@
         public int? DocumentoBeneficiado { get; set; }
         public DateTime? FechaUtilizacion { get; set; }
 
-        public List<DtoComprobantesDetalles>? Detalles { get; set; }
+        public List<DtoComprobantesDetalles>? ListDetalles { get; set; }
     }
 
     public class DtoComprobantesDetalles
