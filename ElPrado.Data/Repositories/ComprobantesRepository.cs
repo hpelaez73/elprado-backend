@@ -65,7 +65,7 @@ namespace ElPrado.Data.Repositories
             if (comprobante != null)
             {
                 sql = "SELECT * FROM GET_DATOS_COMPROBANTE_DETALLE(@codTalonario, @nroComprobante)";
-                comprobante.Detalles = connection.Query<DtoComprobantesDetalles>(sql, new { codTalonario, nroComprobante }, transaction).ToList();
+                comprobante.ListDetalles = connection.Query<DtoComprobantesDetalles>(sql, new { codTalonario, nroComprobante }, transaction).ToList();
             }
 
             return comprobante;
