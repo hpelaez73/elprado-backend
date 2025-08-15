@@ -1,12 +1,8 @@
-using ElPrado.Core;
-using ElPrado.WebApi.MiddleWares;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
 using Serilog;
 using System.Text;
-
-const string strConexionLocal = "DataSource=127.0.0.1;Database=D:\\Trabajo\\Prado\\Base\\ELPRADO_PEREZ.FDB;Port=3050;User=sysdba;Password=masterkey;Dialect=3;Charset=ISO8859_1";
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -52,7 +48,7 @@ builder.Services.AddSwaggerGen(c =>
 });
 
 // Cors
-var allowedOrigin = builder.Configuration.GetSection("AllowedOrigins").Get<string[]>() ?? new string[] {"*"};
+var allowedOrigin = builder.Configuration.GetSection("AllowedOrigins").Get<string[]>() ?? new string[] { "*" };
 
 var policyName = "CorsPolicy";
 builder.Services.AddCors(options =>
@@ -79,10 +75,14 @@ builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
         };
     });
 
-ConfiguracionGeneralSesion.StrConexion = builder.Configuration.GetConnectionString("DefaultConnection") ?? strConexionLocal;
-ConfiguracionGeneralSesion.AllowedOrigins = allowedOrigin;
+//Add dependency injection
+builder.Services.AddHttpContextAccessor();
+builder.Services.AddScoped<ElPrado.Data.IUnitOfWork, ElPrado.Data.UnitOfWork>();
+builder.Services.AddScoped<ElPrado.Services.IUserContextService, ElPrado.WebApi.UserContextService>();
 
 var app = builder.Build();
+
+app.UseMiddleware<ElPrado.WebApi.MiddleWares.ErrorHandlingMiddleware>();
 
 // Configure the HTTP request pipeline.
 if (app.Environment.IsDevelopment() || app.Environment.IsStaging())
@@ -100,8 +100,6 @@ app.UseCors(policyName);
 app.UseAuthentication();
 
 app.UseAuthorization();
-
-app.UseMiddleware<LoginMiddleWare>();
 
 app.MapControllers();
 

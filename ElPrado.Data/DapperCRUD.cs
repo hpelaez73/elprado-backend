@@ -148,16 +148,16 @@ namespace ElPrado.Data
         /// <para>-Table name can be overridden by adding an attribute on your class [Table("YourTableName")]</para>
         /// <para>By default filters on the Id column</para>
         /// <para>-Id column name can be overridden by adding an attribute on your primary key property [Key]</para>
-        /// <para>Supports transaction and command timeout</para>
+        /// <para>Supports _transaction and command timeout</para>
         /// <para>Returns a single entity by a single id from table T</para>
         /// </summary>
         /// <typeparam name="T"></typeparam>
-        /// <param name="connection"></param>
+        /// <param name="_connection"></param>
         /// <param name="id"></param>
-        /// <param name="transaction"></param>
+        /// <param name="_transaction"></param>
         /// <param name="commandTimeout"></param>
         /// <returns>Returns a single entity by a single id from table T.</returns>
-        public static T Get<T>(this IDbConnection connection, object id, IDbTransaction? transaction = null,
+        public static T Get<T>(this IDbConnection _connection, object id, IDbTransaction? _transaction = null,
             int? commandTimeout = null)
         {
             var currenttype = typeof(T);
@@ -191,24 +191,24 @@ namespace ElPrado.Data
             if (Debugger.IsAttached)
                 Trace.WriteLine(String.Format("Get<{0}>: {1} with Id: {2}", currenttype, sb, id));
 
-            return connection.Query<T>(sb.ToString(), dynParms, transaction, true, commandTimeout).FirstOrDefault();
+            return _connection.Query<T>(sb.ToString(), dynParms, _transaction, true, commandTimeout).FirstOrDefault();
         }
 
         /// <summary>
         /// <para>By default queries the table matching the class name</para>
         /// <para>-Table name can be overridden by adding an attribute on your class [Table("YourTableName")]</para>
         /// <para>whereConditions is an anonymous type to filter the results ex: new {Category = 1, SubCategory=2}</para>
-        /// <para>Supports transaction and command timeout</para>
+        /// <para>Supports _transaction and command timeout</para>
         /// <para>Returns a list of entities that match where conditions</para>
         /// </summary>
         /// <typeparam name="T"></typeparam>
-        /// <param name="connection"></param>
+        /// <param name="_connection"></param>
         /// <param name="whereConditions"></param>
-        /// <param name="transaction"></param>
+        /// <param name="_transaction"></param>
         /// <param name="commandTimeout"></param>
         /// <returns>Gets a list of entities with optional exact match where conditions</returns>
-        public static IEnumerable<T> GetList<T>(this IDbConnection connection, object whereConditions,
-            IDbTransaction? transaction = null, int? commandTimeout = null)
+        public static IEnumerable<T> GetList<T>(this IDbConnection _connection, object whereConditions,
+            IDbTransaction? _transaction = null, int? commandTimeout = null)
         {
             var currenttype = typeof(T);
             var name = GetTableName(currenttype);
@@ -229,7 +229,7 @@ namespace ElPrado.Data
             if (Debugger.IsAttached)
                 Trace.WriteLine(String.Format("GetList<{0}>: {1}", currenttype, sb));
 
-            return connection.Query<T>(sb.ToString(), whereConditions, transaction, true, commandTimeout);
+            return _connection.Query<T>(sb.ToString(), whereConditions, _transaction, true, commandTimeout);
         }
 
         /// <summary>
@@ -237,18 +237,18 @@ namespace ElPrado.Data
         /// <para>-Table name can be overridden by adding an attribute on your class [Table("YourTableName")]</para>
         /// <para>conditions is an SQL where clause and/or order by clause ex: "where name='bob'" or "where age>=@Age"</para>
         /// <para>parameters is an anonymous type to pass in named parameter values: new { Age = 15 }</para>
-        /// <para>Supports transaction and command timeout</para>
+        /// <para>Supports _transaction and command timeout</para>
         /// <para>Returns a list of entities that match where conditions</para>
         /// </summary>
         /// <typeparam name="T"></typeparam>
-        /// <param name="connection"></param>
+        /// <param name="_connection"></param>
         /// <param name="conditions"></param>
         /// <param name="parameters"></param>
-        /// <param name="transaction"></param>
+        /// <param name="_transaction"></param>
         /// <param name="commandTimeout"></param>
         /// <returns>Gets a list of entities with optional SQL where conditions</returns>
-        public static IEnumerable<T> GetList<T>(this IDbConnection connection, string conditions,
-            object? parameters = null, IDbTransaction? transaction = null, int? commandTimeout = null)
+        public static IEnumerable<T> GetList<T>(this IDbConnection _connection, string conditions,
+            object? parameters = null, IDbTransaction? _transaction = null, int? commandTimeout = null)
         {
             var currenttype = typeof(T);
             var name = GetTableName(currenttype);
@@ -264,7 +264,7 @@ namespace ElPrado.Data
             if (Debugger.IsAttached)
                 Trace.WriteLine(String.Format("GetList<{0}>: {1}", currenttype, sb));
 
-            return connection.Query<T>(sb.ToString(), parameters, transaction, true, commandTimeout);
+            return _connection.Query<T>(sb.ToString(), parameters, _transaction, true, commandTimeout);
         }
 
         /// <summary>
@@ -273,11 +273,11 @@ namespace ElPrado.Data
         /// <para>Returns a list of all entities</para>
         /// </summary>
         /// <typeparam name="T"></typeparam>
-        /// <param name="connection"></param>
+        /// <param name="_connection"></param>
         /// <returns>Gets a list of all entities</returns>
-        public static IEnumerable<T> GetList<T>(this IDbConnection connection)
+        public static IEnumerable<T> GetList<T>(this IDbConnection _connection)
         {
-            return connection.GetList<T>(new { });
+            return _connection.GetList<T>(new { });
         }
 
         /// <summary>
@@ -286,21 +286,21 @@ namespace ElPrado.Data
         /// <para>conditions is an SQL where clause ex: "where name='bob'" or "where age>=@Age" - not required </para>
         /// <para>orderby is a column or list of columns to order by ex: "lastname, age desc" - not required - default is by primary key</para>
         /// <para>parameters is an anonymous type to pass in named parameter values: new { Age = 15 }</para>
-        /// <para>Supports transaction and command timeout</para>
+        /// <para>Supports _transaction and command timeout</para>
         /// <para>Returns a list of entities that match where conditions</para>
         /// </summary>
         /// <typeparam name="T"></typeparam>
-        /// <param name="connection"></param>
+        /// <param name="_connection"></param>
         /// <param name="pageNumber"></param>
         /// <param name="rowsPerPage"></param>
         /// <param name="conditions"></param>
         /// <param name="orderby"></param>
         /// <param name="parameters"></param>
-        /// <param name="transaction"></param>
+        /// <param name="_transaction"></param>
         /// <param name="commandTimeout"></param>
         /// <returns>Gets a paged list of entities with optional exact match where conditions</returns>
-        public static IEnumerable<T> GetListPaged<T>(this IDbConnection connection, int pageNumber, int rowsPerPage,
-            string conditions, string orderby, object? parameters = null, IDbTransaction? transaction = null,
+        public static IEnumerable<T> GetListPaged<T>(this IDbConnection _connection, int pageNumber, int rowsPerPage,
+            string conditions, string orderby, object? parameters = null, IDbTransaction? _transaction = null,
             int? commandTimeout = null)
         {
             if (string.IsNullOrEmpty(_getPagedListSql))
@@ -335,7 +335,7 @@ namespace ElPrado.Data
             if (Debugger.IsAttached)
                 Trace.WriteLine(String.Format("GetListPaged<{0}>: {1}", currenttype, query));
 
-            return connection.Query<T>(query, parameters, transaction, true, commandTimeout);
+            return _connection.Query<T>(query, parameters, _transaction, true, commandTimeout);
         }
 
         /// <summary>
@@ -344,18 +344,18 @@ namespace ElPrado.Data
         /// <para>-Table name can be overridden by adding an attribute on your class [Table("YourTableName")]</para>
         /// <para>Insert filters out Id column and any columns with the [Key] attribute</para>
         /// <para>Properties marked with attribute [Editable(false)] and complex types are ignored</para>
-        /// <para>Supports transaction and command timeout</para>
+        /// <para>Supports _transaction and command timeout</para>
         /// <para>Returns the ID (primary key) of the newly inserted record if it is identity using the int? type, otherwise null</para>
         /// </summary>
-        /// <param name="connection"></param>
+        /// <param name="_connection"></param>
         /// <param name="entityToInsert"></param>
-        /// <param name="transaction"></param>
+        /// <param name="_transaction"></param>
         /// <param name="commandTimeout"></param>
         /// <returns>The ID (primary key) of the newly inserted record if it is identity using the int? type, otherwise null</returns>
-        public static int? Insert<TEntity>(this IDbConnection connection, TEntity entityToInsert,
-            IDbTransaction? transaction = null, int? commandTimeout = null)
+        public static int? Insert<TEntity>(this IDbConnection _connection, TEntity entityToInsert,
+            IDbTransaction? _transaction = null, int? commandTimeout = null)
         {
-            return Insert<int?, TEntity>(connection, entityToInsert, transaction, commandTimeout);
+            return Insert<int?, TEntity>(_connection, entityToInsert, _transaction, commandTimeout);
         }
 
         /// <summary>
@@ -364,16 +364,16 @@ namespace ElPrado.Data
         /// <para>-Table name can be overridden by adding an attribute on your class [Table("YourTableName")]</para>
         /// <para>Insert filters out Id column and any columns with the [Key] attribute</para>
         /// <para>Properties marked with attribute [Editable(false)] and complex types are ignored</para>
-        /// <para>Supports transaction and command timeout</para>
+        /// <para>Supports _transaction and command timeout</para>
         /// <para>Returns the ID (primary key) of the newly inserted record if it is identity using the defined type, otherwise null</para>
         /// </summary>
-        /// <param name="connection"></param>
+        /// <param name="_connection"></param>
         /// <param name="entityToInsert"></param>
-        /// <param name="transaction"></param>
+        /// <param name="_transaction"></param>
         /// <param name="commandTimeout"></param>
         /// <returns>The ID (primary key) of the newly inserted record if it is identity using the defined type, otherwise null</returns>
-        public static TKey Insert<TKey, TEntity>(this IDbConnection connection, TEntity entityToInsert,
-            IDbTransaction? transaction = null, int? commandTimeout = null)
+        public static TKey Insert<TKey, TEntity>(this IDbConnection _connection, TEntity entityToInsert,
+            IDbTransaction? _transaction = null, int? commandTimeout = null)
         {
 
             var idProps = GetIdProperties(entityToInsert).ToList();
@@ -446,7 +446,7 @@ namespace ElPrado.Data
             if (Debugger.IsAttached)
                 Trace.WriteLine(String.Format("Insert: {0}", sb));
 
-            var r = connection.Query(sb.ToString(), entityToInsert, transaction, true, commandTimeout);
+            var r = _connection.Query(sb.ToString(), entityToInsert, _transaction, true, commandTimeout);
 
             if (keytype == typeof(Guid) || keyHasPredefinedValue)
             {
@@ -462,16 +462,16 @@ namespace ElPrado.Data
         /// <para>-Table name can be overridden by adding an attribute on your class [Table("YourTableName")]</para>
         /// <para>Updates records where the Id property and properties with the [Key] attribute match those in the database.</para>
         /// <para>Properties marked with attribute [Editable(false)] and complex types are ignored</para>
-        /// <para>Supports transaction and command timeout</para>
+        /// <para>Supports _transaction and command timeout</para>
         /// <para>Returns number of rows affected</para>
         /// </summary>
-        /// <param name="connection"></param>
+        /// <param name="_connection"></param>
         /// <param name="entityToUpdate"></param>
-        /// <param name="transaction"></param>
+        /// <param name="_transaction"></param>
         /// <param name="commandTimeout"></param>
         /// <returns>The number of affected records</returns>
-        public static int Update<TEntity>(this IDbConnection connection, TEntity entityToUpdate,
-            IDbTransaction? transaction = null, int? commandTimeout = null)
+        public static int Update<TEntity>(this IDbConnection _connection, TEntity entityToUpdate,
+            IDbTransaction? _transaction = null, int? commandTimeout = null)
         {
             if (typeof(TEntity)
                 .IsInterface) //FallBack to BaseType Generic Method: https://stackoverflow.com/questions/4101784/calling-a-generic-method-with-a-dynamic-type
@@ -480,7 +480,7 @@ namespace ElPrado.Data
                     .GetMethods().Where(methodInfo =>
                         methodInfo.Name == nameof(Update) && methodInfo.GetGenericArguments().Count() == 1).Single()
                     .MakeGenericMethod(new Type[] { entityToUpdate.GetType() })
-                    .Invoke(null, new object[] { connection, entityToUpdate, transaction, commandTimeout });
+                    .Invoke(null, new object[] { _connection, entityToUpdate, _transaction, commandTimeout });
             }
 
             var masterSb = new StringBuilder();
@@ -503,23 +503,23 @@ namespace ElPrado.Data
                 if (Debugger.IsAttached)
                     Trace.WriteLine(String.Format("Update: {0}", sb));
             });
-            return connection.Execute(masterSb.ToString(), entityToUpdate, transaction, commandTimeout);
+            return _connection.Execute(masterSb.ToString(), entityToUpdate, _transaction, commandTimeout);
         }
 
         /// <summary>
         /// <para>Deletes a record or records in the database that match the object passed in</para>
         /// <para>-By default deletes records in the table matching the class name</para>
         /// <para>Table name can be overridden by adding an attribute on your class [Table("YourTableName")]</para>
-        /// <para>Supports transaction and command timeout</para>
+        /// <para>Supports _transaction and command timeout</para>
         /// <para>Returns the number of records affected</para>
         /// </summary>
         /// <typeparam name="T"></typeparam>
-        /// <param name="connection"></param>
+        /// <param name="_connection"></param>
         /// <param name="entityToDelete"></param>
-        /// <param name="transaction"></param>
+        /// <param name="_transaction"></param>
         /// <param name="commandTimeout"></param>
         /// <returns>The number of records affected</returns>
-        public static int Delete<T>(this IDbConnection connection, T entityToDelete, IDbTransaction? transaction = null,
+        public static int Delete<T>(this IDbConnection _connection, T entityToDelete, IDbTransaction? _transaction = null,
             int? commandTimeout = null)
         {
             var masterSb = new StringBuilder();
@@ -540,7 +540,7 @@ namespace ElPrado.Data
                 if (Debugger.IsAttached)
                     Trace.WriteLine(String.Format("Delete: {0}", sb));
             });
-            return connection.Execute(masterSb.ToString(), entityToDelete, transaction, commandTimeout);
+            return _connection.Execute(masterSb.ToString(), entityToDelete, _transaction, commandTimeout);
         }
 
         /// <summary>
@@ -549,15 +549,15 @@ namespace ElPrado.Data
         /// <para>-Table name can be overridden by adding an attribute on your class [Table("YourTableName")]</para>
         /// <para>Deletes records where the Id property and properties with the [Key] attribute match those in the database</para>
         /// <para>The number of records affected</para>
-        /// <para>Supports transaction and command timeout</para>
+        /// <para>Supports _transaction and command timeout</para>
         /// </summary>
         /// <typeparam name="T"></typeparam>
-        /// <param name="connection"></param>
+        /// <param name="_connection"></param>
         /// <param name="id"></param>
-        /// <param name="transaction"></param>
+        /// <param name="_transaction"></param>
         /// <param name="commandTimeout"></param>
         /// <returns>The number of records affected</returns>
-        public static int Delete<T>(this IDbConnection connection, object id, IDbTransaction? transaction = null,
+        public static int Delete<T>(this IDbConnection _connection, object id, IDbTransaction? _transaction = null,
             int? commandTimeout = null)
         {
             var currenttype = typeof(T);
@@ -591,7 +591,7 @@ namespace ElPrado.Data
             if (Debugger.IsAttached)
                 Trace.WriteLine(String.Format("Delete<{0}> {1}", currenttype, sb));
 
-            return connection.Execute(sb.ToString(), dynParms, transaction, commandTimeout);
+            return _connection.Execute(sb.ToString(), dynParms, _transaction, commandTimeout);
         }
 
         /// <summary>
@@ -601,16 +601,16 @@ namespace ElPrado.Data
         /// <para>Deletes records where that match the where clause</para>
         /// <para>whereConditions is an anonymous type to filter the results ex: new {Category = 1, SubCategory=2}</para>
         /// <para>The number of records affected</para>
-        /// <para>Supports transaction and command timeout</para>
+        /// <para>Supports _transaction and command timeout</para>
         /// </summary>
         /// <typeparam name="T"></typeparam>
-        /// <param name="connection"></param>
+        /// <param name="_connection"></param>
         /// <param name="whereConditions"></param>
-        /// <param name="transaction"></param>
+        /// <param name="_transaction"></param>
         /// <param name="commandTimeout"></param>
         /// <returns>The number of records affected</returns>
-        public static int DeleteList<T>(this IDbConnection connection, object whereConditions,
-            IDbTransaction? transaction = null, int? commandTimeout = null)
+        public static int DeleteList<T>(this IDbConnection _connection, object whereConditions,
+            IDbTransaction? _transaction = null, int? commandTimeout = null)
         {
             var masterSb = new StringBuilder();
             StringBuilderCache(masterSb, $"{typeof(T).FullName}_DeleteWhere{whereConditions?.GetType()?.FullName}",
@@ -630,7 +630,7 @@ namespace ElPrado.Data
                     if (Debugger.IsAttached)
                         Trace.WriteLine(String.Format("DeleteList<{0}> {1}", currenttype, sb));
                 });
-            return connection.Execute(masterSb.ToString(), whereConditions, transaction, commandTimeout);
+            return _connection.Execute(masterSb.ToString(), whereConditions, _transaction, commandTimeout);
         }
 
         /// <summary>
@@ -640,17 +640,17 @@ namespace ElPrado.Data
         /// <para>Deletes records where that match the where clause</para>
         /// <para>conditions is an SQL where clause ex: "where name='bob'" or "where age>=@Age"</para>
         /// <para>parameters is an anonymous type to pass in named parameter values: new { Age = 15 }</para>
-        /// <para>Supports transaction and command timeout</para>
+        /// <para>Supports _transaction and command timeout</para>
         /// </summary>
         /// <typeparam name="T"></typeparam>
-        /// <param name="connection"></param>
+        /// <param name="_connection"></param>
         /// <param name="conditions"></param>
         /// <param name="parameters"></param>
-        /// <param name="transaction"></param>
+        /// <param name="_transaction"></param>
         /// <param name="commandTimeout"></param>
         /// <returns>The number of records affected</returns>
-        public static int DeleteList<T>(this IDbConnection connection, string conditions, object? parameters = null,
-            IDbTransaction? transaction = null, int? commandTimeout = null)
+        public static int DeleteList<T>(this IDbConnection _connection, string conditions, object? parameters = null,
+            IDbTransaction? _transaction = null, int? commandTimeout = null)
         {
             var masterSb = new StringBuilder();
             StringBuilderCache(masterSb, $"{typeof(T).FullName}_DeleteWhere{conditions}", sb =>
@@ -670,26 +670,26 @@ namespace ElPrado.Data
                 if (Debugger.IsAttached)
                     Trace.WriteLine(String.Format("DeleteList<{0}> {1}", currenttype, sb));
             });
-            return connection.Execute(masterSb.ToString(), parameters, transaction, commandTimeout);
+            return _connection.Execute(masterSb.ToString(), parameters, _transaction, commandTimeout);
         }
 
         /// <summary>
         /// <para>By default queries the table matching the class name</para>
         /// <para>-Table name can be overridden by adding an attribute on your class [Table("YourTableName")]</para>
         /// <para>Returns a number of records entity by a single id from table T</para>
-        /// <para>Supports transaction and command timeout</para>
+        /// <para>Supports _transaction and command timeout</para>
         /// <para>conditions is an SQL where clause ex: "where name='bob'" or "where age>=@Age" - not required </para>
         /// <para>parameters is an anonymous type to pass in named parameter values: new { Age = 15 }</para>
         /// </summary>
         /// <typeparam name="T"></typeparam>
-        /// <param name="connection"></param>
+        /// <param name="_connection"></param>
         /// <param name="conditions"></param>
         /// <param name="parameters"></param>
-        /// <param name="transaction"></param>
+        /// <param name="_transaction"></param>
         /// <param name="commandTimeout"></param>
         /// <returns>Returns a count of records.</returns>
-        public static int RecordCount<T>(this IDbConnection connection, string conditions = "",
-            object? parameters = null, IDbTransaction? transaction = null, int? commandTimeout = null)
+        public static int RecordCount<T>(this IDbConnection _connection, string conditions = "",
+            object? parameters = null, IDbTransaction? _transaction = null, int? commandTimeout = null)
         {
             var currenttype = typeof(T);
             var name = GetTableName(currenttype);
@@ -701,24 +701,24 @@ namespace ElPrado.Data
             if (Debugger.IsAttached)
                 Trace.WriteLine(String.Format("RecordCount<{0}>: {1}", currenttype, sb));
 
-            return connection.ExecuteScalar<int>(sb.ToString(), parameters, transaction, commandTimeout);
+            return _connection.ExecuteScalar<int>(sb.ToString(), parameters, _transaction, commandTimeout);
         }
 
         /// <summary>
         /// <para>By default queries the table matching the class name</para>
         /// <para>-Table name can be overridden by adding an attribute on your class [Table("YourTableName")]</para>
         /// <para>Returns a number of records entity by a single id from table T</para>
-        /// <para>Supports transaction and command timeout</para>
+        /// <para>Supports _transaction and command timeout</para>
         /// <para>whereConditions is an anonymous type to filter the results ex: new {Category = 1, SubCategory=2}</para>
         /// </summary>
         /// <typeparam name="T"></typeparam>
-        /// <param name="connection"></param>
+        /// <param name="_connection"></param>
         /// <param name="whereConditions"></param>
-        /// <param name="transaction"></param>
+        /// <param name="_transaction"></param>
         /// <param name="commandTimeout"></param>
         /// <returns>Returns a count of records.</returns>
-        public static int RecordCount<T>(this IDbConnection connection, object whereConditions,
-            IDbTransaction? transaction = null, int? commandTimeout = null)
+        public static int RecordCount<T>(this IDbConnection _connection, object whereConditions,
+            IDbTransaction? _transaction = null, int? commandTimeout = null)
         {
             var currenttype = typeof(T);
             var name = GetTableName(currenttype);
@@ -736,7 +736,7 @@ namespace ElPrado.Data
             if (Debugger.IsAttached)
                 Trace.WriteLine(String.Format("RecordCount<{0}>: {1}", currenttype, sb));
 
-            return connection.ExecuteScalar<int>(sb.ToString(), whereConditions, transaction, commandTimeout);
+            return _connection.ExecuteScalar<int>(sb.ToString(), whereConditions, _transaction, commandTimeout);
         }
 
         //build update statement based on list on an entity

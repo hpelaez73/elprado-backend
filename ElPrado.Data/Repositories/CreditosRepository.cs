@@ -4,7 +4,7 @@ namespace ElPrado.Data.Repositories
 {
     public class CreditosRepository : RepositoryBaseEntidad<Creditos>
     {
-        public CreditosRepository(Transaccion transaccion) : base(transaccion)
+        public CreditosRepository(DbContext dbContext) : base(dbContext)
         {
         }
     }

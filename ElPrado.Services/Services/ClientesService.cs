@@ -1,21 +1,14 @@
 ﻿using ElPrado.Data;
 using ElPrado.Data.Models;
-using ElPrado.Data.Repositories;
 using ElPrado.Dto.Dtos;
 
 namespace ElPrado.Services.Services
 {
     public class ClientesService : ServiceBaseCrud<Clientes, DtoClientes>
     {
-        private ClientesRepository clientesRepository => (repository as ClientesRepository)!;
-
-        public ClientesService(Transaccion? transaccion) : base(transaccion)
+        public ClientesService(IUnitOfWork unitOfWork, IUserContextService userContext) : base(unitOfWork, userContext)
         {
-        }
-
-        protected override RepositoryBaseCrud<Clientes, DtoClientes> CrearRepositorioCrud()
-        {
-            return new ClientesRepository(Transaccion);
+            _repositoryCrud = _uow.Clientes;
         }
     }
 }

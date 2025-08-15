@@ -5,7 +5,7 @@ namespace ElPrado.Data.Repositories
 {
     public class ConfiguracionGeneralRepository : RepositoryBaseEntidad<ConfiguracionGeneral>
     {
-        public ConfiguracionGeneralRepository(Transaccion transaccion) : base(transaccion)
+        public ConfiguracionGeneralRepository(DbContext dbContext) : base(dbContext)
         {
         }
 
@@ -54,7 +54,7 @@ namespace ElPrado.Data.Repositories
 
         private string BuscarValorString(string macro)
         {
-            List<ConfiguracionGeneral> listConfiguracionGeneral = connection.GetList<ConfiguracionGeneral>(new { Macro = macro }, transaction).AsList();
+            List<ConfiguracionGeneral> listConfiguracionGeneral = _connection.GetList<ConfiguracionGeneral>(new { Macro = macro }, _transaction).AsList();
             return (listConfiguracionGeneral.Count == 0) ? string.Empty : listConfiguracionGeneral[0].ValorCaracter ?? string.Empty;
         }
 

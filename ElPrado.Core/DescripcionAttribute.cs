@@ -1,6 +1,4 @@
-﻿using System.Xml.Linq;
-
-namespace ElPrado.Core
+﻿namespace ElPrado.Core
 {
     public class DescripcionAttribute : Attribute
     {

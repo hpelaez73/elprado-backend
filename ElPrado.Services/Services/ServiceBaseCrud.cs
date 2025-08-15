@@ -9,25 +9,21 @@ namespace ElPrado.Services.Services
         where TEntidad : Entidades
         where TDto : DtoBase
     {
-        protected RepositoryBaseCrud<TEntidad, TDto> repositoryCrud => (repository as RepositoryBaseCrud<TEntidad, TDto>)!;
+        protected RepositoryBaseCrud<TEntidad, TDto>? _repositoryCrud;
 
-        public ServiceBaseCrud(Transaccion? transaccion) : base(transaccion)
-        {            
-        }
-
-        protected override RepositoryBase CrearRepositorio()
+        public ServiceBaseCrud(IUnitOfWork unitOfWork, IUserContextService userContext) : base(unitOfWork, userContext)
         {
-            return CrearRepositorioCrud();
-        }
-
-        protected virtual RepositoryBaseCrud<TEntidad, TDto> CrearRepositorioCrud()
-        {
-            return new(Transaccion);
         }
 
         public TDto? Visualizar(int id)
         {
-            return repositoryCrud.Visualizar(id);
+            return _repositoryCrud?.Visualizar(id);
         }
+
+        public IEnumerable<dynamic> Listado(DtoOpcionesListados? opcionesListado)
+        {
+            return (_repositoryCrud != null) ? _repositoryCrud.Listado(opcionesListado) : Enumerable.Empty<dynamic>();
+        }
+
     }
 }

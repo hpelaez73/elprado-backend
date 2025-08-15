@@ -7,6 +7,18 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <Compile Remove="Controllers\ComprobantesController.cs" />
+    <Compile Remove="Controllers\ConfiguracionesController.cs" />
+    <Compile Remove="Controllers\CuentasCorrientesController.cs" />
+    <Compile Remove="Controllers\InhumadosController.cs" />
+    <Compile Remove="Controllers\MediosCobrosController.cs" />
+    <Compile Remove="Controllers\MovimientosFondosController.cs" />
+    <Compile Remove="Controllers\ParcelasController.cs" />
+    <Compile Remove="Controllers\PropuestasController.cs" />
+    <Compile Remove="Controllers\UsuariosController.cs" />
+  </ItemGroup>
+
+  <ItemGroup>
     <PackageReference Include="Microsoft.AspNetCore.Authentication.JwtBearer" Version="7.0.20" />
     <PackageReference Include="Microsoft.AspNetCore.OpenApi" Version="7.0.20" />
     <PackageReference Include="Serilog.AspNetCore" Version="8.0.2" />
@@ -22,6 +34,10 @@
     <ProjectReference Include="..\ElPrado.Data\ElPrado.Data.csproj" />
     <ProjectReference Include="..\ElPrado.Dto\ElPrado.Dto.csproj" />
     <ProjectReference Include="..\ElPrado.Services\ElPrado.Services.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Folder Include="MiddleWares\" />
   </ItemGroup>
 
 </Project>

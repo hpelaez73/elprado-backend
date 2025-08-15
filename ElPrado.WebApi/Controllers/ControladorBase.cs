@@ -1,5 +1,5 @@
-﻿using ElPrado.Core;
-using ElPrado.Dto.Dtos;
+﻿using ElPrado.Data;
+using ElPrado.Services;
 using ElPrado.Services.Services;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
@@ -12,24 +12,20 @@ namespace ElPrado.WebApi.Controllers
     public class ControladorBase : ControllerBase, IDisposable
     {
         private bool disposed;
-        protected ServiceBase servicio;
-        protected ExtrasLog extrasLog;
+        protected ServiceBase _servicio;
+        protected readonly IUnitOfWork _uow;
+        protected readonly IUserContextService _userContext;
 
-        public ControladorBase()
+        public ControladorBase(IUnitOfWork unitOfWork, IUserContextService userContextService)
         {
-            servicio = CrearServicio();
-            extrasLog = new ExtrasLog
-            {
-                CodUsuario = ConfiguracionGeneralSesion.CodUsuario,
-                CodCliente = ConfiguracionGeneralSesion.CodCliente,
-                CodPropuesta = ConfiguracionGeneralSesion.CodPropuesta,
-                Environment = Environment.GetEnvironmentVariable("ASPNETCORE_ENVIRONMENT")
-            };
+            _uow = unitOfWork;
+            _userContext = userContextService;
+            _servicio = CrearServicio();
         }
 
         protected virtual ServiceBase CrearServicio()
         {
-            return new(null);
+            return new(_uow, _userContext);
         }
 
         public void Dispose()
@@ -52,52 +48,7 @@ namespace ElPrado.WebApi.Controllers
 
         protected virtual void DisposeServicios()
         {
-            servicio.Dispose();
+            _servicio.Dispose();
         }
-
-        [HttpPost("Listado")]
-        public ApiResponse<IEnumerable<dynamic>> Listado([FromBody] DtoOpcionesListados opcionesListado)
-        {
-            try
-            {
-                ApiResponse<IEnumerable<dynamic>> apiResponse = new()
-                {
-                    Data = servicio.Listado(opcionesListado)
-                };
-                return apiResponse;
-            }
-            catch (Exception ex)
-            {
-                Serilog.Log.Error(ex, "{Controlador}.Listado({@opcionesListado}): {Mensaje} {@Extras}", this, opcionesListado, ex.Message, extrasLog);
-                throw;
-            }
-        }
-
-        [HttpGet("Listado")]
-        public ApiResponse<IEnumerable<dynamic>> Listado()
-        {
-            try
-            {
-                ApiResponse<IEnumerable<dynamic>> apiResponse = new()
-                {
-                    Data = servicio.Listado(null)
-                };
-                return apiResponse;
-            }
-            catch (Exception ex)
-            {
-                Serilog.Log.Error(ex, "{Controlador}.Listado(): {Mensaje} {@Extras}", this, ex.Message, extrasLog);
-                throw;
-            }
-        }
-
-    }
-
-    public class ExtrasLog
-    {
-        public int CodUsuario { get; set; }
-        public int CodCliente { get; set; }
-        public int CodPropuesta { get; set; }
-        public string? Environment { get; set; }
     }
 }

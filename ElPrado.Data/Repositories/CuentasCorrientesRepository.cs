@@ -9,7 +9,7 @@ namespace ElPrado.Data.Repositories
     {
         private ConfiguracionListado configuracionListadoResumenCuotas;
 
-        public CuentasCorrientesRepository(Transaccion transaccion) : base(transaccion)
+        public CuentasCorrientesRepository(DbContext dbContext) : base(dbContext)
         {
             configuracionListadoResumenCuotas = new()
             {
@@ -57,14 +57,14 @@ namespace ElPrado.Data.Repositories
         public List<DtoCuentasCorrientes> ConsultaDeudaMercadoPago(int codCliente, DateTime fechaDia)
         {
             string sql = "SELECT * FROM CONSULTA_DEUDA_MERCADOPAGO(@codCliente, @fechaDia)";
-            return connection.Query<DtoCuentasCorrientes>(sql, new { codCliente, fechaDia }, transaction).AsList();
+            return _connection.Query<DtoCuentasCorrientes>(sql, new { codCliente, fechaDia }, _transaction).AsList();
         }
 
         public List<DtoCuentasCorrientesResumen> ResumenCuentas(int codPropuesta, bool mostrarBaja, bool mostrarInactiva, DateTime? fechaInteres, DateTime? fechaHasta)
         {
             string sql = @" SELECT * FROM CONSULTA_RESUMEN_CUENTAS(@codPropuesta, @mostrarBaja, @mostrarInactiva, @fechaInteres, @fechaHasta) C
                             ORDER BY C.ES_INDEPENDIENTE, C.FECHA_INICIO DESC";
-            return connection.Query<DtoCuentasCorrientesResumen>(sql, new { codPropuesta, mostrarBaja, mostrarInactiva, fechaInteres, fechaHasta }, transaction).AsList();
+            return _connection.Query<DtoCuentasCorrientesResumen>(sql, new { codPropuesta, mostrarBaja, mostrarInactiva, fechaInteres, fechaHasta }, _transaction).AsList();
         }
 
         public ApiResponseListado<IEnumerable<dynamic>> ListadoResumenCuotas(DtoOpcionesListados opcionesListado)
@@ -140,7 +140,7 @@ namespace ElPrado.Data.Repositories
                             {sqlFrom} 
                             {sqlWhere}";
 
-            string sql = $@"SELECT {funcionesListados.ParseSqlPaginado(sqlCant, connection, transaction)}
+            string sql = $@"SELECT {funcionesListados.ParseSqlPaginado(sqlCant, _connection, _transaction)}
                             {sqlCampos}                            
                             C.TOTAL, C.FECHA_RENDICION, C.COD_TALONARIO_FACTURACION, C.NRO_COMPROBANTE_FACTURACION, C.COD_TALONARIO_IMPUTACION, C.NRO_COMPROBANTE_IMPUTACION,
                             C.MONTO, C.DESCUENTO, C.PUNITORIO, C.PUNITORIO - C.DESCUENTO AS DESCUENTO_RECARGO, C.ANULADO, C.COD_MOVIMIENTO_FONDO,
@@ -156,7 +156,7 @@ namespace ElPrado.Data.Repositories
                             {sqlWhere}
                             ORDER BY 1, 2 DESC, 3 DESC";
 
-            return funcionesListados.ApiResponse(sql, connection, transaction);
+            return funcionesListados.ApiResponse(sql, _connection, _transaction);
         }
 
     }

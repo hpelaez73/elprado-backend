@@ -1,7 +1,6 @@
 ﻿using ElPrado.Core;
 using ElPrado.Data;
 using ElPrado.Data.Models;
-using ElPrado.Data.Repositories;
 using ElPrado.Dto.Dtos;
 using ElPrado.Services.Mappers;
 using System.Security.Cryptography;
@@ -11,35 +10,33 @@ namespace ElPrado.Services.Services
     [Descripcion("Acceso al sistema por parte de un usuario")]
     public class LoginService : ServiceBase
     {
-        public LoginService(Transaccion? transaccion) : base(transaccion)
+        public LoginService(IUnitOfWork unitOfWork, IUserContextService userContext) : base(unitOfWork, userContext)
         {
         }
 
         public DtoLogin? Login(int legajo, long dniCuit, string clave)
         {
-            ConfiguracionGeneralRepository configuracionGeneralRepository = new(Transaccion);
-            string claveMaestra = configuracionGeneralRepository.BuscarClaveMaestra();
+            string claveMaestra = _uow.ConfiguracionGeneral.BuscarClaveMaestra();
             string claveHash = Utils.SHA1(clave);
             bool esAdmin = claveMaestra.Equals(claveHash);
-            ClientesRepository clientesRepository = new(Transaccion);
-            Clientes? cliente = clientesRepository.Buscar(legajo, dniCuit, claveHash, esAdmin);
+
+            Clientes? cliente = _uow.Clientes.Buscar(legajo, dniCuit, claveHash, esAdmin);
             if (cliente != null)
             {
-                PropuestasRepository propuestasRepository = new(Transaccion);
-                Propuestas? propuesta = propuestasRepository.BuscarPropuesta(legajo);
+                Propuestas? propuesta = _uow.Propuestas.BuscarPropuesta(legajo);
                 if (propuesta != null)
                 {
                     try
                     {
                         RegistrarLogCliente("Acceso desde la web", cliente.CodCliente);
                         DtoLogin dtoLogin = GenerarTokenCliente(cliente, propuesta);
-                        
-                        Commit();
+
+                        _uow.Commit();
                         return dtoLogin;
                     }
                     catch
                     {
-                        Rollback();
+                        _uow.Rollback();
                         throw;
                     }
                 }
@@ -58,21 +55,20 @@ namespace ElPrado.Services.Services
 
         public DtoLogin? Login(string alias, string clave)
         {
-            UsuariosRepository usuariosRepository = new(Transaccion);
-            Usuarios? usuario = usuariosRepository.Buscar(alias, clave);
+            Usuarios? usuario = _uow.Usuarios.Buscar(alias, clave);
             if (usuario != null)
             {
                 try
-                { 
+                {
                     RegistrarLogUsuario("Acceso desde la web", usuario.CodUsuario);
                     DtoLogin dtoLogin = GenerarTokenUsuario(usuario);
 
-                    Commit();
+                    _uow.Commit();
                     return dtoLogin;
                 }
                 catch
                 {
-                    Rollback();
+                    _uow.Rollback();
                     throw;
                 }
             }
@@ -89,22 +85,18 @@ namespace ElPrado.Services.Services
 
         public DtoLogin? RenovarToken(string token)
         {
-            RefreshTokensRepository refreshTokensRepository = new(Transaccion);
-            RefreshTokens? refreshToken = refreshTokensRepository.BuscarTokenActivo(token);
+            RefreshTokens? refreshToken = _uow.RefreshTokens.BuscarTokenActivo(token);
 
             if (refreshToken == null) return null;
             if (refreshToken.CodCliente != null && refreshToken.CodPropuesta != null)
             {
-                ClientesRepository clientesRepository = new(Transaccion);
-                PropuestasRepository propuestasRepository = new(Transaccion);
-                Clientes cliente = clientesRepository.Buscar(refreshToken.CodCliente.Value);
-                Propuestas propuesta = propuestasRepository.Buscar(refreshToken.CodPropuesta.Value);
+                Clientes cliente = _uow.Clientes.Buscar(refreshToken.CodCliente.Value);
+                Propuestas propuesta = _uow.Propuestas.Buscar(refreshToken.CodPropuesta.Value);
                 return GenerarTokenCliente(cliente, propuesta);
             }
             else if (refreshToken.CodUsuario != null)
             {
-                UsuariosRepository usuariosRepository = new(Transaccion);
-                Usuarios usuario = usuariosRepository.Buscar(refreshToken.CodUsuario.Value);
+                Usuarios usuario = _uow.Usuarios.Buscar(refreshToken.CodUsuario.Value);
                 return GenerarTokenUsuario(usuario);
             }
             return null;
@@ -120,8 +112,7 @@ namespace ElPrado.Services.Services
 
             if (resultado.HayError) return resultado;
 
-            ClientesRepository clientesRepository = new(Transaccion);
-            Clientes? cliente = clientesRepository.Buscar(altaCliente.Propuesta, altaCliente.DniCuit);
+            Clientes? cliente = _uow.Clientes.Buscar(altaCliente.Propuesta, altaCliente.DniCuit);
             if (cliente == null)
             {
                 resultado.Agregar("No hay cliente con los datos ingresados");
@@ -132,13 +123,13 @@ namespace ElPrado.Services.Services
             {
                 cliente.ClaveAcceso = Utils.SHA1(altaCliente.Clave.Trim());
                 cliente.Email = altaCliente.Email.Trim();
-                clientesRepository.Modificar(cliente);
-                
-                Commit();
+                _uow.Clientes.Modificar(cliente);
+
+                _uow.Commit();
             }
             catch
             {
-                Rollback();
+                _uow.Rollback();
                 throw;
             }
             return resultado;
@@ -148,8 +139,7 @@ namespace ElPrado.Services.Services
         {
             Resultados resultado = new();
 
-            ClientesRepository clientesRepository = new(Transaccion);
-            Clientes? cliente = clientesRepository.Buscar(codCliente);
+            Clientes? cliente = _uow.Clientes.Buscar(codCliente);
             if (cliente == null)
             {
                 resultado.Agregar("El cliente no existe");
@@ -162,13 +152,13 @@ namespace ElPrado.Services.Services
             try
             {
                 cliente.ClaveAcceso = string.Empty;
-                clientesRepository.Modificar(cliente);
+                _uow.Clientes.Modificar(cliente);
 
-                Commit();
+                _uow.Commit();
             }
             catch
             {
-                Rollback();
+                _uow.Rollback();
                 throw;
             }
             return resultado;
@@ -179,9 +169,7 @@ namespace ElPrado.Services.Services
             var tokenBytes = RandomNumberGenerator.GetBytes(64);
             string token = Convert.ToBase64String(tokenBytes);
 
-            RefreshTokensRepository refreshTokensRepository = new(Transaccion);
-
-            if (refreshTokensRepository.ExisteToken(token))
+            if (_uow.RefreshTokens.ExisteToken(token))
             {
                 return GenerarRefreshToken();
             }
@@ -190,7 +178,6 @@ namespace ElPrado.Services.Services
 
         private void GuardarRefreshToken(int? codCliente, int? codPropuesta, int? codUsuario, string refreshtoken)
         {
-            RefreshTokensRepository refreshTokensRepository = new(Transaccion);
             RefreshTokens refreshToken = new()
             {
                 CodCliente = codCliente,
@@ -200,7 +187,7 @@ namespace ElPrado.Services.Services
                 FechaExpiracion = DateTime.Today.AddDays(7)
             };
 
-            refreshTokensRepository.Agregar(refreshToken);
+            _uow.RefreshTokens.Agregar(refreshToken);
         }
     }
 }

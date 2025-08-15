@@ -1,4 +1,5 @@
-﻿using ElPrado.Data.Models;
+﻿using ElPrado.Data;
+using ElPrado.Data.Models;
 using ElPrado.Dto.Dtos;
 using ElPrado.Services.Services;
 using Microsoft.AspNetCore.Mvc;
@@ -9,7 +10,7 @@ namespace ElPrado.WebApi.Controllers
     {
         private MediosCobrosService mediosCobrosService => (servicio as MediosCobrosService)!;
 
-        public MediosCobrosController()
+        public MediosCobrosController(IUnitOfWork unitOfWork) : base(unitOfWork)
         {
         }
 

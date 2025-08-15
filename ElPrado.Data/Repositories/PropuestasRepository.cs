@@ -12,7 +12,7 @@ namespace ElPrado.Data.Repositories
         private ConfiguracionListado configuracionListadoInhumados;
         private ConfiguracionListado configuracionListadoBeneficiarios;
 
-        public PropuestasRepository(Transaccion transaccion) : base(transaccion)
+        public PropuestasRepository(DbContext dbContext) : base(dbContext)
         {
             configuracionListadoTitulares = new()
             {
@@ -116,7 +116,7 @@ namespace ElPrado.Data.Repositories
 
         public Propuestas? BuscarPropuesta(int legajo)
         {
-            List<Propuestas> listPropuestas = connection.GetList<Propuestas>(new { Legajo = legajo }, transaction).AsList();
+            List<Propuestas> listPropuestas = _connection.GetList<Propuestas>(new { Legajo = legajo }, _transaction).AsList();
             return listPropuestas.Count == 0 ? null : listPropuestas[0];
         }
 
@@ -128,25 +128,25 @@ namespace ElPrado.Data.Repositories
                             WHERE (P.FECHA_BAJA IS NULL OR 1 = @incluirBaja)
                             AND PA.LEGAJO = @parcela
                             ORDER BY P.FECHA_BAJA DESC NULLS FIRST";
-            return connection.QuerySingleOrDefault<Propuestas>(sql, new { parcela, incluirBaja }, transaction);
+            return _connection.QuerySingleOrDefault<Propuestas>(sql, new { parcela, incluirBaja }, _transaction);
         }
 
         public DtoPropuestaDetalleResp? BuscarPropuestaDetalle(int codPropuesta)
         {
             string sql = @" SELECT * FROM GET_CONSULTA_PROPUESTA(@codPropuesta) P";
-            return connection.QuerySingleOrDefault<DtoPropuestaDetalleResp>(sql, new { codPropuesta }, transaction);
+            return _connection.QuerySingleOrDefault<DtoPropuestaDetalleResp>(sql, new { codPropuesta }, _transaction);
         }
 
         public List<DtoPropuestasAsociadas> BuscarPropuestasAsociadas(int codPropuesta, bool incluirBajas)
         {
             string sql = "SELECT * FROM GET_DATOS_PROPUESTAS_ASOCIADAS(@codPropuesta, @incluirBajas)";
-            return connection.Query<DtoPropuestasAsociadas>(sql, new { codPropuesta, incluirBajas }, transaction).ToList();
+            return _connection.Query<DtoPropuestasAsociadas>(sql, new { codPropuesta, incluirBajas }, _transaction).ToList();
         }
 
         public List<DtoClientesPropuestasHistorial> DetalleHistorialTitulares(int codPropuesta)
         {
             string sql = "SELECT * FROM GET_DATOS_HISTORIAL_TITULARES(@codPropuesta)";
-            return connection.Query<DtoClientesPropuestasHistorial>(sql, new { codPropuesta }, transaction).ToList();
+            return _connection.Query<DtoClientesPropuestasHistorial>(sql, new { codPropuesta }, _transaction).ToList();
         }
 
         public ApiResponseListado<IEnumerable<dynamic>> ListadoInhumados(DtoOpcionesListados opcionesListado)
@@ -185,7 +185,7 @@ namespace ElPrado.Data.Repositories
                                   (SELECT COUNT(*) {sqlFrom1} {sqlWhere1})
                                 + (SELECT COUNT(*) {sqlFrom2} {sqlWhere2}) AS CANT
                                 FROM RDB$DATABASE";
-            string sql = $@"SELECT {funcionesListados.ParseSqlPaginado(sqlCant, connection, transaction)}
+            string sql = $@"SELECT {funcionesListados.ParseSqlPaginado(sqlCant, _connection, _transaction)}
                             I.NOMBRE_INHUMADO, I.FECHA_INHUMACION, I.NRO_DOCUMENTO,
                             I.COD_PROPUESTA, I.PROPUESTA, I.PARCELA,
                             I.FECHA, I.FECHA_BAJA
@@ -205,7 +205,7 @@ namespace ElPrado.Data.Repositories
                             {funcionesListados.ParseSqlOrden()}
                             ) I";
 
-            return funcionesListados.ApiResponse(sql, connection, transaction);
+            return funcionesListados.ApiResponse(sql, _connection, _transaction);
         }
 
         public ApiResponseListado<IEnumerable<dynamic>> ListadoTitulares(DtoOpcionesListados opcionesListado)
@@ -230,14 +230,14 @@ namespace ElPrado.Data.Repositories
             string sqlCant = $@"SELECT COUNT(*)
                             {sqlFrom} 
                             {sqlWhere}";
-            string sql = $@"SELECT {funcionesListados.ParseSqlPaginado(sqlCant, connection, transaction)}
+            string sql = $@"SELECT {funcionesListados.ParseSqlPaginado(sqlCant, _connection, _transaction)}
                             CL.NOMBRE, CL.NRO_DOCUMENTO, P.COD_PROPUESTA, P.LEGAJO AS PROPUESTA, PA.LEGAJO AS PARCELA,
                             P.FECHA, P.FECHA_BAJA, CL.COD_CLIENTE
                             {sqlFrom} 
                             {sqlWhere}
                             {funcionesListados.ParseSqlOrden()}";
 
-            return funcionesListados.ApiResponse(sql, connection, transaction);
+            return funcionesListados.ApiResponse(sql, _connection, _transaction);
         }
 
         public ApiResponseListado<IEnumerable<dynamic>> ListadoBeneficiarios(DtoOpcionesListados opcionesListado)
@@ -262,14 +262,14 @@ namespace ElPrado.Data.Repositories
             string sqlCant = $@"SELECT COUNT(*)
                             {sqlFrom} 
                             {sqlWhere}";
-            string sql = $@"SELECT {funcionesListados.ParseSqlPaginado(sqlCant, connection, transaction)}
+            string sql = $@"SELECT {funcionesListados.ParseSqlPaginado(sqlCant, _connection, _transaction)}
                             DISTINCT CL.NOMBRE, CL.NRO_DOCUMENTO, P.LEGAJO AS PROPUESTA, PA.LEGAJO AS PARCELA, H.COD_PROPUESTA,
                             P.FECHA, P.FECHA_BAJA
                             {sqlFrom} 
                             {sqlWhere}
                             {funcionesListados.ParseSqlOrden()}";
 
-            return funcionesListados.ApiResponse(sql, connection, transaction);
+            return funcionesListados.ApiResponse(sql, _connection, _transaction);
         }
 
     }

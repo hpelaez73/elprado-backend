@@ -7,7 +7,7 @@ namespace ElPrado.Data.Repositories
         where TEntidad : Entidades
         where TDto : DtoBase
     {
-        public RepositoryBaseCrud(Transaccion transaccion) : base(transaccion)
+        public RepositoryBaseCrud(DbContext dbContext) : base(dbContext)
         {
         }
 

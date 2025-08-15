@@ -1,5 +1,7 @@
-﻿using ElPrado.Data.Models;
+﻿using ElPrado.Data;
+using ElPrado.Data.Models;
 using ElPrado.Dto.Dtos;
+using ElPrado.Services;
 using ElPrado.Services.Services;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
@@ -13,9 +15,9 @@ namespace ElPrado.WebApi.Controllers
         where TEntidad : Entidades
         where TDto : DtoBase
     {
-        protected ServiceBaseCrud<TEntidad, TDto> serviceCrud => (servicio as ServiceBaseCrud<TEntidad, TDto>)!;
+        protected ServiceBaseCrud<TEntidad, TDto> _serviceCrud => (_servicio as ServiceBaseCrud<TEntidad, TDto>)!;
 
-        public ControladorBaseCrud()
+        public ControladorBaseCrud(IUnitOfWork unitOfWork, IUserContextService userContext) : base(unitOfWork, userContext)
         {
         }
 
@@ -26,30 +28,42 @@ namespace ElPrado.WebApi.Controllers
 
         protected virtual ServiceBaseCrud<TEntidad, TDto> CrearServicioCrud()
         {
-            return new(null);
+            return new(_uow, _userContext);
         }
 
         [HttpGet("{id}")]
         public ActionResult<ApiResponse<TDto>> Get(int id)
         {
-            try
+            ApiResponse<TDto> apiResponse = new()
             {
-                ApiResponse<TDto> apiResponse = new()
-                {
-                    Data = serviceCrud.Visualizar(id)
-                };
-                if (apiResponse.Data == null)
-                {
-                    apiResponse.Agregar("El registro no existe");
-                    return NotFound(apiResponse);
-                }
-                return apiResponse;
-            }
-            catch (Exception ex)
+                Data = _serviceCrud.Visualizar(id)
+            };
+            if (apiResponse.Data == null)
             {
-                Serilog.Log.Error(ex, "{Controlador}.Get({id}): {Mensaje} {@Extras}", this, id, ex.Message, extrasLog);
-                throw;
+                apiResponse.Agregar("El registro no existe");
+                return NotFound(apiResponse);
             }
+            return apiResponse;
+        }
+
+        [HttpPost("Listado")]
+        public ApiResponse<IEnumerable<dynamic>> Listado([FromBody] DtoOpcionesListados opcionesListado)
+        {
+            ApiResponse<IEnumerable<dynamic>> apiResponse = new()
+            {
+                Data = _serviceCrud.Listado(opcionesListado)
+            };
+            return apiResponse;
+        }
+
+        [HttpGet("Listado")]
+        public ApiResponse<IEnumerable<dynamic>> Listado()
+        {
+            ApiResponse<IEnumerable<dynamic>> apiResponse = new()
+            {
+                Data = _serviceCrud.Listado(null)
+            };
+            return apiResponse;
         }
     }
 }

@@ -1,4 +1,5 @@
 ﻿using ElPrado.Core;
+using ElPrado.Data;
 using ElPrado.Dto;
 using ElPrado.Dto.Dtos;
 using ElPrado.Services.Services;
@@ -10,7 +11,7 @@ namespace ElPrado.WebApi.Controllers
     {
         private ComprobantesService comprobantesService => (servicio as ComprobantesService)!;
 
-        public ComprobantesController()
+        public ComprobantesController(IUnitOfWork unitOfWork) : base(unitOfWork)
         {
         }
 

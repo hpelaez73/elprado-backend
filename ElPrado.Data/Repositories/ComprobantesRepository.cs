@@ -11,7 +11,7 @@ namespace ElPrado.Data.Repositories
     {
         private ConfiguracionListado configuracionListadoFacturasEnviar;
 
-        public ComprobantesRepository(Transaccion transaccion) : base(transaccion)
+        public ComprobantesRepository(DbContext dbContext) : base(dbContext)
         {
             configuracionListadoFacturasEnviar = new()
             {
@@ -60,12 +60,12 @@ namespace ElPrado.Data.Repositories
         public DtoComprobantes? Visualizar(int codTalonario, string nroComprobante)
         {
             string sql = "SELECT * FROM GET_DATOS_COMPROBANTE(@codTalonario, @nroComprobante)";
-            DtoComprobantes? comprobante = connection.QuerySingleOrDefault<DtoComprobantes>(sql, new { codTalonario, nroComprobante }, transaction);
+            DtoComprobantes? comprobante = _connection.QuerySingleOrDefault<DtoComprobantes>(sql, new { codTalonario, nroComprobante }, _transaction);
 
             if (comprobante != null)
             {
                 sql = "SELECT * FROM GET_DATOS_COMPROBANTE_DETALLE(@codTalonario, @nroComprobante)";
-                comprobante.ListDetalles = connection.Query<DtoComprobantesDetalles>(sql, new { codTalonario, nroComprobante }, transaction).ToList();
+                comprobante.ListDetalles = _connection.Query<DtoComprobantesDetalles>(sql, new { codTalonario, nroComprobante }, _transaction).ToList();
             }
 
             return comprobante;
@@ -74,13 +74,13 @@ namespace ElPrado.Data.Repositories
         public IEnumerable<DtoComprobantesFacturasElectronicas> Facturas(int codCliente, DateTime fechaDesde, DateTime fechaHasta)
         {
             string sql = "SELECT * FROM GET_FACTURAS_AFIP(@codCliente, @fechaDesde, @fechaHasta)";
-            return connection.Query<DtoComprobantesFacturasElectronicas>(sql, new { codCliente , fechaDesde, fechaHasta }, transaction);
+            return _connection.Query<DtoComprobantesFacturasElectronicas>(sql, new { codCliente , fechaDesde, fechaHasta }, _transaction);
         }
 
         public DtoComprobantesPeriodo? PeriodosFacturacion(int codCliente)
         {
             string sql = "SELECT * FROM GET_PERIODOS_FACTURAS_AFIP(@codCliente)";
-            return connection.QuerySingleOrDefault<DtoComprobantesPeriodo?>(sql, new { codCliente }, transaction);
+            return _connection.QuerySingleOrDefault<DtoComprobantesPeriodo?>(sql, new { codCliente }, _transaction);
         }
 
         public ApiResponseListado<IEnumerable<dynamic>> ListadoFacturasEnviar(DtoOpcionesListados opcionesListado)
@@ -115,7 +115,7 @@ namespace ElPrado.Data.Repositories
             string sqlCant = $@"SELECT COUNT(*)
                             {sqlFrom} 
                             {sqlWhere}";
-            string sql = $@"SELECT {funcionesListados.ParseSqlPaginado(sqlCant, connection, transaction)}
+            string sql = $@"SELECT {funcionesListados.ParseSqlPaginado(sqlCant, _connection, _transaction)}
                             P.LEGAJO AS PROPUESTA, C.NRO_COMPROBANTE, C.COD_TALONARIO, P.COD_PROPUESTA, 
                             CL.TELEFONO_MOVIL, CL.NOMBRE AS CLIENTE, C.FECHA, CL.COD_CLIENTE,
                             (SELECT MAX(H.FECHA_ENVIO) FROM HIST_ENVIOS_FACTURAS H
@@ -124,14 +124,14 @@ namespace ElPrado.Data.Repositories
                             {sqlWhere}
                             {funcionesListados.ParseSqlOrden()}";
 
-            return funcionesListados.ApiResponse(sql, connection, transaction);
+            return funcionesListados.ApiResponse(sql, _connection, _transaction);
         }
 
         public void RegistrarEnvio(int codCliente, int codTalonario, string nroComprobante, string medioEnvio, int codUsuario)
         {
             string sql = @" INSERT INTO HIST_ENVIOS_FACTURAS (FECHA_ENVIO, POR_WHATSAPP, COD_USUARIO, COD_CLIENTE, COD_TALONARIO, NRO_COMPROBANTE, MEDIO_ENVIO)
                             VALUES (CURRENT_TIMESTAMP, 1, @codUsuario, @codCliente, @codTalonario, @nroComprobante, @medioEnvio)";
-            connection.Execute(sql, new { codUsuario, codCliente, codTalonario, nroComprobante, medioEnvio }, transaction);
+            _connection.Execute(sql, new { codUsuario, codCliente, codTalonario, nroComprobante, medioEnvio }, _transaction);
         }
 
     }

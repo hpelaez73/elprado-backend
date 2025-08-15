@@ -1,4 +1,3 @@
-using ElPrado.Core;
 using Microsoft.AspNetCore.Mvc;
 
 namespace ElPrado.WebApi.Controllers
@@ -7,8 +6,11 @@ namespace ElPrado.WebApi.Controllers
     [Route("[controller]")]
     public class ValuesController : ControllerBase
     {
-        public ValuesController()
+        private readonly IConfiguration _configuration;
+
+        public ValuesController(IConfiguration configuration)
         {
+            _configuration = configuration;
         }
 
         [HttpGet]
@@ -17,11 +19,9 @@ namespace ElPrado.WebApi.Controllers
             List<string> values = new()
             {
                 Environment.GetEnvironmentVariable("ASPNETCORE_ENVIRONMENT")!,
-                ConfiguracionGeneralSesion.StrConexion,
+                _configuration.GetConnectionString("DefaultConnection") ?? "El string de conexión no está configurado"
             };
-            if (ConfiguracionGeneralSesion.AllowedOrigins != null)
-                values.AddRange(ConfiguracionGeneralSesion.AllowedOrigins);
-            values.Add("Version: 07/08/2025 21:10");
+            values.Add("Version: 14/08/2025 21:10");
             return values;
         }
     }

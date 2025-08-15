@@ -5,23 +5,23 @@ namespace ElPrado.Data.Repositories
     public class RepositoryBaseEntidad<TEntidad> : RepositoryBase
         where TEntidad : Entidades
     {
-        public RepositoryBaseEntidad(Transaccion transaccion) : base(transaccion)
+        public RepositoryBaseEntidad(DbContext dbContext) : base(dbContext)
         {
         }
 
         public TEntidad Buscar(int id)
         {
-            return connection.Get<TEntidad>(id, transaction);
+            return _connection.Get<TEntidad>(id, _transaction);
         }
 
         public void Agregar(TEntidad entidad)
         {
-            connection.Insert(entidad, transaction);
+            _connection.Insert(entidad, _transaction);
         }
 
         public void Modificar(TEntidad entidad)
         {
-            connection.Update(entidad, transaction);
+            _connection.Update(entidad, _transaction);
         }
     }
 }

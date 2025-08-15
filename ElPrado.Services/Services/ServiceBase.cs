@@ -1,36 +1,20 @@
 ﻿using ElPrado.Core;
 using ElPrado.Data;
-using ElPrado.Data.Models;
-using ElPrado.Data.Repositories;
-using ElPrado.Dto.Dtos;
 
 namespace ElPrado.Services.Services
 {
     public class ServiceBase : IDisposable
     {
         private bool disposed = false;
-        protected RepositoryBase repository;
+        private int _codLogUsuario;
 
-        private readonly LogsService? logsService;
+        protected readonly IUnitOfWork _uow;
+        protected readonly IUserContextService _userContext;
 
-        private readonly Transaccion transaccion;
-        protected bool transaccionPropia;
-        protected Transaccion Transaccion { get => transaccion; }
-
-        public ServiceBase(Transaccion? transaccion)
-        {
-            transaccionPropia = transaccion == null;
-            this.transaccion = transaccion ?? new();
-            repository = CrearRepositorio();
-            if (this is not LogsService)
-            {
-                logsService = new(this.transaccion, this);
-            }
-        }
-
-        protected virtual RepositoryBase CrearRepositorio()
-        {
-            return new(Transaccion);
+        public ServiceBase(IUnitOfWork unitOfWork, IUserContextService userContext)
+        {   
+            _uow = unitOfWork;
+            _userContext = userContext;
         }
 
         public void Dispose()
@@ -46,7 +30,6 @@ namespace ElPrado.Services.Services
 
             if (disposing)
             {
-                transaccion.Dispose();
                 DisposeRecursos();
             }
             disposed = true;
@@ -57,35 +40,44 @@ namespace ElPrado.Services.Services
 
         }
 
-        protected void Commit()
-        {
-            if (transaccionPropia) transaccion.Commit();
-        }
-
-        protected void Rollback()
-        {
-            if (transaccionPropia) transaccion.Rollback();
-        }
-
-        public IEnumerable<dynamic> Listado(DtoOpcionesListados? opcionesListado)
-        {
-            return repository.Listado(opcionesListado);
-        }
-
         protected void RegistrarLogUsuario(string log, int codUsuario)
         {
-            logsService?.RegistrarUsuario(log, codUsuario);
+            Type tipo = GetType();
+            string nombreClase = tipo.Name;
+            string descripcionClase = ObtenerSummaryDeClase(tipo);
+
+            _codLogUsuario = _uow.LogsRepository.RegistrarLogUsuario(_codLogUsuario, log, codUsuario, nombreClase, descripcionClase);
         }
 
         protected void RegistrarLogCliente(string log, int codCliente)
         {
-            logsService?.RegistrarCliente(log, codCliente);
+            Type tipo = GetType();
+            string nombreClase = tipo.Name;
+
+            _uow.LogsRepository.RegistrarLogCliente(codCliente, log, nombreClase);
         }
 
         protected void RegistrarLog(string log)
         {
-            if (ConfiguracionGeneralSesion.CodUsuario > 0) RegistrarLogUsuario(log, ConfiguracionGeneralSesion.CodUsuario);
-            else if (ConfiguracionGeneralSesion.CodCliente > 0) RegistrarLogCliente(log, ConfiguracionGeneralSesion.CodCliente);
+            if (_userContext.GetCodUsuario() > 0) RegistrarLogUsuario(log, _userContext.GetCodUsuario());
+            else if (_userContext.GetCodCliente() > 0) RegistrarLogCliente(log, _userContext.GetCodCliente());
         }
+
+        private static string ObtenerSummaryDeClase(Type tipo)
+        {
+            // Using reflection.
+            Attribute[] attrs = Attribute.GetCustomAttributes(tipo);  // Reflection.
+
+            // Displaying output.
+            foreach (Attribute attr in attrs)
+            {
+                if (attr is DescripcionAttribute a)
+                {
+                    return a.GetDescripcion();
+                }
+            }
+            return string.Empty;
+        }
+
     }
 }

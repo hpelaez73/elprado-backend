@@ -1,4 +1,5 @@
 ﻿using ElPrado.Core;
+using ElPrado.Data;
 using ElPrado.Dto.Dtos;
 using ElPrado.Services.Services;
 using Microsoft.AspNetCore.Mvc;
@@ -9,7 +10,7 @@ namespace ElPrado.WebApi.Controllers
     {
         private PropuestasService propuestasService => (servicio as PropuestasService)!;
 
-        public PropuestasController()
+        public PropuestasController(IUnitOfWork unitOfWork) : base(unitOfWork)
         {
         }
 

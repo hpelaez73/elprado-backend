@@ -6,14 +6,14 @@ namespace ElPrado.Data.Repositories
 {
     public class DomiciliosRepository : RepositoryBaseCrud<Domicilios, DtoDomicilos>
     {
-        public DomiciliosRepository(Transaccion transaccion) : base(transaccion)
+        public DomiciliosRepository(DbContext dbContext) : base(dbContext)
         {
         }
 
         public override DtoDomicilos? Visualizar(int id)
         {
             string sql = "SELECT * FROM DOMICILIO_SIMPLE(@id)";
-            return connection.QuerySingleOrDefault<DtoDomicilos>(sql, new { id }, transaction);
+            return _connection.QuerySingleOrDefault<DtoDomicilos>(sql, new { id }, _transaction);
         }
     }
 }

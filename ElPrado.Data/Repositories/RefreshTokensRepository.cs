@@ -5,7 +5,7 @@ namespace ElPrado.Data.Repositories
 {
     public class RefreshTokensRepository : RepositoryBaseEntidad<RefreshTokens>
     {
-        public RefreshTokensRepository(Transaccion transaccion) : base(transaccion)
+        public RefreshTokensRepository(DbContext dbContext) : base(dbContext)
         {
         }
 
@@ -15,7 +15,7 @@ namespace ElPrado.Data.Repositories
                             FROM REFRESH_TOKENS R
                             WHERE R.TOKEN = @token
                             AND R.FECHA_EXPIRACION >= CURRENT_DATE";
-            return connection.QuerySingleOrDefault<RefreshTokens?>(sql, new { token }, transaction);
+            return _connection.QuerySingleOrDefault<RefreshTokens?>(sql, new { token }, _transaction);
         }
 
         public bool ExisteToken(string token)

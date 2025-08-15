@@ -1,4 +1,5 @@
 ﻿using ElPrado.Core;
+using ElPrado.Data;
 using ElPrado.Dto.Dtos;
 using ElPrado.Services.Services;
 using Microsoft.AspNetCore.Authorization;
@@ -10,7 +11,7 @@ namespace ElPrado.WebApi.Controllers
     {
         private CuentasCorrientesService cuentasCorrientesService => (servicio as CuentasCorrientesService)!;
 
-        public CuentasCorrientesController()
+        public CuentasCorrientesController(IUnitOfWork unitOfWork) : base(unitOfWork)
         {
         }
 

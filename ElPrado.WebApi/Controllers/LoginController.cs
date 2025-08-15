@@ -1,5 +1,7 @@
 ﻿using ElPrado.Core;
+using ElPrado.Data;
 using ElPrado.Dto.Dtos;
+using ElPrado.Services;
 using ElPrado.Services.Services;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.IdentityModel.Tokens;
@@ -14,138 +16,102 @@ namespace ElPrado.WebApi.Controllers
     public sealed class LoginController : ControllerBase
     {
         private readonly IConfiguration configuration;
+        private readonly IUnitOfWork _uow;
+        private readonly IUserContextService _userContext;
 
-        public LoginController(IConfiguration configuration)
+        public LoginController(IConfiguration configuration, IUnitOfWork unitOfWork, IUserContextService userContext) 
         {
             this.configuration = configuration;
+            _uow = unitOfWork;
+            _userContext = userContext;
         }
 
         [HttpPost("Usuario")]
         public ActionResult<ApiResponse<DtoLogin>> LoginUsuario([FromBody] DtoLoginUsuario alta)
         {
-            try
+            using LoginService loginService = new(_uow, _userContext);
+            ApiResponse<DtoLogin> apiResponse = new();
+            DtoLogin? login = loginService.Login(alta.Alias, alta.Clave);
+            if (login != null)
             {
-                using LoginService loginService = new(null);
-                ApiResponse<DtoLogin> apiResponse = new();
-                DtoLogin? login = loginService.Login(alta.Alias, alta.Clave);
-                if (login != null)
-                {
-                    login.Token = BuildToken(login);
-                    apiResponse.Data = login;
-                    return apiResponse;
-                }
-                else
-                {
-                    apiResponse.Agregar("Clave inválida o usuario inexistente");
-                    return Unauthorized(apiResponse);
-                }
+                login.Token = BuildToken(login);
+                apiResponse.Data = login;
+                return apiResponse;
             }
-            catch (Exception ex)
+            else
             {
-                Serilog.Log.Error(ex, "{Controlador}.Login({@alta}): {Mensaje}", this, alta, ex.Message);
-                throw;
+                apiResponse.Agregar("Clave inválida o usuario inexistente");
+                return Unauthorized(apiResponse);
             }
         }
 
         [HttpPost("Cliente")]
         public ActionResult<ApiResponse<DtoLogin>> LoginCliente([FromBody] DtoLoginCliente alta)
         {
-            try
+            using LoginService loginService = new(_uow, _userContext);
+            ApiResponse<DtoLogin> apiResponse = new();
+            DtoLogin? login = loginService.Login(alta.Propuesta, alta.DniCuit, alta.Clave);
+            if (login != null)
             {
-                using LoginService loginService = new(null);
-                ApiResponse<DtoLogin> apiResponse = new();
-                DtoLogin? login = loginService.Login(alta.Propuesta, alta.DniCuit, alta.Clave);
-                if (login != null)
-                {
-                    login.Token = BuildToken(login);
-                    apiResponse.Data = login;
-                    return apiResponse;
-                }
-                else
-                {
-                    apiResponse.Agregar("Clave inválida o cliente inexistente");
-                    return Unauthorized(apiResponse);
-                }
+                login.Token = BuildToken(login);
+                apiResponse.Data = login;
+                return apiResponse;
             }
-            catch (Exception ex)
+            else
             {
-                Serilog.Log.Error(ex, "{Controlador}.Login({@alta}): {Mensaje}", this, alta, ex.Message);
-                throw;
+                apiResponse.Agregar("Clave inválida o cliente inexistente");
+                return Unauthorized(apiResponse);
             }
         }
 
         [HttpPost("RenovarToken")]
         public ActionResult<ApiResponse<DtoLogin>> RenovarToken([FromBody] DtoRefreshToken alta)
         {
-            try
+            using LoginService loginService = new(_uow, _userContext);
+            ApiResponse<DtoLogin> apiResponse = new();
+            DtoLogin? login = loginService.RenovarToken(alta.RefreshToken);
+            if (login != null)
             {
-                using LoginService loginService = new(null);
-                ApiResponse<DtoLogin> apiResponse = new();
-                DtoLogin? login = loginService.RenovarToken(alta.RefreshToken);
-                if (login != null)
-                {
-                    login.Token = BuildToken(login);
-                    apiResponse.Data = login;
-                    return apiResponse;
-                }
-                else
-                {
-                    apiResponse.Agregar("Refresh token inválido");
-                    return Unauthorized(apiResponse);
-                }
+                login.Token = BuildToken(login);
+                apiResponse.Data = login;
+                return apiResponse;
             }
-            catch (Exception ex)
+            else
             {
-                Serilog.Log.Error(ex, "{Controlador}.RenovarToken({@alta}): {Mensaje}", this, alta, ex.Message);
-                throw;
+                apiResponse.Agregar("Refresh token inválido");
+                return Unauthorized(apiResponse);
             }
         }
 
         [HttpPost("Registrar")]
         public ActionResult<ApiResponse<int>> RegistrarCliente([FromBody] DtoLoginClienteAlta altaCliente)
         {
-            try
+            using LoginService loginService = new(_uow, _userContext);
+            ApiResponse<int> apiResponse = new();
+            Resultados resultado = loginService.Registrar(altaCliente);
+            if (resultado.HayError)
             {
-                using LoginService loginService = new(null);
-                ApiResponse<int> apiResponse = new();
-                Resultados resultado = loginService.Registrar(altaCliente);
-                if (resultado.HayError)
-                {
-                    apiResponse.Agregar(resultado);
-                    return BadRequest(apiResponse);
-                }
-                apiResponse.Message = "Usuario creado exitosamente";
-                return apiResponse;
+                apiResponse.Agregar(resultado);
+                return BadRequest(apiResponse);
             }
-            catch (Exception ex)
-            {
-                Serilog.Log.Error(ex, "{Controlador}.Registrar({@altaCliente}): {Mensaje}", this, altaCliente, ex.Message);
-                throw;
-            }
+            apiResponse.Message = "Usuario creado exitosamente";
+            return apiResponse;
         }
 
         [HttpDelete("{id}")]
         public ActionResult<ApiResponse<int>> BorrarCliente(int id)
         {
-            try
+            using LoginService loginService = new(_uow, _userContext);
+            ApiResponse<int> apiResponse = new();
+            Resultados resultado = loginService.BorrarCliente(id);
+            if (resultado.HayError)
             {
-                using LoginService loginService = new(null);
-                ApiResponse<int> apiResponse = new();
-                Resultados resultado = loginService.BorrarCliente(id);
-                if (resultado.HayError)
-                {
-                    apiResponse.Agregar(resultado);
-                    return BadRequest(apiResponse);
-                }
-                apiResponse.Data = id;
-                apiResponse.Message = "Usuario eliminado";
-                return apiResponse;
+                apiResponse.Agregar(resultado);
+                return BadRequest(apiResponse);
             }
-            catch (Exception ex)
-            {
-                Serilog.Log.Error(ex, "{Controlador}.BorrarCliente({id}): {Mensaje}", this, id, ex.Message);
-                throw;
-            }
+            apiResponse.Data = id;
+            apiResponse.Message = "Usuario eliminado";
+            return apiResponse;
         }
 
         private string BuildToken(DtoLogin login)
@@ -157,8 +123,9 @@ namespace ElPrado.WebApi.Controllers
 
             // CREAMOS LOS CLAIMS //
             var listClaim = new[] {
-                new Claim(ClaimTypes.NameIdentifier, (login.CodUsuario > 0) ? login.CodUsuario.ToString() : login.CodCliente.ToString()),
+                new Claim(ClaimTypes.NameIdentifier, login.CodUsuario.ToString()),
                 new Claim(ClaimTypes.Name, login.Nombre),
+                new Claim("CodCliente", login.CodCliente.ToString()),
                 new Claim("CodPropuesta", login.CodPropuesta.ToString())
             };
 

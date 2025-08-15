@@ -1,4 +1,5 @@
-﻿using ElPrado.Dto.Dtos;
+﻿using ElPrado.Data;
+using ElPrado.Dto.Dtos;
 using ElPrado.Services.Services;
 using Microsoft.AspNetCore.Mvc;
 
@@ -8,7 +9,7 @@ namespace ElPrado.WebApi.Controllers
     {
         private InhumadosService inhumadosService => (servicio as InhumadosService)!;
 
-        public InhumadosController()
+        public InhumadosController(IUnitOfWork unitOfWork) : base(unitOfWork)
         {
         }
 

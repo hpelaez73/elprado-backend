@@ -1,4 +1,5 @@
-﻿using ElPrado.Dto;
+﻿using ElPrado.Data;
+using ElPrado.Dto;
 using ElPrado.Dto.Dtos;
 using ElPrado.Services.Services;
 using Microsoft.AspNetCore.Mvc;
@@ -9,7 +10,7 @@ namespace ElPrado.WebApi.Controllers
     {
         private MovimientosFondosService movimientosFondosService => (servicio as MovimientosFondosService)!;
 
-        public MovimientosFondosController()
+        public MovimientosFondosController(IUnitOfWork unitOfWork) : base(unitOfWork)
         {
         }
         protected override ServiceBase CrearServicio()

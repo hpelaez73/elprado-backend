@@ -1,4 +1,5 @@
 ﻿using ElPrado.Core;
+using ElPrado.Data;
 using ElPrado.Dto.Dtos;
 using ElPrado.Services.Services;
 using Microsoft.AspNetCore.Authorization;
@@ -10,7 +11,7 @@ namespace ElPrado.WebApi.Controllers
     {
         private ConfiguracionesService configuracionesService => (servicio as ConfiguracionesService)!;
 
-        public ConfiguracionesController()
+        public ConfiguracionesController(IUnitOfWork unitOfWork) : base(unitOfWork)
         {
         }
 
