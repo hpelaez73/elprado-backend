@@ -1,7 +1,6 @@
 ﻿using ElPrado.Core;
 using ElPrado.Data;
 using ElPrado.Data.Models;
-using ElPrado.Data.Repositories;
 using ElPrado.Dto.Dtos;
 using ElPrado.Services.Mappers;
 
@@ -9,22 +8,16 @@ namespace ElPrado.Services.Services
 {
     public class UsuariosService : ServiceBaseCrud<Usuarios, DtoUsuarios>
     {
-        private UsuariosRepository usuariosRepository => (repository as UsuariosRepository)!;
-
-        public UsuariosService(Transaccion? transaccion) : base(transaccion)
+        public UsuariosService(IUnitOfWork unitOfWork, IUserContextService userContext) : base(unitOfWork, userContext)
         {
-        }
-
-        protected override RepositoryBaseCrud<Usuarios, DtoUsuarios> CrearRepositorio()
-        {
-            return new UsuariosRepository(Transaccion);
+            _repositoryCrud = unitOfWork.Usuarios;
         }
 
         public List<DtoMenus> BuscarMenu()
         {
-            List<MenusWeb> listMenusWeb = (ConfiguracionGeneralSesion.CodUsuario > 0)
-                ? usuariosRepository.BuscarMenuUsuario(ConfiguracionGeneralSesion.CodUsuario, false)
-                : usuariosRepository.BuscarMenuCliente(false);
+            List<MenusWeb> listMenusWeb = (_userContext.GetCodUsuario() > 0)
+                ? _uow.Usuarios.BuscarMenuUsuario(_userContext.GetCodUsuario(), false)
+                : _uow.Usuarios.BuscarMenuCliente(false);
 
             int maxNivel = listMenusWeb.Max(x => x.Nivel);
             for (int i = maxNivel; i > 1; i--)
@@ -40,32 +33,31 @@ namespace ElPrado.Services.Services
                 }
                 listMenusWeb.RemoveAll(x => x.Nivel == i);
             }
-            return MenusMapper.MapToDto(listMenusWeb, ConfiguracionGeneralSesion.CodUsuario > 0);
+            return MenusMapper.MapToDto(listMenusWeb, _userContext.GetCodUsuario() > 0);
         }
 
         public List<DtoPanel> BuscarPanel()
         {
-            List<MenusWeb> listMenusWeb = (ConfiguracionGeneralSesion.CodUsuario > 0)
-                ? usuariosRepository.BuscarMenuUsuario(ConfiguracionGeneralSesion.CodUsuario, true)
-                : usuariosRepository.BuscarMenuCliente(true);
+            List<MenusWeb> listMenusWeb = (_userContext.GetCodUsuario() > 0)
+                ? _uow.Usuarios.BuscarMenuUsuario(_userContext.GetCodUsuario(), true)
+                : _uow.Usuarios.BuscarMenuCliente(true);
 
-            return PanelMapper.MapToDto(listMenusWeb, ConfiguracionGeneralSesion.CodUsuario > 0);
+            return PanelMapper.MapToDto(listMenusWeb, _userContext.GetCodUsuario() > 0);
         }
 
         public Resultados<DtoAutorizacionesSolicitudResp> AnalizarSolicitudAutorizacion(DtoAutorizacionesSolicitudReq solicitud)
         {
             Resultados<DtoAutorizacionesSolicitudResp> resultado = new();
-            if (solicitud.Parte1.Trim() == string.Empty 
+            if (solicitud.Parte1.Trim() == string.Empty
                 || solicitud.Parte2.Trim() == string.Empty
                 || solicitud.Parte3.Trim() == string.Empty) resultado.Agregar("La solicitud está incompleta");
 
             if (resultado.HayError) return resultado;
 
-            VariosSeguridadRepository variosSeguridadRepository = new(Transaccion);
             DtoAutorizacionesSolicitudResp solicitudResp = new()
             {
-                Proceso = variosSeguridadRepository.TraducirClave(solicitud.Parte1.Trim(), false),
-                Usuario = variosSeguridadRepository.TraducirClave(solicitud.Parte2.Trim(), true)
+                Proceso = _uow.VariosSeguridad.TraducirClave(solicitud.Parte1.Trim(), false),
+                Usuario = _uow.VariosSeguridad.TraducirClave(solicitud.Parte2.Trim(), true)
             };
 
             if (solicitudResp.Usuario == string.Empty || solicitudResp.Proceso == string.Empty)
@@ -96,7 +88,7 @@ namespace ElPrado.Services.Services
             Resultados<DtoAutorizacionesSolicitudResp> resultadoInfo = AnalizarSolicitudAutorizacion(solicitudReq);
             if (resultadoInfo.HayError) resultado.Agregar(resultadoInfo);
 
-            Usuarios? usuario = usuariosRepository.Buscar(ConfiguracionGeneralSesion.CodUsuario, solicitud.Clave);
+            Usuarios? usuario = _uow.Usuarios.Buscar(_userContext.GetCodUsuario(), solicitud.Clave);
             if (usuario == null)
             {
                 resultado.Agregar("La clave es incorrecta");
@@ -117,7 +109,7 @@ namespace ElPrado.Services.Services
             string str1 = Ajustar(solicitud.Parte1.Trim());
             string str2 = Ajustar(solicitud.Parte2.Trim());
             string str3 = Ajustar(solicitud.Parte3.Trim());
-            string str4 = Ajustar(ConfiguracionGeneralSesion.CodUsuario.ToString());
+            string str4 = Ajustar(_userContext.GetCodUsuario().ToString());
 
             string strRes = Unir(str1, str2);
             strRes = Unir(strRes, str3);

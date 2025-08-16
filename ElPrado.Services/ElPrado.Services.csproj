@@ -7,20 +7,6 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <Compile Remove="Services\ComprobantesService.cs" />
-    <Compile Remove="Services\ConfiguracionesService.cs" />
-    <Compile Remove="Services\CuentasCorrientesService.cs" />
-    <Compile Remove="Services\InhumadosService.cs" />
-    <Compile Remove="Services\MediosCobrosService.cs" />
-    <Compile Remove="Services\MercadoPagoApiService.cs" />
-    <Compile Remove="Services\MercadoPagoService.cs" />
-    <Compile Remove="Services\MovimientosFondosService.cs" />
-    <Compile Remove="Services\ParcelasService.cs" />
-    <Compile Remove="Services\PropuestasService.cs" />
-    <Compile Remove="Services\UsuariosService.cs" />
-  </ItemGroup>
-
-  <ItemGroup>
     <None Remove="Services\MercadoPagoService.cs.bak" />
   </ItemGroup>
 

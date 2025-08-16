@@ -30,5 +30,12 @@ namespace ElPrado.WebApi
             var claim = _httpContextAccessor.HttpContext?.User.Claims.FirstOrDefault(x => x.Type.Equals("CodPropuesta"));
             return (claim != null) ? Convert.ToInt32(claim.Value) : 0;
         }
+
+        public bool EsTesting()
+        {
+            // Assuming there's a claim that indicates if the user is in testing mode.
+            var claim = _httpContextAccessor.HttpContext?.User.Claims.FirstOrDefault(x => x.Type.Equals("EsTesting"));
+            return (claim != null) && Convert.ToBoolean(claim.Value);
+        }
     }
 }

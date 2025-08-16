@@ -1,34 +1,23 @@
 ﻿using ElPrado.Core;
 using ElPrado.Data;
 using ElPrado.Data.Models;
-using ElPrado.Data.Repositories;
 using ElPrado.Dto.Dtos;
 
 namespace ElPrado.Services.Services
 {
     public class MercadoPagoService : ServiceBase
     {
-        private MercadoPagoRepository mercadoPagoRepository => (repository as MercadoPagoRepository)!;
-
-        public MercadoPagoService(Transaccion? transaccion) : base(transaccion)
+        public MercadoPagoService(IUnitOfWork unitOfWork, IUserContextService userContext) : base(unitOfWork, userContext)
         {
-        }
-
-        protected override RepositoryBase CrearRepositorio()
-        {
-            return new MercadoPagoRepository(Transaccion);
         }
 
         internal Resultados<string> ArmarPago(List<DtoCuentasCorrientes> listCuotas, int codCliente, DateTime? fechaVencimiento)
         {
             Resultados<string> resultado = new();
 
-            ConfiguracionGeneralRepository configuracionGeneralRepository = new(Transaccion);
-            ClientesRepository clientesRepository = new(Transaccion);
+            bool esTesting = _userContext.EsTesting();
 
-            bool esTesting = ConfiguracionGeneralSesion.StrConexion.Contains("elprado_dev");
-
-            DtoClientes? dtoCliente = clientesRepository.Visualizar(codCliente);
+            DtoClientes? dtoCliente = _uow.Clientes.Visualizar(codCliente);
             if (dtoCliente == null)
             {
                 resultado.Agregar("El cliente no existe");
@@ -37,12 +26,12 @@ namespace ElPrado.Services.Services
 
             DtoMercadoPago dtoMercadoPago = new()
             {
-                CodPreferencia = mercadoPagoRepository.ProximoCodigo("PREFERENCIAS_MERCADOPAGO"),
-                AccessToken = configuracionGeneralRepository.BuscarMercadoPagoAccessToken(),
-                NotificationUrl = configuracionGeneralRepository.BuscarMercadoPagoNotificationUrl(),
-                BackUrlsSuccess = configuracionGeneralRepository.BuscarMercadoPagoBackUrlsSuccess(),
-                BackUrlsFailure = configuracionGeneralRepository.BuscarMercadoPagoBackUrlsFailure(),
-                BackUrlsPending = configuracionGeneralRepository.BuscarMercadoPagoBackUrlsPending()
+                CodPreferencia = _uow.MercadoPago.ProximoCodigo("PREFERENCIAS_MERCADOPAGO"),
+                AccessToken = _uow.ConfiguracionGeneral.BuscarMercadoPagoAccessToken(),
+                NotificationUrl = _uow.ConfiguracionGeneral.BuscarMercadoPagoNotificationUrl(),
+                BackUrlsSuccess = _uow.ConfiguracionGeneral.BuscarMercadoPagoBackUrlsSuccess(),
+                BackUrlsFailure = _uow.ConfiguracionGeneral.BuscarMercadoPagoBackUrlsFailure(),
+                BackUrlsPending = _uow.ConfiguracionGeneral.BuscarMercadoPagoBackUrlsPending()
             };
             if (string.IsNullOrEmpty(dtoMercadoPago.AccessToken)) resultado.Agregar("Falta configurar el acceso a Mercado Pago");
             if (string.IsNullOrEmpty(dtoMercadoPago.NotificationUrl)) resultado.Agregar("Falta configurar la Url de notificación de Mercado Pago");
@@ -70,7 +59,7 @@ namespace ElPrado.Services.Services
                 FechaVencimiento = fechaVencimiento
             };
 
-            mercadoPagoRepository.Agregar(preferenciasMercadopago);
+            _uow.MercadoPago.Agregar(preferenciasMercadopago);
             foreach (DtoCuentasCorrientes dtoCuenta in listCuotas)
             {
                 if (dtoCuenta.Tipo == "CR")
@@ -83,7 +72,7 @@ namespace ElPrado.Services.Services
                         Pago = dtoCuenta.Pago,
                         Importe = dtoCuenta.Total
                     };
-                    mercadoPagoRepository.Agregar(detPreferenciasMercadopagoCr);
+                    _uow.MercadoPago.Agregar(detPreferenciasMercadopagoCr);
                 }
                 else
                 {
@@ -95,7 +84,7 @@ namespace ElPrado.Services.Services
                         Pago = dtoCuenta.Pago,
                         Importe = dtoCuenta.Total
                     };
-                    mercadoPagoRepository.Agregar(detPreferenciasMercadopagoCp);
+                    _uow.MercadoPago.Agregar(detPreferenciasMercadopagoCp);
                 }
             }
             resultado.Valor = dtoPreferencia.InitPoint;
@@ -105,8 +94,7 @@ namespace ElPrado.Services.Services
 
         internal bool ImputarPago(long id)
         {
-            ConfiguracionGeneralRepository configuracionGeneralRepository = new(Transaccion);
-            string accessToken = configuracionGeneralRepository.BuscarMercadoPagoAccessToken();
+            string accessToken = _uow.ConfiguracionGeneral.BuscarMercadoPagoAccessToken();
             if (string.IsNullOrEmpty(accessToken)) return false;
 
             if (id == 123456)
@@ -126,7 +114,7 @@ namespace ElPrado.Services.Services
 
             if (dtoPayment.PagoAprobado)
             {
-                mercadoPagoRepository.ImputarPago(id, dtoPayment.CodPreferencia, dtoPayment.ReferenciaExterna, dtoPayment.FechaPago);
+                _uow.MercadoPago.ImputarPago(id, dtoPayment.CodPreferencia, dtoPayment.ReferenciaExterna, dtoPayment.FechaPago);
                 return true;
             }
             return false;

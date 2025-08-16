@@ -1,7 +1,7 @@
 ﻿using ElPrado.Core;
 using ElPrado.Data;
-using ElPrado.Dto;
 using ElPrado.Dto.Dtos;
+using ElPrado.Services;
 using ElPrado.Services.Services;
 using Microsoft.AspNetCore.Mvc;
 
@@ -9,116 +9,75 @@ namespace ElPrado.WebApi.Controllers
 {
     public class ComprobantesController : ControladorBase
     {
-        private ComprobantesService comprobantesService => (servicio as ComprobantesService)!;
+        private ComprobantesService comprobantesService => (_servicio as ComprobantesService)!;
 
-        public ComprobantesController(IUnitOfWork unitOfWork) : base(unitOfWork)
+        public ComprobantesController(IUnitOfWork unitOfWork, IUserContextService userContext) : base(unitOfWork, userContext)
         {
         }
 
         protected override ServiceBase CrearServicio()
         {
-            return new ComprobantesService(null);
+            return new ComprobantesService(_uow, _userContext);
         }
 
         [HttpPost("Visualizar")]
         public ActionResult<ApiResponse<DtoComprobantes>> Visualizar([FromBody] DtoComprobanteReq dtoComprobante)
         {
-            try
+            ApiResponse<DtoComprobantes> apiResponse = new();
+            DtoComprobantes? comprobante = comprobantesService.Visualizar(dtoComprobante.CodTalonario, dtoComprobante.NroComprobante);
+            if (comprobante == null)
             {
-                ApiResponse<DtoComprobantes> apiResponse = new();
-                DtoComprobantes? comprobante = comprobantesService.Visualizar(dtoComprobante.CodTalonario, dtoComprobante.NroComprobante);
-                if (comprobante == null)
-                {
-                    apiResponse.Agregar("No se encontró el comprobante");
-                    return NotFound(apiResponse);
-                }
-                apiResponse.Data = comprobante;
-                return apiResponse;
+                apiResponse.Agregar("No se encontró el comprobante");
+                return NotFound(apiResponse);
             }
-            catch (Exception ex)
-            {
-                Serilog.Log.Error(ex, "{Controlador}.Visualizar({@dtoComprobante}): {Mensaje} {@Extras}", this, dtoComprobante, ex.Message, extrasLog);
-                throw;
-            }
+            apiResponse.Data = comprobante;
+            return apiResponse;
         }
-
 
         [HttpGet("PeriodosFacturacion")]
         public ActionResult<ApiResponse<List<int>>> PeriodosFacturacion()
         {
-            try
-            {
-                ApiResponse<List<int>> apiResponse = new();
+            ApiResponse<List<int>> apiResponse = new();
 
-                List<int> listPeriodos = comprobantesService.PeriodosFacturacion();
-                if (listPeriodos.Count == 0)
-                {
-                    apiResponse.Agregar("No hay periodos facturados");
-                    return NotFound(apiResponse);
-                }
-                apiResponse.Data = listPeriodos;
-                return apiResponse;
-            }
-            catch (Exception ex)
+            List<int> listPeriodos = comprobantesService.PeriodosFacturacion();
+            if (listPeriodos.Count == 0)
             {
-                Serilog.Log.Error(ex, "{Controlador}.PeriodosFacturacion(): {Mensaje} {@Extras}", this, ex.Message, extrasLog);
-                throw;
+                apiResponse.Agregar("No hay periodos facturados");
+                return NotFound(apiResponse);
             }
+            apiResponse.Data = listPeriodos;
+            return apiResponse;
         }
 
         [HttpGet("Facturas/{periodo}")]
         public ApiResponse<IEnumerable<DtoComprobantesFacturasElectronicas>> Facturas(int periodo)
         {
-            try
+            ApiResponse<IEnumerable<DtoComprobantesFacturasElectronicas>> apiResponse = new()
             {
-                ApiResponse<IEnumerable<DtoComprobantesFacturasElectronicas>> apiResponse = new()
-                {
-                    Data = comprobantesService.Facturas(periodo)
-                };
-                return apiResponse;
-            }
-            catch (Exception ex)
-            {
-                Serilog.Log.Error(ex, "{Controlador}.Facturas({periodo}): {Mensaje} {@Extras}", this, periodo, ex.Message, extrasLog);
-                throw;
-            }
+                Data = comprobantesService.Facturas(periodo)
+            };
+            return apiResponse;
         }
 
         #region Envio de facturas
         [HttpPost("ListadoFacturasEnviar")]
         public ApiResponseListado<IEnumerable<dynamic>> ListadoFacturasEnviar([FromBody] DtoOpcionesListados opcionesListado)
         {
-            try
-            {
-                return comprobantesService.ListadoFacturasEnviar(opcionesListado);
-            }
-            catch (Exception ex)
-            {
-                Serilog.Log.Error(ex, "{Controlador}.ListadoFacturasEnviar({@opcionesListado}): {Mensaje} {@Extras}", this, opcionesListado, ex.Message, extrasLog);
-                throw;
-            }
+            return comprobantesService.ListadoFacturasEnviar(opcionesListado);
         }
 
         [HttpPost("RegistrarEnvio")]
         public ActionResult<ApiResponse<int>> RegistrarEnvio([FromBody] DtoRegistrarEnvioReq solicitud)
         {
-            try
+            ApiResponse<int> apiResponse = new();
+            Resultados resultado = comprobantesService.RegistrarEnvio(solicitud);
+            if (resultado.HayError)
             {
-                ApiResponse<int> apiResponse = new();
-                Resultados resultado = comprobantesService.RegistrarEnvio(solicitud);
-                if (resultado.HayError)
-                {
-                    apiResponse.Agregar(resultado);
-                    return BadRequest(apiResponse);
-                }
-                apiResponse.Message = "Envio registrado";
-                return apiResponse;
+                apiResponse.Agregar(resultado);
+                return BadRequest(apiResponse);
             }
-            catch (Exception ex)
-            {
-                Serilog.Log.Error(ex, "{Controlador}.RegistrarEnvio({@solicitud}): {Mensaje} {@Extras}", this, solicitud, ex.Message, extrasLog);
-                throw;
-            }
+            apiResponse.Message = "Envio registrado";
+            return apiResponse;
         }
 
         #endregion

@@ -116,6 +116,7 @@ namespace ElPrado.WebApi.Controllers
 
         private string BuildToken(DtoLogin login)
         {
+            bool esTesting = configuration.GetConnectionString("DefaultConnection")?.ToLower().Contains("elprado_dev") ?? false;
             // CREAMOS EL HEADER //
             var key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(configuration["JWT:Key"]!));
             var creds = new SigningCredentials(key, SecurityAlgorithms.HmacSha256);
@@ -126,7 +127,8 @@ namespace ElPrado.WebApi.Controllers
                 new Claim(ClaimTypes.NameIdentifier, login.CodUsuario.ToString()),
                 new Claim(ClaimTypes.Name, login.Nombre),
                 new Claim("CodCliente", login.CodCliente.ToString()),
-                new Claim("CodPropuesta", login.CodPropuesta.ToString())
+                new Claim("CodPropuesta", login.CodPropuesta.ToString()),
+                new Claim("EsTesting", esTesting.ToString()),
             };
 
             // CREAMOS EL PAYLOAD //

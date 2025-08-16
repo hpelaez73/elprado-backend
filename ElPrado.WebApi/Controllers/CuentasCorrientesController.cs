@@ -1,6 +1,7 @@
 ﻿using ElPrado.Core;
 using ElPrado.Data;
 using ElPrado.Dto.Dtos;
+using ElPrado.Services;
 using ElPrado.Services.Services;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
@@ -9,156 +10,100 @@ namespace ElPrado.WebApi.Controllers
 {
     public class CuentasCorrientesController : ControladorBase
     {
-        private CuentasCorrientesService cuentasCorrientesService => (servicio as CuentasCorrientesService)!;
+        private CuentasCorrientesService cuentasCorrientesService => (_servicio as CuentasCorrientesService)!;
 
-        public CuentasCorrientesController(IUnitOfWork unitOfWork) : base(unitOfWork)
+        public CuentasCorrientesController(IUnitOfWork unitOfWork, IUserContextService userContext) : base(unitOfWork, userContext)
         {
         }
 
         protected override ServiceBase CrearServicio()
         {
-            return new CuentasCorrientesService(null);
+            return new CuentasCorrientesService(_uow, _userContext);
         }
 
         [HttpGet("PendientesMercadoPago")]
         public ActionResult<ApiResponse<List<DtoCuentasCorrientes>>> PendientesMercadoPago()
         {
-            try
+            ApiResponse<List<DtoCuentasCorrientes>> apiResponse = new();
+            Resultados<List<DtoCuentasCorrientes>> resultado = cuentasCorrientesService.PendientesMercadoPago(_userContext.GetCodCliente());
+            if (resultado.HayError || resultado.Valor == null)
             {
-                ApiResponse<List<DtoCuentasCorrientes>> apiResponse = new();
-                Resultados<List<DtoCuentasCorrientes>> resultado = cuentasCorrientesService.PendientesMercadoPago(ConfiguracionGeneralSesion.CodCliente);
-                if (resultado.HayError || resultado.Valor == null)
-                {
-                    apiResponse.Agregar(resultado);
-                    return BadRequest(apiResponse);
-                }
-                apiResponse.Data = resultado.Valor;
-                return apiResponse;
+                apiResponse.Agregar(resultado);
+                return BadRequest(apiResponse);
             }
-            catch (Exception ex)
-            {
-                Serilog.Log.Error(ex, "{Controlador}.PendientesMercadoPago(): {Mensaje} {@Extras}", this, ex.Message, extrasLog);
-                throw;
-            }
+            apiResponse.Data = resultado.Valor;
+            return apiResponse;
         }
 
         [HttpGet("PendientesMercadoPago/{codCliente}")]
         public ActionResult<ApiResponse<List<DtoCuentasCorrientes>>> PendientesMercadoPago(int codCliente)
         {
-            try
+            ApiResponse<List<DtoCuentasCorrientes>> apiResponse = new();
+            Resultados<List<DtoCuentasCorrientes>> resultado = cuentasCorrientesService.PendientesMercadoPago(codCliente);
+            if (resultado.HayError || resultado.Valor == null)
             {
-                ApiResponse<List<DtoCuentasCorrientes>> apiResponse = new();
-                Resultados<List<DtoCuentasCorrientes>> resultado = cuentasCorrientesService.PendientesMercadoPago(codCliente);
-                if (resultado.HayError || resultado.Valor == null)
-                {
-                    apiResponse.Agregar(resultado);
-                    return BadRequest(apiResponse);
-                }
-                apiResponse.Data = resultado.Valor;
-                return apiResponse;
+                apiResponse.Agregar(resultado);
+                return BadRequest(apiResponse);
             }
-            catch (Exception ex)
-            {
-                Serilog.Log.Error(ex, "{Controlador}.PendientesMercadoPago({codCliente}): {Mensaje} {@Extras}", this, codCliente, ex.Message, extrasLog);
-                throw;
-            }
+            apiResponse.Data = resultado.Valor;
+            return apiResponse;
         }
 
         [HttpPost("SolicitudMercadoPago")]
         public ActionResult<ApiResponse<string>> SolicitudMercadoPago([FromBody] List<DtoCuotasMercadoPago> listCuotas)
         {
-            try
+            ApiResponse<string> apiResponse = new();
+            Resultados<string> resultado = cuentasCorrientesService.SolicitudMercadoPago(listCuotas);
+            if (resultado.HayError || string.IsNullOrEmpty(resultado.Valor))
             {
-                ApiResponse<string> apiResponse = new();
-                Resultados<string> resultado = cuentasCorrientesService.SolicitudMercadoPago(listCuotas);
-                if (resultado.HayError || string.IsNullOrEmpty(resultado.Valor))
-                {
-                    apiResponse.Agregar(resultado);
-                    return BadRequest(apiResponse);
-                }
-                apiResponse.Data = resultado.Valor;
-                return apiResponse;
+                apiResponse.Agregar(resultado);
+                return BadRequest(apiResponse);
             }
-            catch (Exception ex)
-            {
-                Serilog.Log.Error(ex, "{Controlador}.SolicitudMercadoPago({@listCuotas}): {Mensaje} {@Extras}", this, listCuotas, ex.Message, extrasLog);
-                throw;
-            }
+            apiResponse.Data = resultado.Valor;
+            return apiResponse;
         }
 
         [HttpPost("SolicitudMercadoPagoLink")]
         public ActionResult<ApiResponse<string>> SolicitudMercadoPagoLink([FromBody] DtoSolicitudMercadoPago dtoSolicitud)
         {
-            try
+            ApiResponse<string> apiResponse = new();
+            Resultados<string> resultado = cuentasCorrientesService.SolicitudMercadoPagoLink(dtoSolicitud);
+            if (resultado.HayError || string.IsNullOrEmpty(resultado.Valor))
             {
-                ApiResponse<string> apiResponse = new();
-                Resultados<string> resultado = cuentasCorrientesService.SolicitudMercadoPagoLink(dtoSolicitud);
-                if (resultado.HayError || string.IsNullOrEmpty(resultado.Valor))
-                {
-                    apiResponse.Agregar(resultado);
-                    return BadRequest(apiResponse);
-                }
-                apiResponse.Data = resultado.Valor;
-                return apiResponse;
+                apiResponse.Agregar(resultado);
+                return BadRequest(apiResponse);
             }
-            catch (Exception ex)
-            {
-                Serilog.Log.Error(ex, "{Controlador}.SolicitudMercadoPagoLink({@dtoSolicitud}): {Mensaje} {@Extras}", this, dtoSolicitud, ex.Message, extrasLog);
-                throw;
-            }
+            apiResponse.Data = resultado.Valor;
+            return apiResponse;
         }
 
         [AllowAnonymous]
         [HttpPost("NotificacionMercadoPago")]
         public ActionResult NotificacionMercadoPago(string topic, long id)
         {
-            try
-            {
-                bool resultado = cuentasCorrientesService.NotificacionMercadoPago(topic, id);
-                if (resultado) return Ok();
-                else return BadRequest();
-            }
-            catch (Exception ex)
-            {
-                Serilog.Log.Error(ex, "{Controlador}.NotificacionMercadoPago({topic}, {id}): {Mensaje} {@Extras}", this, topic, id, ex.Message, extrasLog);
-                throw;
-            }
+            bool resultado = cuentasCorrientesService.NotificacionMercadoPago(topic, id);
+            if (resultado) return Ok();
+            else return BadRequest();
         }
 
         [HttpPost("ResumenCuentas")]
         public ActionResult<ApiResponse<List<DtoCuentasCorrientesResumen>>> ResumenCuentas([FromBody] DtoCuentasCorrientesResumenReq dtoCuentas)
         {
-            try
+            ApiResponse<List<DtoCuentasCorrientesResumen>> apiResponse = new();
+            Resultados<List<DtoCuentasCorrientesResumen>> resultado = cuentasCorrientesService.ResumenCuentas(dtoCuentas);
+            if (resultado.HayError || resultado.Valor == null)
             {
-                ApiResponse<List<DtoCuentasCorrientesResumen>> apiResponse = new();
-                Resultados<List<DtoCuentasCorrientesResumen>> resultado = cuentasCorrientesService.ResumenCuentas(dtoCuentas);
-                if (resultado.HayError || resultado.Valor == null)
-                {
-                    apiResponse.Agregar(resultado);
-                    return BadRequest(apiResponse);
-                }
-                apiResponse.Data = resultado.Valor;
-                return apiResponse;
+                apiResponse.Agregar(resultado);
+                return BadRequest(apiResponse);
             }
-            catch (Exception ex)
-            {
-                Serilog.Log.Error(ex, "{Controlador}.ResumenCuentas({@dtoCuentas}): {Mensaje} {@Extras}", this, dtoCuentas, ex.Message, extrasLog);
-                throw;
-            }
+            apiResponse.Data = resultado.Valor;
+            return apiResponse;
         }
 
         [HttpPost("ListadoResumenCuotas")]
         public ApiResponseListado<IEnumerable<dynamic>> ListadoResumenCuotas([FromBody] DtoOpcionesListados opcionesListado)
         {
-            try
-            {
-                return cuentasCorrientesService.ListadoResumenCuotas(opcionesListado);
-            }
-            catch (Exception ex)
-            {
-                Serilog.Log.Error(ex, "{Controlador}.ListadoResumenCuotas({@opcionesListado}): {Mensaje} {@Extras}", this, opcionesListado, ex.Message, extrasLog);
-                throw;
-            }
+            return cuentasCorrientesService.ListadoResumenCuotas(opcionesListado);
         }
 
     }

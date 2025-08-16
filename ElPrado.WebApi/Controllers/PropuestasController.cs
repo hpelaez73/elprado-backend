@@ -1,6 +1,7 @@
 ﻿using ElPrado.Core;
 using ElPrado.Data;
 using ElPrado.Dto.Dtos;
+using ElPrado.Services;
 using ElPrado.Services.Services;
 using Microsoft.AspNetCore.Mvc;
 
@@ -8,148 +9,89 @@ namespace ElPrado.WebApi.Controllers
 {
     public class PropuestasController : ControladorBase
     {
-        private PropuestasService propuestasService => (servicio as PropuestasService)!;
+        private PropuestasService propuestasService => (_servicio as PropuestasService)!;
 
-        public PropuestasController(IUnitOfWork unitOfWork) : base(unitOfWork)
+        public PropuestasController(IUnitOfWork unitOfWork, IUserContextService userContext) : base(unitOfWork, userContext)
         {
         }
 
         protected override ServiceBase CrearServicio()
         {
-            return new PropuestasService(null);
+            return new PropuestasService(_uow, _userContext);
         }
 
         [HttpPost("Titulares")]
         public ActionResult<ApiResponse<List<DtoClientesPropuestas>>> Titulares([FromBody] DtoPropuestaDetalleReq dtoPropuesta)
         {
-            try
+            ApiResponse<List<DtoClientesPropuestas>> apiResponse = new();
+            Resultados<List<DtoClientesPropuestas>> resultado = propuestasService.Titulares(dtoPropuesta);
+            if (resultado.HayError || resultado.Valor == null)
             {
-                ApiResponse<List<DtoClientesPropuestas>> apiResponse = new();
-                Resultados<List<DtoClientesPropuestas>> resultado = propuestasService.Titulares(dtoPropuesta);
-                if (resultado.HayError || resultado.Valor == null)
-                {
-                    apiResponse.Agregar(resultado);
-                    return BadRequest(apiResponse);
-                }
-                apiResponse.Data = resultado.Valor;
-                return apiResponse;
+                apiResponse.Agregar(resultado);
+                return BadRequest(apiResponse);
             }
-            catch (Exception ex)
-            {
-                Serilog.Log.Error(ex, "{Controlador}.Titulares({@dtoPropuesta}): {Mensaje} {@Extras}", this, dtoPropuesta, ex.Message, extrasLog);
-                throw;
-            }
+            apiResponse.Data = resultado.Valor;
+            return apiResponse;
         }
 
         [HttpPost("Detalle")]
         public ActionResult<ApiResponse<DtoPropuestaDetalleResp>> Detalle([FromBody] DtoPropuestaDetalleReq dtoPropuesta)
         {
-            try
+            ApiResponse<DtoPropuestaDetalleResp> apiResponse = new();
+            Resultados<DtoPropuestaDetalleResp> resultado = propuestasService.Detalle(dtoPropuesta);
+            if (resultado.HayError || resultado.Valor == null)
             {
-                ApiResponse<DtoPropuestaDetalleResp> apiResponse = new();
-                Resultados<DtoPropuestaDetalleResp> resultado = propuestasService.Detalle(dtoPropuesta);
-                if (resultado.HayError || resultado.Valor == null)
-                {
-                    apiResponse.Agregar(resultado);
-                    return BadRequest(apiResponse);
-                }
-                apiResponse.Data = resultado.Valor;
-                return apiResponse;
+                apiResponse.Agregar(resultado);
+                return BadRequest(apiResponse);
             }
-            catch (Exception ex)
-            {
-                Serilog.Log.Error(ex, "{Controlador}.Detalle({@dtoPropuesta}): {Mensaje} {@Extras}", this, dtoPropuesta, ex.Message, extrasLog);
-                throw;
-            }
-
+            apiResponse.Data = resultado.Valor;
+            return apiResponse;
         }
 
         [HttpPost("DetalleContratos")]
         public ActionResult<ApiResponse<DtoPropuestaDetalleContratosResp>> DetalleContratos([FromBody] DtoPropuestaDetalleReq dtoPropuesta)
         {
-            try
+            ApiResponse<DtoPropuestaDetalleContratosResp> apiResponse = new();
+            Resultados<DtoPropuestaDetalleContratosResp> resultado = propuestasService.DetalleContratos(dtoPropuesta);
+            if (resultado.HayError || resultado.Valor == null)
             {
-                ApiResponse<DtoPropuestaDetalleContratosResp> apiResponse = new();
-                Resultados<DtoPropuestaDetalleContratosResp> resultado = propuestasService.DetalleContratos(dtoPropuesta);
-                if (resultado.HayError || resultado.Valor == null)
-                {
-                    apiResponse.Agregar(resultado);
-                    return BadRequest(apiResponse);
-                }
-                apiResponse.Data = resultado.Valor;
-                return apiResponse;
+                apiResponse.Agregar(resultado);
+                return BadRequest(apiResponse);
             }
-            catch (Exception ex)
-            {
-                Serilog.Log.Error(ex, "{Controlador}.DetalleContratos({@dtoPropuesta}): {Mensaje} {@Extras}", this, dtoPropuesta, ex.Message, extrasLog);
-                throw;
-            }
-
+            apiResponse.Data = resultado.Valor;
+            return apiResponse;
         }
 
         [HttpPost("DetalleHistorialTitulares")]
         public ActionResult<ApiResponse<List<DtoClientesPropuestasHistorial>>> DetalleHistorialTitulares([FromBody] DtoPropuestaDetalleReq dtoPropuesta)
         {
-            try
+            ApiResponse<List<DtoClientesPropuestasHistorial>> apiResponse = new();
+            Resultados<List<DtoClientesPropuestasHistorial>> resultado = propuestasService.DetalleHistorialTitulares(dtoPropuesta);
+            if (resultado.HayError || resultado.Valor == null)
             {
-                ApiResponse<List<DtoClientesPropuestasHistorial>> apiResponse = new();
-                Resultados<List<DtoClientesPropuestasHistorial>> resultado = propuestasService.DetalleHistorialTitulares(dtoPropuesta);
-                if (resultado.HayError || resultado.Valor == null)
-                {
-                    apiResponse.Agregar(resultado);
-                    return BadRequest(apiResponse);
-                }
-                apiResponse.Data = resultado.Valor;
-                return apiResponse;
+                apiResponse.Agregar(resultado);
+                return BadRequest(apiResponse);
             }
-            catch (Exception ex)
-            {
-                Serilog.Log.Error(ex, "{Controlador}.DetalleHistorialTitulares({@dtoPropuesta}): {Mensaje} {@Extras}", this, dtoPropuesta, ex.Message, extrasLog);
-                throw;
-            }
-
+            apiResponse.Data = resultado.Valor;
+            return apiResponse;
         }
 
         [HttpPost("ListadoTitulares")]
         public ApiResponseListado<IEnumerable<dynamic>> ListadoTitulares([FromBody] DtoOpcionesListados opcionesListado)
         {
-            try
-            {
-                return propuestasService.ListadoTitulares(opcionesListado);
-            }
-            catch (Exception ex)
-            {
-                Serilog.Log.Error(ex, "{Controlador}.ListadoTitulares({@opcionesListado}): {Mensaje} {@Extras}", this, opcionesListado, ex.Message, extrasLog);
-                throw;
-            }
+            return propuestasService.ListadoTitulares(opcionesListado);
         }
 
         [HttpPost("ListadoInhumados")]
         public ApiResponseListado<IEnumerable<dynamic>> ListadoInhumados([FromBody] DtoOpcionesListados opcionesListado)
         {
-            try
-            {
-                return propuestasService.ListadoInhumados(opcionesListado);
-            }
-            catch (Exception ex)
-            {
-                Serilog.Log.Error(ex, "{Controlador}.ListadoInhumados({@opcionesListado}): {Mensaje} {@Extras}", this, opcionesListado, ex.Message, extrasLog);
-                throw;
-            }
+            return propuestasService.ListadoInhumados(opcionesListado);
         }
 
         [HttpPost("ListadoBeneficiarios")]
         public ApiResponseListado<IEnumerable<dynamic>> ListadoBeneficiarios([FromBody] DtoOpcionesListados opcionesListado)
         {
-            try
-            {
-                return propuestasService.ListadoBeneficiarios(opcionesListado);
-            }
-            catch (Exception ex)
-            {
-                Serilog.Log.Error(ex, "{Controlador}.ListadoBeneficiarios({@opcionesListado}): {Mensaje} {@Extras}", this, opcionesListado, ex.Message, extrasLog);
-                throw;
-            }
+            return propuestasService.ListadoBeneficiarios(opcionesListado);
         }
     }
 }

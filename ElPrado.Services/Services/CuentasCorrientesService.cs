@@ -1,22 +1,13 @@
 ﻿using ElPrado.Core;
 using ElPrado.Data;
-using ElPrado.Data.Models;
-using ElPrado.Data.Repositories;
 using ElPrado.Dto.Dtos;
 
 namespace ElPrado.Services.Services
 {
     public class CuentasCorrientesService : ServiceBase
     {
-        private CuentasCorrientesRepository cuentasCorrientesRepository => (repository as CuentasCorrientesRepository)!;
-
-        public CuentasCorrientesService(Transaccion? transaccion) : base(transaccion)
+        public CuentasCorrientesService(IUnitOfWork unitOfWork, IUserContextService userContext) : base(unitOfWork, userContext)
         {
-        }
-
-        protected override RepositoryBase CrearRepositorio()
-        {
-            return new CuentasCorrientesRepository(Transaccion);
         }
 
         public Resultados<List<DtoCuentasCorrientes>> PendientesMercadoPago(int codCliente)
@@ -24,9 +15,9 @@ namespace ElPrado.Services.Services
             Resultados<List<DtoCuentasCorrientes>> resultado = new();
 
             DateTime fechaDia = DateTime.Today.AddMonths(-6).AddDays(1 - DateTime.Today.Day);
-            List<DtoCuentasCorrientes> listCuotas = cuentasCorrientesRepository.ConsultaDeudaMercadoPago(codCliente, fechaDia);
+            List<DtoCuentasCorrientes> listCuotas = _uow.CuentasCorrientes.ConsultaDeudaMercadoPago(codCliente, fechaDia);
 
-            if (ConfiguracionGeneralSesion.CodUsuario == 0)
+            if (_userContext.GetCodUsuario() == 0)
             {
                 if (listCuotas != null && listCuotas.Count > 0)
                 {
@@ -46,7 +37,7 @@ namespace ElPrado.Services.Services
 
         public Resultados<string> SolicitudMercadoPago(List<DtoCuotasMercadoPago> listCuotas)
         {
-            Resultados<string> resultado = GenerarSolicitudMercadoPago(listCuotas, ConfiguracionGeneralSesion.CodCliente, null);
+            Resultados<string> resultado = GenerarSolicitudMercadoPago(listCuotas, _userContext.GetCodCliente(), null);
 
             return resultado;
         }
@@ -63,7 +54,7 @@ namespace ElPrado.Services.Services
             Resultados<string> resultado = new();
             if (listCuotas.Count == 0) resultado.Agregar("No hay cuotas seleccionadas");
 
-            if (ConfiguracionGeneralSesion.CodUsuario != 0)
+            if (_userContext.GetCodUsuario() != 0)
             {
                 if (fechaVencimiento == null) resultado.Agregar("Falta ingresar la fecha de vencimiento del link");
                 else if (fechaVencimiento <= DateTime.Today) resultado.Agregar("La fecha de vencimiento del link debe ser posterior a hoy");
@@ -105,21 +96,13 @@ namespace ElPrado.Services.Services
 
             if (resultado.HayError) return resultado;
 
-            //            try
-            //            {
-            using MercadoPagoService mercadoPagoService = new(Transaccion);
+            using MercadoPagoService mercadoPagoService = new(_uow, _userContext);
 
             resultado = mercadoPagoService.ArmarPago(listCuotasSolicitud, codCliente, fechaVencimiento);
             RegistrarLog("Se generó una solicitud MP para cod_cliente: " + codCliente.ToString());
 
-            if (resultado.EstaOK) Commit();
-            //else Rollback();
-            //            }
-            //            catch
-            //            {
-            //                Rollback();
-            //                throw;
-            //            }
+            if (resultado.EstaOK) _uow.Commit();
+
             return resultado;
         }
 
@@ -127,19 +110,10 @@ namespace ElPrado.Services.Services
         {
             if (topic != "payment") return false;
 
-            //try
-            //{
-                using MercadoPagoService mercadoPagoService = new(Transaccion);
+            using MercadoPagoService mercadoPagoService = new(_uow, _userContext);
+            mercadoPagoService.ImputarPago(id);
+            _uow.Commit();
 
-                mercadoPagoService.ImputarPago(id);
-
-                Commit();
-            //}
-            //catch
-            //{
-                //Rollback();
-                //throw;
-            //}
             return true;
         }
 
@@ -147,9 +121,9 @@ namespace ElPrado.Services.Services
         {
             Resultados<List<DtoCuentasCorrientesResumen>> resultado = new()
             {
-                Valor = cuentasCorrientesRepository.ResumenCuentas(
+                Valor = _uow.CuentasCorrientes.ResumenCuentas(
                     dtoCuentas.CodPropuesta, dtoCuentas.MostrarBaja, dtoCuentas.MostrarInactiva,
-                    dtoCuentas.FechaInteres ?? DateUtils.FinDeMes(DateTime.Today.AddMonths(-1)), 
+                    dtoCuentas.FechaInteres ?? DateUtils.FinDeMes(DateTime.Today.AddMonths(-1)),
                     dtoCuentas.FechaHasta ?? DateUtils.FinDeMes())
             };
             return resultado;
@@ -157,7 +131,7 @@ namespace ElPrado.Services.Services
 
         public ApiResponseListado<IEnumerable<dynamic>> ListadoResumenCuotas(DtoOpcionesListados opcionesListado)
         {
-            return cuentasCorrientesRepository.ListadoResumenCuotas(opcionesListado);
+            return _uow.CuentasCorrientes.ListadoResumenCuotas(opcionesListado);
         }
     }
 }

@@ -1,42 +1,33 @@
-﻿using ElPrado.Core;
-using ElPrado.Data;
+﻿using ElPrado.Data;
 using ElPrado.Dto.Dtos;
+using ElPrado.Services;
 using ElPrado.Services.Services;
-using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace ElPrado.WebApi.Controllers
 {
     public class ConfiguracionesController : ControladorBase
     {
-        private ConfiguracionesService configuracionesService => (servicio as ConfiguracionesService)!;
+        private ConfiguracionesService configuracionesService => (_servicio as ConfiguracionesService)!;
 
-        public ConfiguracionesController(IUnitOfWork unitOfWork) : base(unitOfWork)
+        public ConfiguracionesController(IUnitOfWork unitOfWork, IUserContextService userContext) : base(unitOfWork, userContext)
         {
         }
 
         protected override ServiceBase CrearServicio()
         {
-            return new ConfiguracionesService(null);
+            return new ConfiguracionesService(_uow, _userContext);
         }
 
         [HttpPost("Paginas")]
         public ActionResult<ApiResponse<int>> ActualizarPaginas([FromBody] List<DtoProcesosSistemas> listProcesos)
         {
-            try
+            configuracionesService.ActualizarPaginas(listProcesos);
+            ApiResponse<int> apiResponse = new()
             {
-                configuracionesService.ActualizarPaginas(listProcesos);
-                ApiResponse<int> apiResponse = new()
-                {
-                    Message = "Páginas actualizadas"
-                };
-                return Ok(apiResponse);
-            }
-            catch (Exception ex)
-            {
-                Serilog.Log.Error(ex, "{Controlador}.ActualizarPaginas({@listProcesos}): {Mensaje} {@Extras}", this, listProcesos, ex.Message, extrasLog);
-                throw;
-            }
+                Message = "Páginas actualizadas"
+            };
+            return Ok(apiResponse);
         }
 
     }

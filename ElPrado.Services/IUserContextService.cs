@@ -5,5 +5,6 @@
         int GetCodCliente();
         int GetCodPropuesta();
         int GetCodUsuario();
+        bool EsTesting();
     }
 }
