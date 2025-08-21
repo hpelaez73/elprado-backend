@@ -9,8 +9,8 @@
         // Datos generales
         public string TipoDocumento { get; set; } = string.Empty;
         public long? NroDocumento { get; set; }
-        public DateTime? FechaNacimiento { get; set; }
-        public DateTime? FechaFallecimiento { get; set; }
+        public DateOnly? FechaNacimiento { get; set; }
+        public DateOnly? FechaFallecimiento { get; set; }
         public string Sexo { get; set; } = string.Empty;
         public string EstadoCivil { get; set; } = string.Empty;
         public string Nacionalidad { get; set; } = string.Empty;
@@ -20,8 +20,8 @@
         public string CategoriaIva { get; set; } = string.Empty;
         public long? Cuit { get; set; }
         public string IngresosBrutos { get; set; } = string.Empty;
-        public DateTime? FechaAlta { get; set; }
-        public DateTime? FechaBaja { get; set; }
+        public DateOnly? FechaAlta { get; set; }
+        public DateOnly? FechaBaja { get; set; }
         public bool PermitirFacturarReintegros { get; set; }
         // Datos de contactos
         public string Telefono1 { get; set; } = string.Empty;
@@ -64,8 +64,8 @@
         public string Direccion { get; set; } = string.Empty;
         public string Localidad { get; set; } = string.Empty;
         public string Provincia { get; set; } = string.Empty;
-        public DateTime? FechaNacimiento { get; set; }
-        public DateTime? FechaAlta { get; set; }
+        public DateOnly? FechaNacimiento { get; set; }
+        public DateOnly? FechaAlta { get; set; }
         public string Web { get; set; } = string.Empty;
     }
 
@@ -87,7 +87,7 @@
         public DateTime FechaAlta { get; set; }
         public string AutorizaAlta { get; set; } = string.Empty;
         public string UsuarioAlta { get; set; } = string.Empty;
-        public DateTime? FechaBaja { get; set; }
+        public DateOnly? FechaBaja { get; set; }
         public string AutorizaBaja { get; set; } = string.Empty;
         public string UsuarioBaja { get; set; } = string.Empty;
     }

@@ -7,6 +7,7 @@ namespace ElPrado.Data
     {
         private readonly DbContext _dbContext;
 
+        private CampaniasRepository? _campaniasRepository;
         private ClientesRepository? _clientesRepository;
         private ComprobantesRepository? _comprobantesRepository;
         private ConfiguracionGeneralRepository? _configuracionGeneralRepository;
@@ -26,6 +27,7 @@ namespace ElPrado.Data
         private PropuestasRepository? _propuestasRepository;
         private ProcesosSistemasRepository? _procesosSistemasRepository;
         private RefreshTokensRepository? _refreshTokensRepository;
+        private ServiciosModelosRepository? _serviciosModelosRepository;
 
         private UsuariosRepository? _usuariosRepository;
         private VariosSeguridadRepository? _variosSeguridadRepository;
@@ -35,6 +37,7 @@ namespace ElPrado.Data
             _dbContext = new DbContext(configuration);
         }
 
+        public CampaniasRepository Campanias => _campaniasRepository ?? new CampaniasRepository(_dbContext);
         public ClientesRepository Clientes => _clientesRepository ??= new ClientesRepository(_dbContext);
         public ComprobantesRepository Comprobantes => _comprobantesRepository ??= new ComprobantesRepository(_dbContext);
         public ConfiguracionGeneralRepository ConfiguracionGeneral => _configuracionGeneralRepository ??= new ConfiguracionGeneralRepository(_dbContext);
@@ -54,6 +57,7 @@ namespace ElPrado.Data
         public PropuestasRepository Propuestas => _propuestasRepository ??= new PropuestasRepository(_dbContext);
         public ProcesosSistemasRepository ProcesosSistemas => _procesosSistemasRepository ??= new ProcesosSistemasRepository(_dbContext);
         public RefreshTokensRepository RefreshTokens => _refreshTokensRepository ??= new RefreshTokensRepository(_dbContext);
+        public ServiciosModelosRepository ServiciosModelos => _serviciosModelosRepository ??= new ServiciosModelosRepository(_dbContext);
 
         public UsuariosRepository Usuarios => _usuariosRepository ??= new UsuariosRepository(_dbContext);
         public VariosSeguridadRepository VariosSeguridad => _variosSeguridadRepository ??= new VariosSeguridadRepository(_dbContext);

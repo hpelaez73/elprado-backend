@@ -4,7 +4,6 @@ using ElPrado.Core.Enums;
 using ElPrado.Dto.Dtos;
 using System.Text;
 using System.Text.RegularExpressions;
-using System.Transactions;
 
 namespace ElPrado.Data.Comun
 {

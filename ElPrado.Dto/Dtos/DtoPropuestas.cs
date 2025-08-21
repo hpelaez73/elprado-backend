@@ -13,8 +13,8 @@
         public int CodPropuesta { get; set; }
         public int Propuesta { get; set; }
         public string TipoPropuesta { get; set; } = string.Empty;
-        public DateTime Fecha { get; set; }
-        public DateTime? FechaBaja { get; set; }
+        public DateOnly Fecha { get; set; }
+        public DateOnly? FechaBaja { get; set; }
         public string EstadoDeuda { get; set; } = string.Empty;
         public bool MuestraMensajeAlerta { get; set; }
         public string MensajeAlerta { get; set; } = string.Empty;
@@ -62,8 +62,8 @@
         public long NroDocumento { get; set; }
         public int Propuesta { get; set; }
         public string Parcela { get; set; } = string.Empty;
-        public DateTime Fecha { get; set; }
-        public DateTime? FechaBaja { get; set; }
+        public DateOnly Fecha { get; set; }
+        public DateOnly? FechaBaja { get; set; }
         public int CodCliente { get; set; }
     }
 
@@ -72,11 +72,11 @@
         public int CodPropuesta { get; set; }
         public string NombreInhumado { get; set; } = string.Empty;
         public long NroDocumento { get; set; }
-        public DateTime? FechaInhumacion { get; set; }
+        public DateOnly? FechaInhumacion { get; set; }
         public int Propuesta { get; set; }
         public string Parcela { get; set; } = string.Empty;
-        public DateTime Fecha { get; set; }
-        public DateTime? FechaBaja { get; set; }
+        public DateOnly Fecha { get; set; }
+        public DateOnly? FechaBaja { get; set; }
     }
 }
 

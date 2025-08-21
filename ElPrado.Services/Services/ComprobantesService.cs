@@ -23,7 +23,7 @@ namespace ElPrado.Services.Services
         public List<int> PeriodosFacturacion()
         {
             DtoComprobantesPeriodo? periodo = _uow.Comprobantes.PeriodosFacturacion(_userContext.GetCodCliente());
-            if (periodo == null || periodo.MinFecha == DateTime.MinValue)
+            if (periodo == null || periodo.MinFecha == DateOnly.MinValue)
             {
                 return new();
             }
@@ -59,7 +59,7 @@ namespace ElPrado.Services.Services
             return repListFacturas;
         }
 
-        private string ArmarLinkWs(string telefonoMovil, string cliente, string nroComprobante, DateTime fecha, int propuesta)
+        private string ArmarLinkWs(string telefonoMovil, string cliente, string nroComprobante, DateOnly fecha, int propuesta)
         {
             string strTexto = $"Estimado/a%20*{cliente.Replace(" ", "%20")}*%20:%0A%0A" +
                 $"Puede%20descargar%20su%20Factura%20Electronica%20desde:%20{_uow.ConfiguracionGeneral.BuscarUrlFacturasPdf()}/{fecha.Year}/{nroComprobante}-{propuesta.ToString().PadLeft(10, '0')}.pdf%0A%0A" +
@@ -93,5 +93,11 @@ namespace ElPrado.Services.Services
             return resultado;
         }
         #endregion
+
+        public ApiResponseListado<IEnumerable<dynamic>> ListadoComprobantesPropuesta(DtoOpcionesListados opcionesListado)
+        {
+            return _uow.Comprobantes.ListadoComprobantesPropuesta(opcionesListado);
+        }
+
     }
 }

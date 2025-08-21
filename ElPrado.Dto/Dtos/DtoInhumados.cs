@@ -10,10 +10,10 @@
         public string NombreInhumado { get; set; } = string.Empty;
         public string TipoDocumento { get; set; } = string.Empty;
         public int? NroDocumento { get; set; }
-        public DateTime? FechaNacimiento { get; set; }
-        public DateTime? FechaFallecimiento { get; set; }
-        public DateTime FechaInhumacion { get; set; }
-        public DateTime? FechaExhumacion { get; set; }
+        public DateOnly? FechaNacimiento { get; set; }
+        public DateOnly? FechaFallecimiento { get; set; }
+        public DateOnly FechaInhumacion { get; set; }
+        public DateOnly? FechaExhumacion { get; set; }
         public string NombreBIM { get; set; } = string.Empty;
         public int? NroDeclaracionJurada { get; set; }
     }
@@ -37,7 +37,7 @@
         public string Referencia1 { get; set; } = string.Empty;
         public string Referencia2 { get; set; } = string.Empty;
         public string ObservacionesInhumacion { get; set; } = string.Empty;
-        public DateTime? FechaInhumacion { get; set; }
+        public DateOnly? FechaInhumacion { get; set; }
         public string TipoServicio { get; set; } = string.Empty;
         public bool ConServicioReligioso { get; set; }
         public bool ConServicioSepelio { get; set; }
@@ -50,8 +50,8 @@
         public int? NroDocumentoAutInhumacion { get; set; }
         public string ParentescoAutInhumacion { get; set; } = string.Empty;
         public string NombreBin { get; set; } = string.Empty;
-        public DateTime? FechaNacimiento { get; set; }
-        public DateTime? FechaFallecimiento { get; set; }
+        public DateOnly? FechaNacimiento { get; set; }
+        public DateOnly? FechaFallecimiento { get; set; }
         public int? Edad { get; set; }
         public string TipoDocumento { get; set; } = string.Empty;
         public int? NroDocumento { get; set; }
@@ -67,7 +67,7 @@
         public string ActaDefuncionTomo { get; set; } = string.Empty;
         public string ActaDefuncionSerie { get; set; } = string.Empty;
         public string ActaDefuncionAa { get; set; } = string.Empty;
-        public DateTime? FechaExhumacion { get; set; }
+        public DateOnly? FechaExhumacion { get; set; }
         public string CatEntidadDestino { get; set; } = string.Empty;
         public string EntidadDestino { get; set; } = string.Empty;
         public string NombreAutExhumacion { get; set; } = string.Empty;

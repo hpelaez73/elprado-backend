@@ -79,7 +79,13 @@ namespace ElPrado.WebApi.Controllers
             apiResponse.Message = "Envio registrado";
             return apiResponse;
         }
-
         #endregion
+
+        [HttpPost("ListadoComprobantesPropuesta")]
+        public ApiResponseListado<IEnumerable<dynamic>> ListadoComprobantesPropuesta([FromBody] DtoOpcionesListados opcionesListado)
+        {
+            return comprobantesService.ListadoComprobantesPropuesta(opcionesListado);
+        }
+
     }
 }

@@ -8,7 +8,7 @@
 
     public class DtoComprobantes
     {
-        public DateTime Fecha { get; set; }
+        public DateOnly Fecha { get; set; }
         public string TipoComprobante { get; set; } = string.Empty;
         public string Talonario { get; set; } = string.Empty;
         public string NroComprobante { get; set; } = string.Empty;
@@ -34,7 +34,7 @@
         public string Cobrador { get; set; } = string.Empty;
         public string ClienteBeneficiado { get; set; } = string.Empty;
         public int? DocumentoBeneficiado { get; set; }
-        public DateTime? FechaUtilizacion { get; set; }
+        public DateOnly? FechaUtilizacion { get; set; }
 
         public List<DtoComprobantesDetalles>? ListDetalles { get; set; }
     }
@@ -50,15 +50,15 @@
 
     public class DtoComprobantesPeriodo
     {
-        public DateTime MinFecha { get; set; }
-        public DateTime MaxFecha { get; set; }
+        public DateOnly MinFecha { get; set; }
+        public DateOnly MaxFecha { get; set; }
     }
 
     public class DtoComprobantesFacturasElectronicas
     {
         public int Propuesta { get; set; }
         public string NroComprobante { get; set; } = string.Empty;
-        public DateTime Fecha { get; set; }
+        public DateOnly Fecha { get; set; }
         public double Total { get; set; }
         public string Link { get; set; } = string.Empty;
     }
@@ -67,11 +67,11 @@
     {
         public int Propuesta { get; set; }
         public string NroComprobante { get; set; } = string.Empty;
-        public DateTime Fecha { get; set; }
+        public DateOnly Fecha { get; set; }
         public string Cliente { get; set; } = string.Empty;
         public string TelefonoMovil { get; set; } = string.Empty;
         public string LinkWhatsApp { get; set; } = string.Empty;
-        public DateTime? UltimoEnvio { get; set; }
+        public DateOnly? UltimoEnvio { get; set; }
         public int CodTalonario { get; set; }
         public int CodCliente { get; set; }
         public int CodPropuesta { get; set; }
@@ -84,4 +84,26 @@
         public string NroComprobante { get; set; } = string.Empty;
         public string TelefonoMovil { get; set; } = string.Empty;
     }
+
+    public class DtoComprobantesPropuestaList : DtoBase
+    {
+        public DateOnly Fecha { get; set; }
+        public string TipoComprobante { get; set; } = string.Empty;
+        public string Talonario { get; set; } = string.Empty;
+        public string NroComprobante { get; set; } = string.Empty;
+        public string Cliente { get; set; } = string.Empty;
+        public double Total { get; set; }
+        public string Estado { get; set; } = string.Empty;
+        public string Concepto { get; set; } = string.Empty;
+        public string Anulado { get; set; } = string.Empty;
+        public double Pago { get; set; }
+        public string Usuario { get; set; } = string.Empty;
+        public string NroComprobanteImputacion { get; set; } = string.Empty;
+        public string ClienteBeneficiado { get; set; } = string.Empty;
+        public int CodClienteBeneficiado { get; set; }
+        public int CodTalonario { get; set; }
+        public int CodTalonarioAsociado1 { get; set; }
+        public int CodMovimientoFondo { get; set; }
+    }
+
 }

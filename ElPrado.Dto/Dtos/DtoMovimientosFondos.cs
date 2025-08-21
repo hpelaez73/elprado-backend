@@ -1,11 +1,11 @@
-﻿namespace ElPrado.Dto
+﻿namespace ElPrado.Dto.Dtos
 {
     public class DtoMovimientosFondos
     {
         public string TipoComprobante { get; set; } = string.Empty;
         public string Talonario { get; set; } = string.Empty;
         public string NroComprobante { get; set; } = string.Empty;
-        public DateTime Fecha { get; set; }
+        public DateOnly Fecha { get; set; }
         public string Alias { get; set; } = string.Empty;
         public string Concepto { get; set; } = string.Empty;
         public int? Propuesta { get; set; }
@@ -45,7 +45,7 @@
         public string NroCheque { get; set; } = string.Empty;
         public double Importe { get; set; }
         public string Estado { get; set; } = string.Empty;
-        public DateTime? FechaCobro { get; set; }
+        public DateOnly? FechaCobro { get; set; }
         public string Banco { get; set; } = string.Empty;
         public int? Propuesta { get; set; }
     }

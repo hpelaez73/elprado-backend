@@ -14,7 +14,7 @@ namespace ElPrado.Services.Services
         {
             Resultados<List<DtoCuentasCorrientes>> resultado = new();
 
-            DateTime fechaDia = DateTime.Today.AddMonths(-6).AddDays(1 - DateTime.Today.Day);
+            DateOnly fechaDia = DateOnly.FromDateTime(DateTime.Today.AddMonths(-6).AddDays(1 - DateTime.Today.Day));
             List<DtoCuentasCorrientes> listCuotas = _uow.CuentasCorrientes.ConsultaDeudaMercadoPago(codCliente, fechaDia);
 
             if (_userContext.GetCodUsuario() == 0)

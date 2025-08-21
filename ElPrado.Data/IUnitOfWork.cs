@@ -4,6 +4,7 @@ namespace ElPrado.Data
 {
     public interface IUnitOfWork : IDisposable
     {
+        CampaniasRepository Campanias { get; }
         ClientesRepository Clientes { get; }
         ComprobantesRepository Comprobantes { get; }
         ConfiguracionGeneralRepository ConfiguracionGeneral { get; }
@@ -23,6 +24,7 @@ namespace ElPrado.Data
         PropuestasRepository Propuestas { get; }
         ProcesosSistemasRepository ProcesosSistemas { get; }
         RefreshTokensRepository RefreshTokens { get; }
+        ServiciosModelosRepository ServiciosModelos { get; }
 
         UsuariosRepository Usuarios { get; }
         VariosSeguridadRepository VariosSeguridad { get; }

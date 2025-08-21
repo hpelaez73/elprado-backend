@@ -1,6 +1,6 @@
 ﻿using Dapper;
 using ElPrado.Data.Models;
-using ElPrado.Dto;
+using ElPrado.Dto.Dtos;
 
 namespace ElPrado.Data.Repositories
 {

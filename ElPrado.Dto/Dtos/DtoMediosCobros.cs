@@ -9,7 +9,7 @@
         public string Cobrador { get; set; } = string.Empty;
         public string InicialCobrador { get; set; } = string.Empty;
         public int CantEnvios { get; set; }
-        public DateTime? CantEnviosHasta { get; set; }
+        public DateOnly? CantEnviosHasta { get; set; }
         public int EnviarElDia { get; set; }
         public string Direccion { get; set; } = string.Empty;
         public string Localidad { get; set; } = string.Empty;

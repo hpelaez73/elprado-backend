@@ -1,5 +1,5 @@
 ﻿using ElPrado.Data;
-using ElPrado.Dto;
+using ElPrado.Dto.Dtos;
 
 namespace ElPrado.Services.Services
 {

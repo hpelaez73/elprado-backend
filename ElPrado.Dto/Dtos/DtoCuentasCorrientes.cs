@@ -29,8 +29,8 @@
         public int CodPropuesta { get; set; }
         public bool MostrarBaja { get; set; }
         public bool MostrarInactiva { get; set; }
-        public DateTime? FechaInteres { get; set; }
-        public DateTime? FechaHasta { get; set; }
+        public DateOnly? FechaInteres { get; set; }
+        public DateOnly? FechaHasta { get; set; }
     }
 
     public class DtoCuentasCorrientesResumen
@@ -42,8 +42,8 @@
         public string Estado { get; set; } = string.Empty;
         public double Importe { get; set; }
         public double PrecioDolar { get; set; }
-        public DateTime FechaInicio { get; set; }
-        public DateTime? FechaBaja { get; set; }
+        public DateOnly FechaInicio { get; set; }
+        public DateOnly? FechaBaja { get; set; }
         public string Cobrador { get; set; } = string.Empty;
         public string Cliente { get; set; } = string.Empty;
         public int CodCliente { get; set; }
@@ -53,8 +53,8 @@
         public int? CodMedioCobro { get; set; }
         public string Comercializadora { get; set; } = string.Empty;
         public int Cuotas { get; set; }
-        public DateTime? CuotaDesde { get; set; }
-        public DateTime? CuotaHasta { get; set; }
+        public DateOnly? CuotaDesde { get; set; }
+        public DateOnly? CuotaHasta { get; set; }
         public double ImporteVencido { get; set; }
         public double Interes { get; set; }
         public double ImporteAVencer { get; set; }
@@ -74,9 +74,9 @@
         public int CodCuenta { get; set; }
         public int Cuota { get; set; }
         public int Pago { get; set; }
-        public DateTime FechaCuota { get; set; }
+        public DateOnly FechaCuota { get; set; }
         public double Total { get; set; }
-        public DateTime? FechaRendicion { get; set; }
+        public DateOnly? FechaRendicion { get; set; }
         public int? CodTalonarioFacturacion { get; set; }
         public string NroComprobanteFacturacion { get; set; } = string.Empty;
         public int? CodTalonarioImputacion { get; set; }

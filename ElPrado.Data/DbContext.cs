@@ -1,4 +1,5 @@
-﻿using FirebirdSql.Data.FirebirdClient;
+﻿using Dapper;
+using FirebirdSql.Data.FirebirdClient;
 using Microsoft.Extensions.Configuration;
 using System.Data;
 
@@ -12,7 +13,11 @@ namespace ElPrado.Data
 
         public DbContext(IConfiguration configuration)
         {
-            Dapper.DefaultTypeMap.MatchNamesWithUnderscores = true;
+            DefaultTypeMap.MatchNamesWithUnderscores = true;
+
+            SqlMapper.AddTypeHandler(new SqlDateOnlyTypeHandler());
+            SqlMapper.AddTypeHandler(new SqlTimeOnlyTypeHandler());
+
             _connection = new FbConnection(configuration.GetConnectionString("DefaultConnection"));
             _connection.Open();
 

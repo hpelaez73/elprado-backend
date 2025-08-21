@@ -7,11 +7,11 @@ namespace ElPrado.Data.Repositories
 {
     public class CuentasCorrientesRepository : RepositoryBase
     {
-        private ConfiguracionListado configuracionListadoResumenCuotas;
+        private ConfiguracionListado cfgListResumenCuotas;
 
         public CuentasCorrientesRepository(DbContext dbContext) : base(dbContext)
         {
-            configuracionListadoResumenCuotas = new()
+            cfgListResumenCuotas = new()
             {
                 ListCampos = new()
                 {
@@ -54,13 +54,13 @@ namespace ElPrado.Data.Repositories
             };
         }
 
-        public List<DtoCuentasCorrientes> ConsultaDeudaMercadoPago(int codCliente, DateTime fechaDia)
+        public List<DtoCuentasCorrientes> ConsultaDeudaMercadoPago(int codCliente, DateOnly fechaDia)
         {
             string sql = "SELECT * FROM CONSULTA_DEUDA_MERCADOPAGO(@codCliente, @fechaDia)";
             return _connection.Query<DtoCuentasCorrientes>(sql, new { codCliente, fechaDia }, _transaction).AsList();
         }
 
-        public List<DtoCuentasCorrientesResumen> ResumenCuentas(int codPropuesta, bool mostrarBaja, bool mostrarInactiva, DateTime? fechaInteres, DateTime? fechaHasta)
+        public List<DtoCuentasCorrientesResumen> ResumenCuentas(int codPropuesta, bool mostrarBaja, bool mostrarInactiva, DateOnly? fechaInteres, DateOnly? fechaHasta)
         {
             string sql = @" SELECT * FROM CONSULTA_RESUMEN_CUENTAS(@codPropuesta, @mostrarBaja, @mostrarInactiva, @fechaInteres, @fechaHasta) C
                             ORDER BY C.ES_INDEPENDIENTE, C.FECHA_INICIO DESC";
@@ -69,7 +69,7 @@ namespace ElPrado.Data.Repositories
 
         public ApiResponseListado<IEnumerable<dynamic>> ListadoResumenCuotas(DtoOpcionesListados opcionesListado)
         {
-            FuncionesListados<DtoCuotasResumenList> funcionesListados = new(configuracionListadoResumenCuotas, opcionesListado);
+            FuncionesListados<DtoCuotasResumenList> funcionesListados = new(cfgListResumenCuotas, opcionesListado);
 
             if (opcionesListado.ListFiltros == null || opcionesListado.ListFiltros.Count == 0)
             {

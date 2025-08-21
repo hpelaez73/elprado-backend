@@ -9,11 +9,12 @@ namespace ElPrado.Data.Repositories
 {
     public class ComprobantesRepository : RepositoryBaseEntidad<Comprobantes>
     {
-        private ConfiguracionListado configuracionListadoFacturasEnviar;
+        private ConfiguracionListado cfgListFacturasEnviar;
+        private ConfiguracionListado cfgListComprobantesPropuesta;
 
         public ComprobantesRepository(DbContext dbContext) : base(dbContext)
         {
-            configuracionListadoFacturasEnviar = new()
+            cfgListFacturasEnviar = new()
             {
                 ListCampos = new()
                 {
@@ -55,6 +56,20 @@ namespace ElPrado.Data.Repositories
                     }
                 }
             };
+
+            cfgListComprobantesPropuesta = new()
+            {
+                ListCampos = new()
+                {
+                    new CamposListado()
+                    {
+                        Campo = "codPropuesta",
+                        Etiqueta = "Propuesta",
+                        TipoDato = TipoDatoListado.Entero,
+                        PermiteFiltrar = true
+                    }
+                }
+            };
         }
 
         public DtoComprobantes? Visualizar(int codTalonario, string nroComprobante)
@@ -85,7 +100,7 @@ namespace ElPrado.Data.Repositories
 
         public ApiResponseListado<IEnumerable<dynamic>> ListadoFacturasEnviar(DtoOpcionesListados opcionesListado)
         {
-            FuncionesListados<DtoFacturasEnviarList> funcionesListados = new(configuracionListadoFacturasEnviar, opcionesListado);
+            FuncionesListados<DtoFacturasEnviarList> funcionesListados = new(cfgListFacturasEnviar, opcionesListado);
 
             string sqlWhere = $@"WHERE C.AFIP_CAE IS NOT NULL AND S.FECHA_CANCELACION IS NULL
                                 AND S.POR_WHATSAPP = 1 AND CL.TELEFONO_MOVIL IS NOT NULL
@@ -132,6 +147,37 @@ namespace ElPrado.Data.Repositories
             string sql = @" INSERT INTO HIST_ENVIOS_FACTURAS (FECHA_ENVIO, POR_WHATSAPP, COD_USUARIO, COD_CLIENTE, COD_TALONARIO, NRO_COMPROBANTE, MEDIO_ENVIO)
                             VALUES (CURRENT_TIMESTAMP, 1, @codUsuario, @codCliente, @codTalonario, @nroComprobante, @medioEnvio)";
             _connection.Execute(sql, new { codUsuario, codCliente, codTalonario, nroComprobante, medioEnvio }, _transaction);
+        }
+
+        public ApiResponseListado<IEnumerable<dynamic>> ListadoComprobantesPropuesta(DtoOpcionesListados opcionesListado)
+        {
+            FuncionesListados<DtoComprobantesPropuestaList> funcionesListados = new(cfgListComprobantesPropuesta, opcionesListado);
+
+            if (opcionesListado.ListFiltros == null || opcionesListado.ListFiltros.Count == 0)
+            {
+                return new ApiResponseListado<IEnumerable<dynamic>>();
+            }
+
+            string codigo = string.Empty;
+            DtoCamposFiltroListado? campoFiltro = opcionesListado.ListFiltros.Find(x => x.Campo.Equals("codPropuesta", StringComparison.CurrentCultureIgnoreCase));
+            if (campoFiltro != null && !string.IsNullOrEmpty(campoFiltro.Valor) && campoFiltro.TipoComparacion == TipoComparacion.Igual)
+            {
+                codigo = campoFiltro.Valor;
+            }
+
+            if (string.IsNullOrEmpty(codigo))
+            {
+                return new ApiResponseListado<IEnumerable<dynamic>>();
+            }
+
+            string sqlFrom = $"FROM GET_COMPROBANTES_PROPUESTA({ codigo }) CP";
+            string sqlCant = $"SELECT COUNT(*) {sqlFrom}";
+            string sql = $@"SELECT {funcionesListados.ParseSqlPaginado(sqlCant, _connection, _transaction)}
+                            CP.* 
+                            {sqlFrom}
+                            {funcionesListados.ParseSqlOrden()}";
+
+            return funcionesListados.ApiResponse(sql, _connection, _transaction);
         }
 
     }
