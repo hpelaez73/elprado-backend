@@ -9,19 +9,15 @@ namespace ElPrado.Services.Services
         {
         }
 
-        public List<DtoServiciosPropuesta> ServiciosPropuesta(int codPropuesta)
+        public DtoServiciosPropuesta ServiciosPropuesta(int codPropuesta)
         {
-            return _uow.ServiciosModelos.ServiciosPropuesta(codPropuesta);
-        }
-
-        public List<DtoServiciosUtilizadosPropuesta> ServiciosUtilizadosPropuesta(int codPropuesta)
-        {
-            return _uow.ServiciosModelos.ServiciosUtilizadosPropuesta(codPropuesta);
-        }
-
-        public List<DtoBeneficiariosPropuesta> BeneficiariosPropuesta(int codPropuesta)
-        {
-            return _uow.ServiciosModelos.BeneficiariosPropuesta(codPropuesta);
+            DtoServiciosPropuesta serviciosPropuesta = new()
+            {
+                ListServiciosHabilitados = _uow.ServiciosModelos.ServiciosPropuesta(codPropuesta),
+                ListServiciosUtilizados = _uow.ServiciosModelos.ServiciosUtilizadosPropuesta(codPropuesta),
+                ListServiciosBeneficiarios = _uow.ServiciosModelos.BeneficiariosPropuesta(codPropuesta)
+            };
+            return serviciosPropuesta;
         }
     }
 }

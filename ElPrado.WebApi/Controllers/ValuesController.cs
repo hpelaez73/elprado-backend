@@ -21,7 +21,7 @@ namespace ElPrado.WebApi.Controllers
                 Environment.GetEnvironmentVariable("ASPNETCORE_ENVIRONMENT")!,
                 _configuration.GetConnectionString("DefaultConnection") ?? "El string de conexión no está configurado"
             };
-            values.Add("Version: 14/08/2025 21:10");
+            values.Add("Version: 22/08/2025 22:10");
             return values;
         }
     }

@@ -20,34 +20,13 @@ namespace ElPrado.WebApi.Controllers
         }
 
         [HttpGet("ServiciosPropuesta/{codPropuesta}")]
-        public ApiResponse<List<DtoServiciosPropuesta>> ServiciosPropuesta(int codPropuesta)
+        public ActionResult<ApiResponse<DtoServiciosPropuesta>> ServiciosPropuesta(int codPropuesta)
         {
-            ApiResponse<List<DtoServiciosPropuesta>> apiResponse = new()
+            ApiResponse<DtoServiciosPropuesta> apiResponse = new()
             {
                 Data = serviciosModelosService.ServiciosPropuesta(codPropuesta)
             };
             return apiResponse;
         }
-
-        [HttpGet("ServiciosUtilizadosPropuesta/{codPropuesta}")]
-        public ApiResponse<List<DtoServiciosUtilizadosPropuesta>> ServiciosUtilizadosPropuesta(int codPropuesta)
-        {
-            ApiResponse<List<DtoServiciosUtilizadosPropuesta>> apiResponse = new()
-            {
-                Data = serviciosModelosService.ServiciosUtilizadosPropuesta(codPropuesta)
-            };
-            return apiResponse;
-        }
-
-        [HttpGet("BeneficiariosPropuesta/{codPropuesta}")]
-        public ApiResponse<List<DtoBeneficiariosPropuesta>> BeneficiariosPropuesta(int codPropuesta)
-        {
-            ApiResponse<List<DtoBeneficiariosPropuesta>> apiResponse = new()
-            {
-                Data = serviciosModelosService.BeneficiariosPropuesta(codPropuesta)
-            };
-            return apiResponse;
-        }
-
     }
 }

@@ -20,7 +20,7 @@ namespace ElPrado.WebApi.Controllers
         }
 
         [HttpPost("ListadoCampaniasPropuesta")]
-        public ApiResponseListado<IEnumerable<dynamic>> ListadoComprobantesPropuesta([FromBody] DtoOpcionesListados opcionesListado)
+        public ApiResponseListado<IEnumerable<dynamic>> ListadoCampaniasPropuesta([FromBody] DtoOpcionesListados opcionesListado)
         {
             return campaniasService.ListadoCampaniasPropuesta(opcionesListado);
         }

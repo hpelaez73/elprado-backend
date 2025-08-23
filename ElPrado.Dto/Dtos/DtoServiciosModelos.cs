@@ -2,6 +2,13 @@
 {
     public class DtoServiciosPropuesta
     {
+        public List<DtoServiciosHabilitados>? ListServiciosHabilitados { get; set; }
+        public List<DtoServiciosUtilizados>? ListServiciosUtilizados { get; set; }
+        public List<DtoServiciosBeneficiarios>? ListServiciosBeneficiarios { get; set; }
+    }
+
+    public class DtoServiciosHabilitados
+    {
         public string PlanBeneficio { get; set; } = string.Empty;
         public string Cliente { get; set; } = string.Empty;
         public string TituloServicio01 { get; set; } = string.Empty;
@@ -38,14 +45,14 @@
         public int CantServicios { get; set; }
     }
 
-    public class DtoServiciosUtilizadosPropuesta
+    public class DtoServiciosUtilizados
     {
         public string Servicio { get; set; } = string.Empty;
         public int ServiciosRealizados { get; set; }
         public int ServiciosPendientes { get; set; }
     }
 
-    public class DtoBeneficiariosPropuesta
+    public class DtoServiciosBeneficiarios
     {
         public DateOnly Fecha { get; set; }
         public string NroComprobante { get; set; } = string.Empty;
