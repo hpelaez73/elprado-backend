@@ -102,8 +102,11 @@ namespace ElPrado.Services.Services
             Payment pago = client.Get(id);
 
             dtoPayment.PagoAprobado = pago.Status != null && pago.Status != PaymentStatus.Rejected;
-
-            if (dtoPayment.PagoAprobado)
+            if (pago.ExternalReference == null)
+            {
+                pago.ExternalReference = "Venta presencial";
+            }
+            else if (dtoPayment.PagoAprobado)
             {
                 if (int.TryParse(pago.ExternalReference, out int codPreferencia)) dtoPayment.CodPreferencia = codPreferencia;
                 else dtoPayment.ReferenciaExterna = pago.ExternalReference;
