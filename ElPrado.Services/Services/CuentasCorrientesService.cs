@@ -89,7 +89,8 @@ namespace ElPrado.Services.Services
             // Verifico la integridad de las seleccionadas
             foreach (DtoCuentasCorrientes item in listCuotasSolicitud)
             {
-                if (listCuotasRestante.Exists(x => (!x.EsIndependiente && !item.EsIndependiente && x.Tipo == "CP" && item.Tipo == "CP") || (x.CodGrupo == item.CodGrupo))) resultado.Agregar("Falta seleccionar cuotas del mismo grupo de cuenta");
+                if (listCuotasRestante.Exists(x => (!x.EsIndependiente && !item.EsIndependiente && x.Tipo == "CP" && item.Tipo == "CP" && x.Codigo == item.Codigo) 
+                    || (x.CodGrupo == item.CodGrupo))) resultado.Agregar("Falta seleccionar cuotas del mismo grupo de cuenta");
             }
 
             if (listCuotasSolicitud.Sum(x => x.Total) == 0) resultado.Agregar("El importe no puede ser 0");
