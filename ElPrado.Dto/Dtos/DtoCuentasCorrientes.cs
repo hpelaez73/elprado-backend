@@ -43,6 +43,7 @@
         public double Importe { get; set; }
         public double PrecioDolar { get; set; }
         public DateOnly FechaInicio { get; set; }
+        public DateOnly? PrimerCuota { get; set; }
         public DateOnly? FechaBaja { get; set; }
         public string Cobrador { get; set; } = string.Empty;
         public string Cliente { get; set; } = string.Empty;
