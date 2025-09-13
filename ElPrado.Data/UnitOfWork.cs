@@ -37,7 +37,7 @@ namespace ElPrado.Data
             _dbContext = new DbContext(configuration);
         }
 
-        public CampaniasRepository Campanias => _campaniasRepository ?? new CampaniasRepository(_dbContext);
+        public CampaniasRepository Campanias => _campaniasRepository ??= new CampaniasRepository(_dbContext);
         public ClientesRepository Clientes => _clientesRepository ??= new ClientesRepository(_dbContext);
         public ComprobantesRepository Comprobantes => _comprobantesRepository ??= new ComprobantesRepository(_dbContext);
         public ConfiguracionGeneralRepository ConfiguracionGeneral => _configuracionGeneralRepository ??= new ConfiguracionGeneralRepository(_dbContext);

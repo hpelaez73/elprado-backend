@@ -6,7 +6,7 @@ using System.Text;
 
 var builder = WebApplication.CreateBuilder(args);
 
-// Usar el archivo de configuracion segun el entorno
+// Usar el archivo de configuración según el entorno
 var configBuilder = new ConfigurationBuilder()
     .SetBasePath(Directory.GetCurrentDirectory())
     .AddJsonFile("appsettings.json", optional: false, reloadOnChange: true)
@@ -17,14 +17,11 @@ var configBuilder = new ConfigurationBuilder()
 builder.WebHost.UseConfiguration(configBuilder)
     .UseUrls("http://*:80");
 
-// Configurar serilog
-builder.Host.UseSerilog((ctx, lc) => lc
-    .ReadFrom.Configuration(ctx.Configuration));
+// Configurar Serilog
+builder.Host.UseSerilog((ctx, lc) => lc.ReadFrom.Configuration(ctx.Configuration));
 
-// Add services to the container.
+// Add services
 builder.Services.AddControllers();
-
-// Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen(c =>
 {
@@ -47,19 +44,32 @@ builder.Services.AddSwaggerGen(c =>
     });
 });
 
-// Cors
-var allowedOrigin = builder.Configuration.GetSection("AllowedOrigins").Get<string[]>() ?? new string[] { "*" };
-
+// CORS dinámico según el entorno
+var allowedOrigins = builder.Configuration.GetSection("AllowedOrigins").Get<string[]>();
 var policyName = "CorsPolicy";
+
 builder.Services.AddCors(options =>
 {
-    options.AddPolicy(name: policyName,
-        builder => builder
-            .WithOrigins(allowedOrigin)
-            .AllowAnyHeader()
-            .AllowAnyMethod());
+    options.AddPolicy(name: policyName, corsBuilder =>
+    {
+        if (builder.Environment.IsDevelopment())
+        {
+            corsBuilder
+                .SetIsOriginAllowed(_ => true) // permite cualquier origen en dev
+                .AllowAnyHeader()
+                .AllowAnyMethod();
+        }
+        else
+        {
+            corsBuilder
+                .WithOrigins(allowedOrigins ?? Array.Empty<string>()) // solo orígenes confiables en prod
+                .AllowAnyHeader()
+                .AllowAnyMethod();
+        }
+    });
 });
 
+// JWT
 builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
     .AddJwtBearer(options =>
     {
@@ -71,20 +81,23 @@ builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
             ValidateIssuerSigningKey = true,
             ValidIssuer = builder.Configuration["Jwt:Issuer"],
             ValidAudience = builder.Configuration["Jwt:Issuer"],
-            IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(builder.Configuration["Jwt:Key"]!))
+            IssuerSigningKey = new SymmetricSecurityKey(
+                Encoding.UTF8.GetBytes(builder.Configuration["Jwt:Key"]!)
+            )
         };
     });
 
-//Add dependency injection
+// DI
 builder.Services.AddHttpContextAccessor();
 builder.Services.AddScoped<ElPrado.Data.IUnitOfWork, ElPrado.Data.UnitOfWork>();
 builder.Services.AddScoped<ElPrado.Services.IUserContextService, ElPrado.WebApi.UserContextService>();
 
 var app = builder.Build();
 
+// Middleware global de errores
 app.UseMiddleware<ElPrado.WebApi.MiddleWares.ErrorHandlingMiddleware>();
 
-// Configure the HTTP request pipeline.
+// Swagger solo en dev/staging
 if (app.Environment.IsDevelopment() || app.Environment.IsStaging())
 {
     app.UseSwagger();
@@ -92,13 +105,12 @@ if (app.Environment.IsDevelopment() || app.Environment.IsStaging())
 }
 else
 {
-    app.UseHttpsRedirection();
+    app.UseHttpsRedirection(); // Forzar HTTPS en producción
 }
 
 app.UseCors(policyName);
 
 app.UseAuthentication();
-
 app.UseAuthorization();
 
 app.MapControllers();
