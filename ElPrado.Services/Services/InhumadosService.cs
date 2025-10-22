@@ -13,5 +13,10 @@ namespace ElPrado.Services.Services
         {
             return _uow.Inhumados.BuscarInhumacion(id);
         }
+
+        public List<DtoServiciosInhumacionesResp> ServiciosEnCurso()
+        {
+            return _uow.Inhumados.ServiciosEnCurso();
+        }
     }
 }

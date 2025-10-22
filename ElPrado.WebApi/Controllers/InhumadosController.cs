@@ -2,6 +2,7 @@
 using ElPrado.Dto.Dtos;
 using ElPrado.Services;
 using ElPrado.Services.Services;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace ElPrado.WebApi.Controllers
@@ -33,5 +34,22 @@ namespace ElPrado.WebApi.Controllers
             }
             return apiResponse;
         }
+
+        [AllowAnonymous]
+        [HttpGet("ServiciosEnCurso")]
+        public ActionResult<ApiResponse<List<DtoServiciosInhumacionesResp>>> ServiciosEnCurso()
+        {
+            ApiResponse<List<DtoServiciosInhumacionesResp>> apiResponse = new()
+            {
+                Data = inhumadosService.ServiciosEnCurso()
+            };
+            if (apiResponse.Data == null || apiResponse.Data.Count == 0)
+            {
+                apiResponse.Agregar("No hay servicios en curso");
+                return NotFound(apiResponse);
+            }
+            return apiResponse;
+        }
+
     }
 }

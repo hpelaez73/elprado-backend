@@ -21,5 +21,11 @@ namespace ElPrado.Data.Repositories
             string sql = "SELECT * FROM GET_DATOS_INHUMADOS(@codPropuesta, @codParcela)";
             return _connection.Query<DtoInhumadosPropuestas>(sql, new { codPropuesta, codParcela }, _transaction).ToList();
         }
+
+        public List<DtoServiciosInhumacionesResp> ServiciosEnCurso()
+        {
+            string sql = "SELECT * FROM GET_SERVICIOS_EN_CURSO";
+            return _connection.Query<DtoServiciosInhumacionesResp>(sql, null, _transaction).ToList();
+        }
     }
 }
