@@ -86,10 +86,10 @@ namespace ElPrado.Data.Repositories
             return comprobante;
         }
 
-        public IEnumerable<DtoComprobantesFacturasElectronicas> Facturas(int codCliente, DateTime fechaDesde, DateTime fechaHasta)
+        public IEnumerable<DtoComprobantesFacturasElectronicas> Facturas(int codCliente, DateTime fechaDesde, DateTime fechaHasta, string basePath)
         {
-            string sql = "SELECT * FROM GET_FACTURAS_AFIP(@codCliente, @fechaDesde, @fechaHasta)";
-            return _connection.Query<DtoComprobantesFacturasElectronicas>(sql, new { codCliente , fechaDesde, fechaHasta }, _transaction);
+            string sql = "SELECT * FROM GET_FACTURAS_AFIP(@codCliente, @fechaDesde, @fechaHasta, @basePath)";
+            return _connection.Query<DtoComprobantesFacturasElectronicas>(sql, new { codCliente , fechaDesde, fechaHasta, basePath }, _transaction);
         }
 
         public DtoComprobantesPeriodo? PeriodosFacturacion(int codCliente)
