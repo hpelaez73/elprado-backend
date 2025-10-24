@@ -10,9 +10,11 @@ namespace ElPrado.WebApi.Controllers
     public class ComprobantesController : ControladorBase
     {
         private ComprobantesService comprobantesService => (_servicio as ComprobantesService)!;
+        private readonly IPdfStorageService _pdfService;
 
-        public ComprobantesController(IUnitOfWork unitOfWork, IUserContextService userContext) : base(unitOfWork, userContext)
+        public ComprobantesController(IUnitOfWork unitOfWork, IUserContextService userContext, IPdfStorageService pdfService) : base(unitOfWork, userContext)
         {
+            _pdfService = pdfService;
         }
 
         protected override ServiceBase CrearServicio()
@@ -54,9 +56,19 @@ namespace ElPrado.WebApi.Controllers
         {
             ApiResponse<IEnumerable<DtoComprobantesFacturasElectronicas>> apiResponse = new()
             {
-                Data = comprobantesService.Facturas(periodo)
+                Data = comprobantesService.Facturas(periodo, _pdfService.GetBasePath())
             };
             return apiResponse;
+        }
+
+        [HttpGet("Factura/{year}/{fileName}")]
+        public IActionResult DescargarFactura(string year, string fileName)
+        {
+            if (!_pdfService.Exists(fileName, year))
+                return NotFound("Archivo no encontrado.");
+
+            var fileBytes = _pdfService.ReadFile(fileName, year);
+            return File(fileBytes, "application/pdf", fileName);
         }
 
         #region Envio de facturas

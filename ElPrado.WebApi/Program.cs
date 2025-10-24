@@ -87,10 +87,13 @@ builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
         };
     });
 
+builder.Services.Configure<ElPrado.Dto.Configuration.PdfSettings>(builder.Configuration.GetSection("PdfSettings"));
+
 // DI
 builder.Services.AddHttpContextAccessor();
 builder.Services.AddScoped<ElPrado.Data.IUnitOfWork, ElPrado.Data.UnitOfWork>();
 builder.Services.AddScoped<ElPrado.Services.IUserContextService, ElPrado.WebApi.UserContextService>();
+builder.Services.AddScoped<ElPrado.Services.Services.IPdfStorageService, ElPrado.Services.Services.PdfStorageService>();
 
 var app = builder.Build();
 

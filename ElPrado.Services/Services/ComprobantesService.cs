@@ -15,9 +15,9 @@ namespace ElPrado.Services.Services
             return _uow.Comprobantes.Visualizar(codTalonario, nroComprobante);
         }
 
-        public IEnumerable<DtoComprobantesFacturasElectronicas> Facturas(int periodo)
+        public IEnumerable<DtoComprobantesFacturasElectronicas> Facturas(int periodo, string basePath)
         {
-            return _uow.Comprobantes.Facturas(_userContext.GetCodCliente(), new DateTime(periodo, 1, 1), new DateTime(periodo, 12, 31));
+            return _uow.Comprobantes.Facturas(_userContext.GetCodCliente(), new DateTime(periodo, 1, 1), new DateTime(periodo, 12, 31), basePath);
         }
 
         public List<int> PeriodosFacturacion()
