@@ -11,12 +11,10 @@ namespace ElPrado.WebApi.Controllers
     {
         private ComprobantesService comprobantesService => (_servicio as ComprobantesService)!;
         private readonly IPdfStorageService _pdfService;
-        private readonly IConfiguration _configuration;
 
-        public ComprobantesController(IUnitOfWork unitOfWork, IUserContextService userContext, IPdfStorageService pdfService, IConfiguration configuration) : base(unitOfWork, userContext)
+        public ComprobantesController(IUnitOfWork unitOfWork, IUserContextService userContext, IPdfStorageService pdfService) : base(unitOfWork, userContext)
         {
             _pdfService = pdfService;
-            _configuration = configuration;
         }
 
         protected override ServiceBase CrearServicio()
@@ -56,12 +54,9 @@ namespace ElPrado.WebApi.Controllers
         [HttpGet("Facturas/{periodo}")]
         public ApiResponse<IEnumerable<DtoComprobantesFacturasElectronicas>> Facturas(int periodo)
         {
-            string apiBaseUrl = _configuration["AppSettings:ApiBaseUrl"]!;
-            string basePath = $"{apiBaseUrl}/api/Comprobantes/Factura";
-
             ApiResponse<IEnumerable<DtoComprobantesFacturasElectronicas>> apiResponse = new()
             {
-                Data = comprobantesService.Facturas(periodo, basePath)
+                Data = comprobantesService.Facturas(periodo)
             };
             return apiResponse;
         }
