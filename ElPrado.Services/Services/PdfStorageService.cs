@@ -5,7 +5,6 @@ namespace ElPrado.Services.Services
 {
     public interface IPdfStorageService
     {
-        string GetBasePath();
         string GetFilePath(string fileName, string? year = null);
         bool Exists(string fileName, string? year = null);
         byte[] ReadFile(string fileName, string? year = null);
@@ -22,11 +21,6 @@ namespace ElPrado.Services.Services
 
             if (!Directory.Exists(_basePath))
                 Directory.CreateDirectory(_basePath);
-        }
-
-        public string GetBasePath()
-        {
-            return _basePath;
         }
 
         public string GetFilePath(string fileName, string? year = null)
