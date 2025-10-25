@@ -60,7 +60,7 @@
         public string NroComprobante { get; set; } = string.Empty;
         public DateOnly Fecha { get; set; }
         public double Total { get; set; }
-        public string Link { get; set; } = string.Empty;
+        public string NombrePdf { get; set; } = string.Empty;
     }
 
     public class DtoFacturasEnviarList : DtoBase
