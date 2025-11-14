@@ -180,5 +180,10 @@ namespace ElPrado.Data.Repositories
             return funcionesListados.ApiResponse(sql, _connection, _transaction);
         }
 
+        public DtoComprobantesFacturasPublicas? BuscarLinkPublicoPdf(string id)
+        {
+            string sql = "SELECT * FROM GET_LINK_PUBLICOS_PDFS(@id)";
+            return _connection.QuerySingleOrDefault<DtoComprobantesFacturasPublicas?>(sql, new { id }, _transaction);
+        }
     }
 }

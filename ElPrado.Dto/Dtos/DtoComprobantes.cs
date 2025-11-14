@@ -63,6 +63,13 @@
         public string NombrePdf { get; set; } = string.Empty;
     }
 
+    public class DtoComprobantesFacturasPublicas
+    {
+        public int Anio { get; set; }
+        public string NombrePdf { get; set; } = string.Empty;
+        public bool Activo { get; set; }
+    }
+
     public class DtoFacturasEnviarList : DtoBase
     {
         public int Propuesta { get; set; }

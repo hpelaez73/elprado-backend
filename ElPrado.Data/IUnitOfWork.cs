@@ -1,4 +1,5 @@
 ﻿using ElPrado.Data.Repositories;
+using ElPrado.Dto.Dtos;
 
 namespace ElPrado.Data
 {

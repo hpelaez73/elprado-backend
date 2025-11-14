@@ -3,6 +3,7 @@ using ElPrado.Data;
 using ElPrado.Dto.Dtos;
 using ElPrado.Services;
 using ElPrado.Services.Services;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace ElPrado.WebApi.Controllers
@@ -69,6 +70,21 @@ namespace ElPrado.WebApi.Controllers
 
             var fileBytes = _pdfService.ReadFile(fileName, year);
             return File(fileBytes, "application/pdf", fileName);
+        }
+
+        [AllowAnonymous]
+        [HttpGet("Public/{id}")]
+        public IActionResult DescargarFactura(string id)
+        {
+            DtoComprobantesFacturasPublicas? dtoFactura = comprobantesService.BuscarLinkPublicoPdf(id);
+            if (dtoFactura == null) return NotFound("Factura no encontrada");
+            if (!dtoFactura.Activo) return NotFound("Enlace inactivo");
+
+            if (!_pdfService.Exists(dtoFactura.NombrePdf, dtoFactura.Anio.ToString()))
+                return NotFound("Archivo no encontrado.");
+
+            var fileBytes = _pdfService.ReadFile(dtoFactura.NombrePdf, dtoFactura.Anio.ToString());
+            return File(fileBytes, "application/pdf", dtoFactura.NombrePdf);
         }
 
         #region Envio de facturas

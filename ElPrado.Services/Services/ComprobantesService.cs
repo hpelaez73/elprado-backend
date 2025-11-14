@@ -99,5 +99,9 @@ namespace ElPrado.Services.Services
             return _uow.Comprobantes.ListadoComprobantesPropuesta(opcionesListado);
         }
 
+        public DtoComprobantesFacturasPublicas? BuscarLinkPublicoPdf(string id)
+        {
+            return _uow.Comprobantes.BuscarLinkPublicoPdf(id);
+        }
     }
 }
