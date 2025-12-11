@@ -28,9 +28,11 @@ namespace ElPrado.Data.Repositories
 
         public Clientes? Buscar(int legajo, long dniCuit, string clave, bool esAdmin)
         {
+            long dni = dniCuit.ToString().Length <= 8 ? dniCuit : 0;
+            long cuit = dniCuit.ToString().Length > 8 ? dniCuit : 0;
             string sql = @"SELECT C.*
                 FROM CLIENTES C
-                WHERE (C.NRO_DOCUMENTO = @dniCuit OR C.CUIT = @dniCuit)
+                WHERE (C.NRO_DOCUMENTO = @dni OR C.CUIT = @cuit)
                 AND (C.CLAVE_ACCESO = @clave OR @esAdmin = 1)
                 AND C.FECHA_BAJA IS NULL AND C.FECHA_FALLECIMIENTO IS NULL
                 AND EXISTS (SELECT 1 FROM PROPUESTA P
@@ -38,7 +40,7 @@ namespace ElPrado.Data.Repositories
                 INNER JOIN ESTADOS_DEUDAS ED ON ED.COD_ESTADO_DEUDA = P.COD_ESTADO_DEUDA
                 WHERE PT.FECHA_BAJA IS NULL AND P.FECHA_BAJA IS NULL AND ED.ACTIVA = 1
                 AND P.LEGAJO = @legajo)";
-            return _connection.QuerySingleOrDefault<Clientes?>(sql, new { dniCuit, clave, legajo, esAdmin }, _transaction);
+            return _connection.QuerySingleOrDefault<Clientes?>(sql, new { dni, cuit, clave, legajo, esAdmin }, _transaction);
         }
 
         public Clientes? Buscar(int legajo, long dniCuit)
