@@ -111,6 +111,12 @@ namespace ElPrado.Services.Services
                 // Si es una venta presencial, no se hace nada
                 return true;
             }
+            else if (string.IsNullOrEmpty(dtoPayment.ReferenciaExterna))
+            {
+                // No se puede imputar el pago sin referencia externa
+                // El pago ingreso por un medio presencial
+                return true;
+            }
 
             if (dtoPayment.PagoAprobado)
             {
