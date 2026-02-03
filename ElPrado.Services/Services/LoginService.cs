@@ -123,6 +123,7 @@ namespace ElPrado.Services.Services
             {
                 cliente.ClaveAcceso = Utils.SHA1(altaCliente.Clave.Trim());
                 cliente.Email = altaCliente.Email.Trim();
+                cliente.TipoDocumento = (cliente.TipoDocumento == string.Empty) ? null : cliente.TipoDocumento;
                 _uow.Clientes.Modificar(cliente);
 
                 _uow.Commit();

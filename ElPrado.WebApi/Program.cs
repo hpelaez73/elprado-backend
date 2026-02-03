@@ -45,9 +45,9 @@ builder.Services.AddSwaggerGen(c =>
 });
 
 // CORS dinámico según el entorno
-var allowedOrigins = builder.Configuration.GetSection("AllowedOrigins").Get<string[]>();
+var allowedOrigins = builder.Configuration.GetSection("AllowedOrigins").Get<string[]>() ?? Array.Empty<string>();
 var policyName = "CorsPolicy";
-
+/*
 builder.Services.AddCors(options =>
 {
     options.AddPolicy(name: policyName, corsBuilder =>
@@ -66,6 +66,17 @@ builder.Services.AddCors(options =>
                 .AllowAnyHeader()
                 .AllowAnyMethod();
         }
+    });
+});
+*/
+builder.Services.AddCors(options =>
+{
+    options.AddPolicy("CorsPolicy", policy =>
+    {
+        policy
+            .WithOrigins(allowedOrigins)
+            .AllowAnyHeader()
+            .AllowAnyMethod();
     });
 });
 
