@@ -241,7 +241,7 @@ namespace ElPrado.Data.Comun
             switch (tipoDato)
             {
                 case TipoDatoListado.Texto:
-                    sql = $"UPPER(TRIM('{valor}'))";
+                    sql = $"UPPER(TRIM('{valor.Replace("'", "''")}'))";
                     break;
                 case TipoDatoListado.Fecha:
                     sql = $"'{DateTime.Parse(valor):MM/dd/yyyy}'";
