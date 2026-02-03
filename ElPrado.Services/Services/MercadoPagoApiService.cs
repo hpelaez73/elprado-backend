@@ -109,8 +109,8 @@ namespace ElPrado.Services.Services
             else if (dtoPayment.PagoAprobado)
             {
                 if (int.TryParse(pago.ExternalReference, out int codPreferencia)) dtoPayment.CodPreferencia = codPreferencia;
-                else dtoPayment.ReferenciaExterna = pago.ExternalReference;
 
+                dtoPayment.ReferenciaExterna = pago.ExternalReference;
                 dtoPayment.FechaPago = pago.DateApproved ?? DateTime.Today;
             }
             return dtoPayment;

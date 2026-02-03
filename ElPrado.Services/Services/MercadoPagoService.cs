@@ -120,7 +120,7 @@ namespace ElPrado.Services.Services
 
             if (dtoPayment.PagoAprobado)
             {
-                _uow.MercadoPago.ImputarPago(id, dtoPayment.CodPreferencia, dtoPayment.ReferenciaExterna, dtoPayment.FechaPago);
+                _uow.MercadoPago.ImputarPago(id, dtoPayment.CodPreferencia, dtoPayment.ReferenciaExterna == dtoPayment.CodPreferencia.ToString() ? "" : dtoPayment.ReferenciaExterna, dtoPayment.FechaPago);
                 return true;
             }
             return false;
