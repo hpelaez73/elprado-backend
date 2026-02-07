@@ -1,4 +1,5 @@
-﻿using ElPrado.Data;
+﻿using ElPrado.Core;
+using ElPrado.Data;
 using ElPrado.Data.Models;
 using ElPrado.Dto.Dtos;
 using ElPrado.Services;
@@ -46,24 +47,24 @@ namespace ElPrado.WebApi.Controllers
             return apiResponse;
         }
 
-        [HttpPost("Listado")]
-        public ApiResponse<IEnumerable<dynamic>> Listado([FromBody] DtoOpcionesListados opcionesListado)
+        [HttpPut]
+        public ActionResult<ApiResponse<TDto>> Put([FromBody] TDto dto)
         {
-            ApiResponse<IEnumerable<dynamic>> apiResponse = new()
+            ApiResponse<TDto> apiResponse = new();
+            Resultados<TDto> resultado = _serviceCrud.Actualizar(dto);
+            if (resultado.HayError)
             {
-                Data = _serviceCrud.Listado(opcionesListado)
-            };
+                apiResponse.Agregar(resultado);
+                return BadRequest(apiResponse);
+            }
+            apiResponse.Data = resultado.Valor;
             return apiResponse;
         }
 
-        [HttpGet("Listado")]
-        public ApiResponse<IEnumerable<dynamic>> Listado()
+        [HttpPost("Listado")]
+        public ApiResponse<IEnumerable<dynamic>> Listado([FromBody] DtoOpcionesListados opcionesListado)
         {
-            ApiResponse<IEnumerable<dynamic>> apiResponse = new()
-            {
-                Data = _serviceCrud.Listado(null)
-            };
-            return apiResponse;
+            return _serviceCrud.Listado(opcionesListado);
         }
     }
 }

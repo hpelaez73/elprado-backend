@@ -1,4 +1,5 @@
-﻿using ElPrado.Data;
+﻿using ElPrado.Core;
+using ElPrado.Data;
 using ElPrado.Data.Models;
 using ElPrado.Data.Repositories;
 using ElPrado.Dto.Dtos;
@@ -20,9 +21,14 @@ namespace ElPrado.Services.Services
             return _repositoryCrud?.Visualizar(id);
         }
 
-        public IEnumerable<dynamic> Listado(DtoOpcionesListados? opcionesListado)
+        public Resultados<TDto> Actualizar(TDto dto)
         {
-            return (_repositoryCrud != null) ? _repositoryCrud.Listado(opcionesListado) : Enumerable.Empty<dynamic>();
+            throw new NotImplementedException();
+        }
+
+        public ApiResponse<IEnumerable<dynamic>> Listado(DtoOpcionesListados opcionesListado)
+        {
+            return (_repositoryCrud != null) ? _repositoryCrud.Listado(opcionesListado) : new ApiResponseListado<IEnumerable<dynamic>>();
         }
 
     }

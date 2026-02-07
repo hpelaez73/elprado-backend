@@ -17,9 +17,9 @@ namespace ElPrado.Data.Repositories
             _transaction = dbContext.GetTransaction();
         }
 
-        public IEnumerable<dynamic> Listado(DtoOpcionesListados? opcionesListado)
+        public virtual ApiResponseListado<IEnumerable<dynamic>> Listado(DtoOpcionesListados opcionesListado)
         {
-            return Enumerable.Empty<dynamic>();
+            return new ApiResponseListado<IEnumerable<dynamic>>();
         }
 
         public bool Existe(string nombreTabla, string nombreCampo, object valor)
