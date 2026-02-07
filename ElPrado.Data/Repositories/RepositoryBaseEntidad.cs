@@ -14,14 +14,19 @@ namespace ElPrado.Data.Repositories
             return _connection.Get<TEntidad>(id, _transaction);
         }
 
-        public void Agregar(TEntidad entidad)
+        public int? Agregar(TEntidad entidad)
         {
-            _connection.Insert(entidad, _transaction);
+            return _connection.Insert<TEntidad>(entidad, _transaction);
         }
 
         public void Modificar(TEntidad entidad)
         {
-            _connection.Update(entidad, _transaction);
+            _connection.Update<TEntidad>(entidad, _transaction);
+        }
+
+        public void Eliminar(int id)
+        {
+            _connection.Delete<TEntidad>(id, _transaction);
         }
     }
 }

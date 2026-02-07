@@ -1,4 +1,5 @@
 ﻿using ElPrado.Core;
+using ElPrado.Core.Utils;
 using ElPrado.Data;
 using ElPrado.Dto.Dtos;
 
@@ -47,7 +48,7 @@ namespace ElPrado.Services.Services
             {
                 foreach (DtoFacturasEnviarList item in repListFacturas.Data!.Select(v => (DtoFacturasEnviarList)v))
                 {
-                    string strTelefono = Utils.ExtraerDigitos(item.TelefonoMovil);
+                    string strTelefono = FunUtils.ExtraerDigitos(item.TelefonoMovil);
                     if (strTelefono[0] == '0') { strTelefono = strTelefono[1..]; }
                     if (strTelefono.Length < 10) { strTelefono = "341" + strTelefono; }
                     if (strTelefono.Length > 10) { strTelefono = strTelefono.Remove(strTelefono.IndexOf("15"), 2); }

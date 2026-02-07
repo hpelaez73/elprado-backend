@@ -48,17 +48,45 @@ namespace ElPrado.WebApi.Controllers
             return apiResponse;
         }
 
-        [HttpPut]
-        public ActionResult<ApiResponse<TDto>> Put([FromBody] TDto dto)
+        [HttpPost]
+        public ActionResult<ApiResponse<TDto>> Post([FromBody] TDto dto)
         {
             ApiResponse<TDto> apiResponse = new();
-            Resultados<TDto> resultado = _serviceCrud.Actualizar(dto);
+            Resultados<TDto> resultado = _serviceCrud.Agregar(dto);
             if (resultado.HayError)
             {
                 apiResponse.Agregar(resultado);
                 return BadRequest(apiResponse);
             }
             apiResponse.Data = resultado.Valor;
+            return apiResponse;
+        }
+
+        [HttpPut]
+        public ActionResult<ApiResponse<TDto>> Put([FromBody] TDto dto)
+        {
+            ApiResponse<TDto> apiResponse = new();
+            Resultados<TDto> resultado = _serviceCrud.Modificar(dto);
+            if (resultado.HayError)
+            {
+                apiResponse.Agregar(resultado);
+                return BadRequest(apiResponse);
+            }
+            apiResponse.Data = resultado.Valor;
+            return apiResponse;
+        }
+
+        [HttpDelete("{id}")]
+        public ActionResult<ApiResponse<bool>> Delete(int id)
+        {
+            ApiResponse<bool> apiResponse = new();
+            Resultados resultado = _serviceCrud.Eliminar(id);
+            if (resultado.HayError)
+            {
+                apiResponse.Agregar(resultado);
+                return BadRequest(apiResponse);
+            }
+            apiResponse.Data = true;
             return apiResponse;
         }
 

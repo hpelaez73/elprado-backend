@@ -1,4 +1,5 @@
 ﻿using ElPrado.Core;
+using ElPrado.Core.Utils;
 using ElPrado.Data;
 using ElPrado.Dto.Dtos;
 
@@ -16,7 +17,7 @@ namespace ElPrado.Services.Services
 
             if (!string.IsNullOrEmpty(dtoParcela.NroTelefono))
             {
-                if (!Utils.EsTelefonoValido(dtoParcela.NroTelefono)) resultado.Agregar("El número de telefono no tiene el formato correcto");
+                if (!FunUtils.EsTelefonoValido(dtoParcela.NroTelefono)) resultado.Agregar("El número de telefono no tiene el formato correcto");
             }
             if (resultado.HayError) return resultado;
 

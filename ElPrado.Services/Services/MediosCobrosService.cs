@@ -1,7 +1,9 @@
 ﻿using ElPrado.Core.Domains;
 using ElPrado.Data;
 using ElPrado.Data.Models;
+using ElPrado.Data.Repositories;
 using ElPrado.Dto.Dtos;
+using ElPrado.Services.Mappers;
 
 namespace ElPrado.Services.Services
 {
@@ -9,9 +11,16 @@ namespace ElPrado.Services.Services
     {
         public MediosCobrosService(IUnitOfWork unitOfWork, IUserContextService userContext) : base(unitOfWork, userContext)
         {
-            _repositoryCrud = _uow.MediosCobros;
         }
 
+        protected override IMapper<MediosCobros, DtoMediosCobros> CrearMapper()
+        {
+            return new MediosCobrosMapper();
+        }
+        protected override RepositoryBaseCrud<MediosCobros, DtoMediosCobros> CrearRepository()
+        {
+            return _uow.MediosCobros;
+        }
         public List<DtoHistorialCobradores> BuscarHistorialCobradores(DtoCuentasCorrientesReq dtoCuentas)
         {
             int? codCredito = null;

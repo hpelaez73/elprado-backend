@@ -2,6 +2,8 @@
 {
     public class DtoMediosCobros : DtoBase
     {
+        public int CodMedioCobro { get; set; }
+        public string Descripcion { get; set; } = string.Empty;
         public string Tipo { get; set; } = string.Empty;
         public string LugarCobro { get; set; } = string.Empty;
         public string Detalle { get; set; } = string.Empty;

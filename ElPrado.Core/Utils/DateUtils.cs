@@ -1,4 +1,4 @@
-﻿namespace ElPrado.Core
+﻿namespace ElPrado.Core.Utils
 {
     public static class DateUtils
     {

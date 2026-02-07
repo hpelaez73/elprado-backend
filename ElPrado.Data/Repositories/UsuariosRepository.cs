@@ -37,6 +37,12 @@ namespace ElPrado.Data.Repositories
             };
         }
 
+        public override DtoUsuarios? Visualizar(int id)
+        {
+            string sql = "SELECT * FROM USUARIOS WHERE COD_USUARIO = @id";
+            return _connection.QuerySingleOrDefault<DtoUsuarios?>(sql, new { id }, _transaction);
+        }
+
         public Usuarios? Buscar(string alias, string clave)
         {
             // Uso interpolación para soportar el uso de ñ y acentos en los alias y claves

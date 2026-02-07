@@ -453,7 +453,7 @@ namespace ElPrado.Data
                 return (TKey)idProps.First().GetValue(entityToInsert, null);
             }
 
-            return (TKey)r.First().id;
+            return (TKey)r.First().ID;
         }
 
         /// <summary>

@@ -1,6 +1,7 @@
 ﻿using ElPrado.Core;
 using ElPrado.Data;
 using ElPrado.Data.Models;
+using ElPrado.Data.Repositories;
 using ElPrado.Dto.Dtos;
 using ElPrado.Services.Mappers;
 
@@ -10,13 +11,28 @@ namespace ElPrado.Services.Services
     {
         public UsuariosService(IUnitOfWork unitOfWork, IUserContextService userContext) : base(unitOfWork, userContext)
         {
-            _repositoryCrud = unitOfWork.Usuarios;
         }
 
-        // Devuelve el mapper concreto para Usuarios
         protected override IMapper<Usuarios, DtoUsuarios> CrearMapper()
         {
             return new UsuariosMapper();
+        }
+
+        protected override RepositoryBaseCrud<Usuarios, DtoUsuarios> CrearRepository()
+        {
+            return _uow.Usuarios;
+        }
+
+        protected override int? AgregarEntidad(Usuarios entidad)
+        {
+            Clientes cliente = new()
+            {
+                Nombre = entidad.Nombre ?? entidad.Alias,
+                CodCatIva = ConstCatIvas.CodConsumidorFinal
+            };
+
+            entidad.CodCliente = _uow.Clientes.Agregar(cliente);
+            return base.AgregarEntidad(entidad);
         }
 
         public List<DtoMenus> BuscarMenu()

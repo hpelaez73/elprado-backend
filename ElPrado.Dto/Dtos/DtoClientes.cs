@@ -17,6 +17,7 @@
         public string Profesion { get; set; } = string.Empty;
         public bool EsPersonaFisica { get; set; }
         // Datos de ventas
+        public int CodCatIva { get; set; }
         public string CategoriaIva { get; set; } = string.Empty;
         public long? Cuit { get; set; }
         public string IngresosBrutos { get; set; } = string.Empty;

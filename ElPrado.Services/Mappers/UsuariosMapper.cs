@@ -1,4 +1,5 @@
-﻿using ElPrado.Data.Models;
+﻿using ElPrado.Core.Utils;
+using ElPrado.Data.Models;
 using ElPrado.Dto.Dtos;
 
 namespace ElPrado.Services.Mappers
@@ -10,8 +11,8 @@ namespace ElPrado.Services.Mappers
             if (dto == null || entidad == null) return;
 
             entidad.CodUsuario = dto.CodUsuario;
-            entidad.Alias = dto.Alias ?? string.Empty;
-            entidad.Nombre = dto.Nombre ?? string.Empty;
+            entidad.Alias = dto.Alias;
+            entidad.Nombre = DbUtils.NormalizeText(dto.Nombre);
 
             // No sobrescribir la clave si viene vacía (útil en actualizaciones)
             if (!string.IsNullOrWhiteSpace(dto.ClaveAcceso))

@@ -1,4 +1,5 @@
 ﻿using ElPrado.Core;
+using ElPrado.Core.Utils;
 using ElPrado.Data;
 using ElPrado.Data.Models;
 using ElPrado.Dto.Dtos;
@@ -17,7 +18,7 @@ namespace ElPrado.Services.Services
         public DtoLogin? Login(int legajo, long dniCuit, string clave)
         {
             string claveMaestra = _uow.ConfiguracionGeneral.BuscarClaveMaestra();
-            string claveHash = Utils.SHA1(clave);
+            string claveHash = FunUtils.SHA1(clave);
             bool esAdmin = claveMaestra.Equals(claveHash);
 
             Clientes? cliente = _uow.Clientes.Buscar(legajo, dniCuit, claveHash, esAdmin);
@@ -107,7 +108,7 @@ namespace ElPrado.Services.Services
             Resultados resultado = new();
             if (altaCliente.Clave.Trim() == string.Empty) resultado.Agregar("La clave está vacia");
             if (altaCliente.Clave.Trim() != altaCliente.ClaveConfirmacion.Trim()) resultado.Agregar("La clave de confimación no coincide");
-            if (!Utils.EsMailValido(altaCliente.Email)) resultado.Agregar("La direccón de correo no es válida");
+            if (!FunUtils.EsMailValido(altaCliente.Email)) resultado.Agregar("La direccón de correo no es válida");
             if (altaCliente.Clave.Trim().Length < 6) resultado.Agregar("La clave debe tener al menos 6 caracteres");
 
             if (resultado.HayError) return resultado;
@@ -121,7 +122,7 @@ namespace ElPrado.Services.Services
 
             try
             {
-                cliente.ClaveAcceso = Utils.SHA1(altaCliente.Clave.Trim());
+                cliente.ClaveAcceso = FunUtils.SHA1(altaCliente.Clave.Trim());
                 cliente.Email = altaCliente.Email.Trim();
                 cliente.TipoDocumento = (cliente.TipoDocumento == string.Empty) ? null : cliente.TipoDocumento;
                 _uow.Clientes.Modificar(cliente);

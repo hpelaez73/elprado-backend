@@ -1,6 +1,8 @@
 ﻿using ElPrado.Data;
 using ElPrado.Data.Models;
+using ElPrado.Data.Repositories;
 using ElPrado.Dto.Dtos;
+using ElPrado.Services.Mappers;
 
 namespace ElPrado.Services.Services
 {
@@ -8,7 +10,15 @@ namespace ElPrado.Services.Services
     {
         public ClientesService(IUnitOfWork unitOfWork, IUserContextService userContext) : base(unitOfWork, userContext)
         {
-            _repositoryCrud = _uow.Clientes;
+        }
+
+        protected override IMapper<Clientes, DtoClientes> CrearMapper()
+        {
+            return new ClientesMapper();
+        }
+        protected override RepositoryBaseCrud<Clientes, DtoClientes> CrearRepository()
+        {
+            return _uow.Clientes;
         }
     }
 }

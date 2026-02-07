@@ -1,9 +1,9 @@
 ﻿using System.ComponentModel.DataAnnotations;
 using System.Text.RegularExpressions;
 
-namespace ElPrado.Core
+namespace ElPrado.Core.Utils
 {
-    public static class Utils
+    public static class FunUtils
     {
         public static string SHA1(string value)
         {
