@@ -3,7 +3,27 @@ using ElPrado.Dto.Dtos;
 
 namespace ElPrado.Services.Mappers
 {
-    public static class UsuariosMapper
+    public class UsuariosMapper : MapperBase<Usuarios, DtoUsuarios>
     {
+        public override void ApplyToEntity(Usuarios entidad, DtoUsuarios dto)
+        {
+            if (dto == null || entidad == null) return;
+
+            entidad.CodUsuario = dto.CodUsuario;
+            entidad.Alias = dto.Alias ?? string.Empty;
+            entidad.Nombre = dto.Nombre ?? string.Empty;
+
+            // No sobrescribir la clave si viene vacía (útil en actualizaciones)
+            if (!string.IsNullOrWhiteSpace(dto.ClaveAcceso))
+            {
+                entidad.ClaveAcceso = dto.ClaveAcceso;
+            }
+
+            entidad.EsAdmin = dto.EsAdmin;
+            entidad.SuperUsuario = dto.SuperUsuario;
+            entidad.PuedeAutorizar = dto.PuedeAutorizar;
+        }
+
+        public override Usuarios MapToEntity(DtoUsuarios dto) => base.MapToEntity(dto);
     }
 }

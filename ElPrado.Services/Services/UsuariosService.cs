@@ -13,6 +13,12 @@ namespace ElPrado.Services.Services
             _repositoryCrud = unitOfWork.Usuarios;
         }
 
+        // Devuelve el mapper concreto para Usuarios
+        protected override IMapper<Usuarios, DtoUsuarios> CrearMapper()
+        {
+            return new UsuariosMapper();
+        }
+
         public List<DtoMenus> BuscarMenu()
         {
             List<MenusWeb> listMenusWeb = (_userContext.GetCodUsuario() > 0)
@@ -124,7 +130,7 @@ namespace ElPrado.Services.Services
             };
         }
 
-        private string Unir(string str1, string str2)
+        private static string Unir(string str1, string str2)
         {
             string resultado = string.Empty;
             for (int i = 0; i < 10; i++)
@@ -140,7 +146,7 @@ namespace ElPrado.Services.Services
             return resultado;
         }
 
-        private string Ajustar(string texto)
+        private static string Ajustar(string texto)
         {
             while (texto.Length < 10)
             {

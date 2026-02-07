@@ -1,9 +1,23 @@
-﻿namespace ElPrado.Services.Mappers
+﻿using ElPrado.Data.Models;
+using ElPrado.Dto.Dtos;
+
+namespace ElPrado.Services.Mappers
 {
-    public class MapperBase
+    public abstract class MapperBase<TEntidad, TDto> : IMapper<TEntidad, TDto>
+        where TDto : DtoBase
+        where TEntidad : Entidades, new()
     {
-        public MapperBase()
+        protected MapperBase()
         {
         }
+
+        public virtual TEntidad MapToEntity(TDto dto)
+        {
+            TEntidad entidad = new();
+            ApplyToEntity(entidad, dto);
+            return entidad;
+        }
+
+        public abstract void ApplyToEntity(TEntidad entidad, TDto dto);
     }
 }

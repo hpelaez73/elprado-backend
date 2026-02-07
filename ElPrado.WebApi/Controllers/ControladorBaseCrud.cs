@@ -13,7 +13,7 @@ namespace ElPrado.WebApi.Controllers
     [Route("api/[controller]")]
     [Authorize]
     public class ControladorBaseCrud<TEntidad, TDto> : ControladorBase
-        where TEntidad : Entidades
+        where TEntidad : Entidades, new()
         where TDto : DtoBase
     {
         protected ServiceBaseCrud<TEntidad, TDto> _serviceCrud => (_servicio as ServiceBaseCrud<TEntidad, TDto>)!;
@@ -29,7 +29,8 @@ namespace ElPrado.WebApi.Controllers
 
         protected virtual ServiceBaseCrud<TEntidad, TDto> CrearServicioCrud()
         {
-            return new(_uow, _userContext);
+            ServiceBaseCrud<TEntidad, TDto> serviceBaseCrud = new(_uow, _userContext);
+            return serviceBaseCrud;
         }
 
         [HttpGet("{id}")]
