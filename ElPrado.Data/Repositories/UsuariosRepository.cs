@@ -74,7 +74,7 @@ namespace ElPrado.Data.Repositories
         {
             FuncionesListados<DtoUsuarios> funcionesListados = new(cfgListUsuario, opcionesListado);
 
-            string sqlWhere = (opcionesListado.ListFiltros == null) ? string.Empty : " WHERE " + funcionesListados.ParseSqlWhere();
+            string sqlWhere = (opcionesListado.ListFiltros == null || opcionesListado.ListFiltros.Count == 0) ? string.Empty : " WHERE " + funcionesListados.ParseSqlWhere();
 
             string sqlCant = $@"SELECT COUNT(*)
                             FROM USUARIOS U
