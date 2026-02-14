@@ -81,8 +81,7 @@ namespace ElPrado.Data.Repositories
                             {sqlWhere}";
 
             string sql = $@"SELECT {funcionesListados.ParseSqlPaginado(sqlCant, _connection, _transaction)}
-                            U.COD_USUARIO, U.ALIAS, U.NOMBRE, U.CLAVE_ACCESO,
-                            U.ES_ADMIN, U.SUPER_USUARIO, U.PUEDE_AUTORIZAR
+                            U.*
                             FROM USUARIOS U
                             {sqlWhere}
                             {funcionesListados.ParseSqlOrden()}";

@@ -23,6 +23,8 @@ namespace ElPrado.Services.Mappers
             entidad.EsAdmin = dto.EsAdmin;
             entidad.SuperUsuario = dto.SuperUsuario;
             entidad.PuedeAutorizar = dto.PuedeAutorizar;
+            entidad.CodCliente = dto.CodCliente;
+            entidad.CodEmpleado = dto.CodEmpleado;
         }
 
         public override Usuarios MapToEntity(DtoUsuarios dto) => base.MapToEntity(dto);
