@@ -1,5 +1,4 @@
-﻿using ElPrado.Data.Repositories;
-using ElPrado.Dto.Dtos;
+using ElPrado.Data.Repositories;
 
 namespace ElPrado.Data
 {
@@ -19,6 +18,7 @@ namespace ElPrado.Data
         MediosCobrosRepository MediosCobros { get; }
         MercadoPagoRepository MercadoPago { get; }
         MovimientosFondosRepository MovimientosFondos { get; }
+        ObituariosRepository Obituarios { get; }
 
         ParcelasRepository Parcelas { get; }
         PlanesVentasRepository PlanesVentas { get; }

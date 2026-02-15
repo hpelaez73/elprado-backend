@@ -21,6 +21,7 @@ namespace ElPrado.Data
         private MediosCobrosRepository? _mediosCobrosRepository;
         private MercadoPagoRepository? _mercadoPagoRepository;
         private MovimientosFondosRepository? _movimientosFondosRepository;
+        private ObituariosRepository? _obituariosRepository;
 
         private ParcelasRepository? _parcelasRepository;
         private PlanesVentasRepository? _planesVentasRepository;
@@ -46,6 +47,7 @@ namespace ElPrado.Data
 
         public DomiciliosRepository Domicilios => _domiciliosRepository ??= new DomiciliosRepository(_dbContext);
         public InhumadosRepository Inhumados => _inhumadosRepository ??= new InhumadosRepository(_dbContext);
+        public ObituariosRepository Obituarios => _obituariosRepository ??= new ObituariosRepository(_dbContext);
 
         public LogsRepository LogsRepository => _logsRepository ??= new LogsRepository(_dbContext);
         public MediosCobrosRepository MediosCobros => _mediosCobrosRepository ??= new MediosCobrosRepository(_dbContext);
