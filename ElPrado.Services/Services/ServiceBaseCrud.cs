@@ -52,23 +52,8 @@ namespace ElPrado.Services.Services
                 return resultado;
             }
 
-            // Aplicar cambios desde DTO usando el mapper
-            TEntidad entidad = Mapper.MapToEntity(dto);
-
-            try
-            {
-                // Persistir cambios
-                RepositoryCrud.Modificar(entidad);
-                _uow.Commit();
-            }
-            catch
-            {
-                _uow.Rollback();
-                throw;
-            }
-
             // Intentar obtener el ID actualizado desde entidad (asumiendo que tiene una propiedad con [Key]
-            object? pkValue = EntityKeyHelper.GetKeyValue(entidad);
+            object? pkValue = EntityKeyHelper.GetKeyValue(dto);
             if (pkValue == null)
             {
                 resultado.Agregar("No se pudo determinar la clave primaria de la entidad.");
@@ -86,6 +71,29 @@ namespace ElPrado.Services.Services
                 return resultado;
             }
 
+            TEntidad entidad = RepositoryCrud.Buscar(id);
+            if (entidad == null)
+            {
+                resultado.Agregar("La entidad no existe");
+                return resultado;
+            }
+
+            // Aplicar cambios desde DTO usando el mapper
+            Mapper.ApplyToEntity(entidad, dto);
+
+            try
+            {
+                // Persistir cambios
+                RepositoryCrud.Modificar(entidad);
+                _uow.Commit();
+            }
+            catch
+            {
+                _uow.Rollback();
+                throw;
+            }
+
+
             // Recuperar DTO actualizado desde repositorio (si lo provee)
             TDto? dtoActualizado = RepositoryCrud.Visualizar(id);
             resultado.Valor = dtoActualizado;
@@ -100,6 +108,14 @@ namespace ElPrado.Services.Services
             if (dto == null)
             {
                 resultado.Agregar("DTO inválido");
+                return resultado;
+            }
+
+            // Valido los datos
+            Resultados resultadoAgregar = ValidarAgregar(dto);
+            if (resultadoAgregar.HayError)
+            {
+                resultado.Agregar(resultadoAgregar);
                 return resultado;
             }
 
@@ -127,6 +143,11 @@ namespace ElPrado.Services.Services
             }
 
             return resultado;
+        }
+
+        protected virtual Resultados ValidarAgregar(TDto dto)
+        {
+            return new Resultados();
         }
 
         protected virtual int? AgregarEntidad(TEntidad entidad)

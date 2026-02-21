@@ -29,7 +29,7 @@ namespace ElPrado.Dto.Dtos
         public List<DtoCondolenciasObituarios> Condolencias { get; set; } = new();
         public List<DtoComentariosObituarios> Comentarios { get; set; } = new();
         public List<DtoReaccionesObituarios> Reacciones { get; set; } = new();
-        public List<DtoServicioObituarios> Servicios { get; set; } = new();
+        public List<DtoServiciosObituarios> Servicios { get; set; } = new();
     }
 
     public class DtoReaccionesObituarios
@@ -40,13 +40,9 @@ namespace ElPrado.Dto.Dtos
         public int Cantidad { get; set; }
     }
 
-    public class DtoServicioObituarios
+    public class DtoAgregarReaccionReq
     {
-        public int CodServicio { get; set; }
         public int CodObituario { get; set; }
-        public string TipoServicio { get; set; } = string.Empty;
-        public string? Lugar { get; set; }
-        public DateTime? FechaHora { get; set; }
-        public string? UrlMaps { get; set; }
+        public string TipoReaccion { get; set; } = string.Empty;
     }
 }

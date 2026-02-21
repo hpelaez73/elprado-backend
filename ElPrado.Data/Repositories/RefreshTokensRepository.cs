@@ -20,7 +20,7 @@ namespace ElPrado.Data.Repositories
 
         public bool ExisteToken(string token)
         {
-            return Existe(nameof(RefreshTokens), nameof(RefreshTokens.Token), token);
+            return ExisteValor(nameof(RefreshTokens), nameof(RefreshTokens.Token), token);
         }
     }
 }

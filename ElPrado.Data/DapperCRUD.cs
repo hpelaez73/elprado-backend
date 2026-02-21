@@ -1005,7 +1005,7 @@ namespace ElPrado.Data
 
         //Get all properties that are named Id or have the Key attribute
         //For Get(id) and Delete(id) we don't have an entity, just the type so this method is used
-        private static IEnumerable<PropertyInfo> GetIdProperties(Type type)
+        public static IEnumerable<PropertyInfo> GetIdProperties(Type type)
         {
             var tp = type.GetProperties().Where(p =>
                 p.GetCustomAttributes(true).Any(attr => attr.GetType().Name == typeof(KeyAttribute).Name)).ToList();

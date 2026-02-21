@@ -20,8 +20,9 @@ namespace ElPrado.Data.Helpers
             var keyProp = props.FirstOrDefault(p => Attribute.IsDefined(p, typeof(KeyAttribute)));
             if (keyProp != null) return keyProp;
 
-            // 2) Convenciones comunes: "Id" o "{Tipo}Id"
+            // 2) Convenciones comunes: "Cod" o "{Tipo}Id"
             var byName = props.FirstOrDefault(p => string.Equals(p.Name, "Cod", StringComparison.OrdinalIgnoreCase))
+                         ?? props.FirstOrDefault(p => p.Name.StartsWith("Cod"))
                          ?? props.FirstOrDefault(p => string.Equals(p.Name, entityType.Name + "Cod", StringComparison.OrdinalIgnoreCase));
             return byName;
         }

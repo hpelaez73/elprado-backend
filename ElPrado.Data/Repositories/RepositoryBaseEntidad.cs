@@ -28,5 +28,14 @@ namespace ElPrado.Data.Repositories
         {
             _connection.Delete<TEntidad>(id, _transaction);
         }
+
+        public bool Existe(int id)
+        {
+            var currenttype = typeof(TEntidad);
+            var idProps = DapperCRUD.GetIdProperties(currenttype).ToList();
+
+            return ExisteValor(currenttype.Name, idProps.First().Name, id);
+        }
+
     }
 }

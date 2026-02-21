@@ -13,7 +13,7 @@ namespace ElPrado.Data.Repositories
         public override DtoCondolenciasObituarios? Visualizar(int id)
         {
             string sql = "SELECT * FROM CONDOLENCIAS_OBITUARIOS WHERE COD_CONDOLENCIA = @id";
-            return _connection.QueryFirstOrDefault<DtoCondolenciasObituarios>(sql, new { id });
+            return _connection.QueryFirstOrDefault<DtoCondolenciasObituarios>(sql, new { id }, _transaction);
         }
 
         public List<DtoCondolenciasObituarios> BuscarPorObituario(int id)

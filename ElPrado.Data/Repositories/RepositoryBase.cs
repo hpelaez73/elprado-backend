@@ -22,7 +22,7 @@ namespace ElPrado.Data.Repositories
             return new ApiResponseListado<IEnumerable<dynamic>>();
         }
 
-        public bool Existe(string nombreTabla, string nombreCampo, object valor)
+        public bool ExisteValor(string nombreTabla, string nombreCampo, object valor)
         {
             string sql = $"SELECT 1 FROM RDB$DATABASE WHERE EXISTS(SELECT 1 FROM {nombreTabla.ToUnderscoreCase().ToUpper()} WHERE {nombreCampo.ToUnderscoreCase().ToUpper()} = @valor)";
             return _connection.QuerySingleOrDefault<bool>(sql, new { valor }, _transaction);

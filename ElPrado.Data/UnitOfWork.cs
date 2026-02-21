@@ -9,7 +9,9 @@ namespace ElPrado.Data
 
         private CampaniasRepository? _campaniasRepository;
         private ClientesRepository? _clientesRepository;
+        private ComentariosObituariosRepository? _comentariosObituariosRepository;
         private ComprobantesRepository? _comprobantesRepository;
+        private CondolenciasObituariosRepository? _condolenciasObituariosRepository;
         private ConfiguracionGeneralRepository? _configuracionGeneralRepository;
         private ContratosRepository? _contratosRepository;
         private CuentasCorrientesRepository? _cuentasCorrientesRepository;
@@ -28,7 +30,10 @@ namespace ElPrado.Data
         private PropuestasRepository? _propuestasRepository;
         private ProcesosSistemasRepository? _procesosSistemasRepository;
         private RefreshTokensRepository? _refreshTokensRepository;
+
         private ServiciosModelosRepository? _serviciosModelosRepository;
+        private ServiciosObituariosRepository? _serviciosObituariosRepository;
+        private SuscripcionesObituariosRepository? _suscripcionesObituariosRepository;
 
         private UsuariosRepository? _usuariosRepository;
         private VariosSeguridadRepository? _variosSeguridadRepository;
@@ -40,7 +45,9 @@ namespace ElPrado.Data
 
         public CampaniasRepository Campanias => _campaniasRepository ??= new CampaniasRepository(_dbContext);
         public ClientesRepository Clientes => _clientesRepository ??= new ClientesRepository(_dbContext);
+        public ComentariosObituariosRepository ComentariosObituarios => _comentariosObituariosRepository ??= new ComentariosObituariosRepository(_dbContext);
         public ComprobantesRepository Comprobantes => _comprobantesRepository ??= new ComprobantesRepository(_dbContext);
+        public CondolenciasObituariosRepository CondolenciasObituarios => _condolenciasObituariosRepository ??= new CondolenciasObituariosRepository(_dbContext);
         public ConfiguracionGeneralRepository ConfiguracionGeneral => _configuracionGeneralRepository ??= new ConfiguracionGeneralRepository(_dbContext);
         public ContratosRepository Contratos => _contratosRepository ??= new ContratosRepository(_dbContext);
         public CuentasCorrientesRepository CuentasCorrientes => _cuentasCorrientesRepository ??= new CuentasCorrientesRepository(_dbContext);
@@ -59,7 +66,10 @@ namespace ElPrado.Data
         public PropuestasRepository Propuestas => _propuestasRepository ??= new PropuestasRepository(_dbContext);
         public ProcesosSistemasRepository ProcesosSistemas => _procesosSistemasRepository ??= new ProcesosSistemasRepository(_dbContext);
         public RefreshTokensRepository RefreshTokens => _refreshTokensRepository ??= new RefreshTokensRepository(_dbContext);
+
         public ServiciosModelosRepository ServiciosModelos => _serviciosModelosRepository ??= new ServiciosModelosRepository(_dbContext);
+        public ServiciosObituariosRepository ServiciosObituarios => _serviciosObituariosRepository ??= new ServiciosObituariosRepository(_dbContext);
+        public SuscripcionesObituariosRepository SuscripcionesObituarios => _suscripcionesObituariosRepository ??= new SuscripcionesObituariosRepository(_dbContext);
 
         public UsuariosRepository Usuarios => _usuariosRepository ??= new UsuariosRepository(_dbContext);
         public VariosSeguridadRepository VariosSeguridad => _variosSeguridadRepository ??= new VariosSeguridadRepository(_dbContext);

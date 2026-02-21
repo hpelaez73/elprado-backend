@@ -1,4 +1,7 @@
+using ElPrado.Services.Interfaces;
+using ElPrado.Services.Services;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.Extensions.FileProviders;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
 using Serilog;
@@ -99,12 +102,15 @@ builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
     });
 
 builder.Services.Configure<ElPrado.Dto.Configuration.PdfSettings>(builder.Configuration.GetSection("PdfSettings"));
+builder.Services.Configure<ElPrado.Dto.Configuration.ImagenSettings>(builder.Configuration.GetSection("ImagenSettings"));
+builder.Services.Configure<ElPrado.Dto.Configuration.ImagenSettings>(builder.Configuration.GetSection("BaseUrl"));
 
 // DI
 builder.Services.AddHttpContextAccessor();
 builder.Services.AddScoped<ElPrado.Data.IUnitOfWork, ElPrado.Data.UnitOfWork>();
 builder.Services.AddScoped<ElPrado.Services.IUserContextService, ElPrado.WebApi.UserContextService>();
-builder.Services.AddScoped<ElPrado.Services.Services.IPdfStorageService, ElPrado.Services.Services.PdfStorageService>();
+builder.Services.AddScoped<IPdfStorageService, PdfStorageService>();
+builder.Services.AddScoped<IImageStorageService, LocalImageStorageService>();
 
 var app = builder.Build();
 

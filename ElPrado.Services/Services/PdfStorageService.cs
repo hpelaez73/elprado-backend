@@ -1,16 +1,9 @@
 ﻿using ElPrado.Dto.Configuration;
+using ElPrado.Services.Interfaces;
 using Microsoft.Extensions.Options;
 
 namespace ElPrado.Services.Services
 {
-    public interface IPdfStorageService
-    {
-        string GetFilePath(string fileName, string? year = null);
-        bool Exists(string fileName, string? year = null);
-        byte[] ReadFile(string fileName, string? year = null);
-        Task<byte[]> ReadFileAsync(string fileName, string? year = null);
-    }
-
     public class PdfStorageService : IPdfStorageService
     {
         private readonly string _basePath;
