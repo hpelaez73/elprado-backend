@@ -1,9 +1,9 @@
 ﻿using ElPrado.Dto.Configuration;
 using ElPrado.Services.Interfaces;
 using Microsoft.AspNetCore.Http;
+using Microsoft.AspNetCore.StaticFiles;
 using Microsoft.Extensions.Options;
 using System.IO;
-using System.Security.Policy;
 
 namespace ElPrado.Services.Services
 {
@@ -51,18 +51,38 @@ namespace ElPrado.Services.Services
             return apiUrlPath;
         }
 
-        public void DeleteObituarioImage(int codObituario, string imageUrl)
+        public void DeleteObituarioImage(int codObituario, string idImagen)
         {
             string folderPath = Path.Combine(_basePath, "obituarios", codObituario.ToString());
-            string fullPath = Path.Combine(folderPath, imageUrl);
+            string fullPath = Path.Combine(folderPath, idImagen);
 
             if (File.Exists(fullPath))
                 File.Delete(fullPath);
         }
 
-        public byte[] GetObituarioImage(int codObituario, string idImagen)
+        public byte[] GetObituarioImage(int codObituario, string idImagen, out string contentType)
         {
-            throw new NotImplementedException();
+            string folderPath = Path.Combine(_basePath, "obituarios", codObituario.ToString());
+            string fullPath = Path.Combine(folderPath, idImagen);
+            
+            if (!File.Exists(fullPath))
+                throw new FileNotFoundException("Imagen no encontrada", idImagen);
+
+            contentType = GetContentType(fullPath);
+
+            return File.ReadAllBytes(fullPath);
+        }
+
+        private string GetContentType(string path)
+        {
+            var provider = new FileExtensionContentTypeProvider();
+
+            if (!provider.TryGetContentType(path, out var contentType))
+            {
+                contentType = "application/octet-stream";
+            }
+
+            return contentType;
         }
     }
 }

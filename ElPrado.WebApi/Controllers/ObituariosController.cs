@@ -13,7 +13,7 @@ namespace ElPrado.WebApi.Controllers
     public class ObituariosController : ControladorBaseCrud<Obituarios, DtoObituarios>
     {
         private ObituariosService obituariosService => (_servicio as ObituariosService)!;
-        IImageStorageService? _imageStorageService;
+        IImageStorageService _imageStorageService;
 
         public ObituariosController(IUnitOfWork unitOfWork, IUserContextService userContext, IImageStorageService imageStorageService) : base(unitOfWork, userContext)
         {
@@ -81,12 +81,8 @@ namespace ElPrado.WebApi.Controllers
             if (!_imageStorageService.Exists(id, idImagen))
                 return NotFound("No se encuentra la imagen");
 
-            return _imageStorageService.Gete(id, idImagen);
-
-
-            var contentType = GetContentType(fullPath);
-
-            return PhysicalFile(fullPath, contentType);
+            var fileBytes = _imageStorageService.GetObituarioImage(id, idImagen, out string contentType);
+            return File(fileBytes, contentType);
         }
     }
 }

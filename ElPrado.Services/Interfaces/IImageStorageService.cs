@@ -7,6 +7,6 @@ namespace ElPrado.Services.Interfaces
         string SaveObituarioImage(int codObituario, IFormFile file);
         void DeleteObituarioImage(int codObituario, string imageUrl);
         bool Exists(int codObituario, string idImagen);
-        byte[] GetObituarioImage(int codObituario, string idImagen);
+        byte[] GetObituarioImage(int codObituario, string idImagen, out string contentType);
     }
 }
