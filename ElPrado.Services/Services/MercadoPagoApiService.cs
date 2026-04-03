@@ -104,7 +104,11 @@ namespace ElPrado.Services.Services
             dtoPayment.PagoAprobado = pago.Status != null && pago.Status != PaymentStatus.Rejected;
             if (pago.ExternalReference == null)
             {
-                pago.ExternalReference = "Venta presencial";
+                dtoPayment.ReferenciaExterna = "Venta presencial";
+            }
+            else if (pago.PointOfInteraction.Type.ToLower() != "checkout")
+            {
+                dtoPayment.ReferenciaExterna = "Venta presencial";
             }
             else if (dtoPayment.PagoAprobado)
             {
