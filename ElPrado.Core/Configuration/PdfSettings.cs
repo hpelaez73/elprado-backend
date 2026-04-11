@@ -1,4 +1,4 @@
-﻿namespace ElPrado.Dto.Configuration
+﻿namespace ElPrado.Core.Configuration
 {
     public class PdfSettings
     {

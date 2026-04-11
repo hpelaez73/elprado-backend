@@ -12,26 +12,40 @@
         public string TipoComprobante { get; set; } = string.Empty;
         public string Talonario { get; set; } = string.Empty;
         public string NroComprobante { get; set; } = string.Empty;
+        public string Letra { get; set; } = string.Empty;
+        public int PuntoVenta { get; set; }
+
+        public int? CodigoAfip { get; set; }
+        public string AfipResultado { get; set; } = string.Empty;
+        public string AfipCAE { get; set; } = string.Empty;
+        public DateTime? AfipVencimientoCAE { get; set; }
+        public int? AfipTipoDocumento { get; set; }
+        public long? AfipNroDocumento { get; set; }
+
         public string TipoDocumento { get; set; } = string.Empty;
         public string Cliente { get; set; } = string.Empty;
-        public int? NroDocumento { get; set; }
+        public long? NroDocumento { get; set; }
         public long? Cuit { get; set; }
         public string Telefono { get; set; } = string.Empty;
         public string CategoriaIva { get; set; } = string.Empty;
         public string Direccion { get; set; } = string.Empty;
         public string Localidad { get; set; } = string.Empty;
+
         public double Neto { get; set; }
         public double Redondeo { get; set; }
         public double NoGravado { get; set; }
         public double Iva { get; set; }
         public double Total { get; set; }
         public bool Pagado { get; set; }
+        public string Observaciones { get; set; } = string.Empty;
+
         public int? Propuesta { get; set; }
         public string Parcela { get; set; } = string.Empty;
         public string Manzana { get; set; } = string.Empty;
         public string Sector { get; set; } = string.Empty;
         public string ZonaCobranza { get; set; } = string.Empty;
         public string Cobrador { get; set; } = string.Empty;
+
         public string ClienteBeneficiado { get; set; } = string.Empty;
         public int? DocumentoBeneficiado { get; set; }
         public DateOnly? FechaUtilizacion { get; set; }
@@ -42,7 +56,7 @@
     public class DtoComprobantesDetalles
     {
         public string Detalle { get; set; } = string.Empty;
-        public double Cantidad { get; set; }
+        public double? Cantidad { get; set; }
         public double PrecioUnitario { get; set; }
         public double Total { get; set; }
         public double Porcentaje { get; set; }
@@ -61,6 +75,7 @@
         public DateOnly Fecha { get; set; }
         public double Total { get; set; }
         public string NombrePdf { get; set; } = string.Empty;
+        public int CodTalonario { get; set; }
     }
 
     public class DtoComprobantesFacturasPublicas

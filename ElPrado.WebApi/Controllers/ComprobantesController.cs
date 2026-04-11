@@ -1,22 +1,30 @@
 ﻿using ElPrado.Core;
 using ElPrado.Data;
+using ElPrado.Dto.Documents;
 using ElPrado.Dto.Dtos;
+using ElPrado.Reports.Documents;
+using ElPrado.Reports.Interfaces;
 using ElPrado.Services;
 using ElPrado.Services.Interfaces;
 using ElPrado.Services.Services;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using QuestPDF.Companion;
 
 namespace ElPrado.WebApi.Controllers
 {
     public class ComprobantesController : ControladorBase
     {
         private ComprobantesService comprobantesService => (_servicio as ComprobantesService)!;
-        private readonly IPdfStorageService _pdfService;
+        private readonly IPdfStorageService _pdfStorageService;
+        private readonly IPdfService _pdfService;
+        private readonly IReportImageService _reportImageService;
 
-        public ComprobantesController(IUnitOfWork unitOfWork, IUserContextService userContext, IPdfStorageService pdfService) : base(unitOfWork, userContext)
+        public ComprobantesController(IUnitOfWork unitOfWork, IUserContextService userContext, IPdfStorageService pdfStorageService, IPdfService pdfService, IReportImageService reportImageService) : base(unitOfWork, userContext)
         {
+            _pdfStorageService = pdfStorageService;
             _pdfService = pdfService;
+            _reportImageService = reportImageService;
         }
 
         protected override ServiceBase CrearServicio()
@@ -66,11 +74,32 @@ namespace ElPrado.WebApi.Controllers
         [HttpGet("Factura/{year}/{fileName}")]
         public IActionResult DescargarFactura(string year, string fileName)
         {
-            if (!_pdfService.Exists(fileName, year))
+            if (!_pdfStorageService.Exists(fileName, year))
                 return NotFound("Archivo no encontrado.");
 
-            var fileBytes = _pdfService.ReadFile(fileName, year);
+            var fileBytes = _pdfStorageService.ReadFile(fileName, year);
             return File(fileBytes, "application/pdf", fileName);
+        }
+
+        [HttpPost("Factura")]
+        public IActionResult DescargarFactura([FromBody] DtoComprobanteReq dtoComprobante)
+        {
+            DocFactura? factura = comprobantesService.FacturaPdf(dtoComprobante.CodTalonario, dtoComprobante.NroComprobante);
+
+            if (factura == null)
+            {
+                return NotFound("Archivo no encontrado.");
+            }
+
+            factura.Imagenes = new DocImagenesFactura
+            {
+                LogoArca = _reportImageService.GetLogoArca(),
+                LogoEmpresa = _reportImageService.GetLogoEmpresa(),
+                SelloPagado = _reportImageService.GetSelloPagado()
+            };
+
+            var pdf = _pdfService.GenerarFactura(factura); 
+            return File(pdf, "application/pdf");
         }
 
         [AllowAnonymous]
@@ -81,10 +110,10 @@ namespace ElPrado.WebApi.Controllers
             if (dtoFactura == null) return NotFound("Factura no encontrada");
             if (!dtoFactura.Activo) return NotFound("Enlace inactivo");
 
-            if (!_pdfService.Exists(dtoFactura.NombrePdf, dtoFactura.Anio.ToString()))
+            if (!_pdfStorageService.Exists(dtoFactura.NombrePdf, dtoFactura.Anio.ToString()))
                 return NotFound("Archivo no encontrado.");
 
-            var fileBytes = _pdfService.ReadFile(dtoFactura.NombrePdf, dtoFactura.Anio.ToString());
+            var fileBytes = _pdfStorageService.ReadFile(dtoFactura.NombrePdf, dtoFactura.Anio.ToString());
             return File(fileBytes, "application/pdf", dtoFactura.NombrePdf);
         }
 

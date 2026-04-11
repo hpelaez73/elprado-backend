@@ -1,7 +1,9 @@
 ﻿using ElPrado.Core;
 using ElPrado.Core.Utils;
 using ElPrado.Data;
+using ElPrado.Dto.Documents;
 using ElPrado.Dto.Dtos;
+using ElPrado.Reports.Mappers;
 
 namespace ElPrado.Services.Services
 {
@@ -103,6 +105,17 @@ namespace ElPrado.Services.Services
         public DtoComprobantesFacturasPublicas? BuscarLinkPublicoPdf(string id)
         {
             return _uow.Comprobantes.BuscarLinkPublicoPdf(id);
+        }
+
+        public DocFactura? FacturaPdf(int codTalonario, string nroComprobante)
+        {
+            DtoComprobantes? comprobante = _uow.Comprobantes.Visualizar(codTalonario, nroComprobante);
+            if (comprobante == null)
+            {
+                return null;
+            }
+
+            return FacturasMapper.MapToDoc(comprobante);
         }
     }
 }
