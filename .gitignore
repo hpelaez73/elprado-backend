@@ -5,10 +5,11 @@
 /ElPrado.Data/obj
 /ElPrado.Dto/bin
 /ElPrado.Dto/obj
+/ElPrado.Reports/bin
+/ElPrado.Reports/obj
 /ElPrado.Services/bin
 /ElPrado.Services/obj
 /ElPrado.WebApi/bin
 /ElPrado.WebApi/obj
-/appdata/pdfs/2025
 appdata
 /ElPrado.WebApi/appsettings.Development.json

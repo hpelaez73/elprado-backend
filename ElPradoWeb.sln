@@ -1,7 +1,7 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
-# Visual Studio Version 17
-VisualStudioVersion = 17.7.34003.232
+# Visual Studio Version 18
+VisualStudioVersion = 18.3.11527.330 d18.3
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "ElPrado.Data", "ElPrado.Data\ElPrado.Data.csproj", "{8049C738-880D-43EB-A9D4-C472C11300D7}"
 EndProject
@@ -12,6 +12,8 @@ EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ElPrado.Core", "ElPrado.Core\ElPrado.Core.csproj", "{A295E3EC-3D3D-4715-84BA-583D1CCB3B66}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ElPrado.Dto", "ElPrado.Dto\ElPrado.Dto.csproj", "{00D14989-F1F4-41C5-B13F-9AA7DC4C2452}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ElPrado.Reports", "ElPrado.Reports\ElPrado.Reports.csproj", "{4C53DDC0-4807-4B05-95BC-EFAD64811D8E}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -39,6 +41,10 @@ Global
 		{00D14989-F1F4-41C5-B13F-9AA7DC4C2452}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{00D14989-F1F4-41C5-B13F-9AA7DC4C2452}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{00D14989-F1F4-41C5-B13F-9AA7DC4C2452}.Release|Any CPU.Build.0 = Release|Any CPU
+		{4C53DDC0-4807-4B05-95BC-EFAD64811D8E}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{4C53DDC0-4807-4B05-95BC-EFAD64811D8E}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{4C53DDC0-4807-4B05-95BC-EFAD64811D8E}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{4C53DDC0-4807-4B05-95BC-EFAD64811D8E}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

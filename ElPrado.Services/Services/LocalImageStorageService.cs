@@ -1,9 +1,8 @@
-﻿using ElPrado.Dto.Configuration;
+﻿using ElPrado.Core.Configuration;
 using ElPrado.Services.Interfaces;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.StaticFiles;
 using Microsoft.Extensions.Options;
-using System.IO;
 
 namespace ElPrado.Services.Services
 {
@@ -64,7 +63,7 @@ namespace ElPrado.Services.Services
         {
             string folderPath = Path.Combine(_basePath, "obituarios", codObituario.ToString());
             string fullPath = Path.Combine(folderPath, idImagen);
-            
+
             if (!File.Exists(fullPath))
                 throw new FileNotFoundException("Imagen no encontrada", idImagen);
 

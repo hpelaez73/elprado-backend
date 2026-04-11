@@ -1,7 +1,8 @@
+using ElPrado.Reports.Interfaces;
+using ElPrado.Reports.Services;
 using ElPrado.Services.Interfaces;
 using ElPrado.Services.Services;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
-using Microsoft.Extensions.FileProviders;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
 using Serilog;
@@ -101,16 +102,23 @@ builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
         };
     });
 
-builder.Services.Configure<ElPrado.Dto.Configuration.PdfSettings>(builder.Configuration.GetSection("PdfSettings"));
-builder.Services.Configure<ElPrado.Dto.Configuration.ImagenSettings>(builder.Configuration.GetSection("ImagenSettings"));
-builder.Services.Configure<ElPrado.Dto.Configuration.ImagenSettings>(builder.Configuration.GetSection("BaseUrl"));
+builder.Services.AddMemoryCache(); // registra IMemoryCache exigido por ReportImageService
+
+builder.Services.Configure<ElPrado.Core.Configuration.PdfSettings>(builder.Configuration.GetSection("PdfSettings"));
+builder.Services.Configure<ElPrado.Core.Configuration.ImagenSettings>(builder.Configuration.GetSection("ImagenSettings"));
+builder.Services.Configure<ElPrado.Core.Configuration.ImagenSettings>(builder.Configuration.GetSection("BaseUrl"));
 
 // DI
 builder.Services.AddHttpContextAccessor();
 builder.Services.AddScoped<ElPrado.Data.IUnitOfWork, ElPrado.Data.UnitOfWork>();
 builder.Services.AddScoped<ElPrado.Services.IUserContextService, ElPrado.WebApi.UserContextService>();
 builder.Services.AddScoped<IPdfStorageService, PdfStorageService>();
+builder.Services.AddScoped<IPdfService, PdfService>();
 builder.Services.AddScoped<IImageStorageService, LocalImageStorageService>();
+builder.Services.AddScoped<IReportImageService, ReportImageService>();
+
+// Configuraciones varias
+ElPrado.Reports.Configuration.DocSettings.Configurar();
 
 var app = builder.Build();
 

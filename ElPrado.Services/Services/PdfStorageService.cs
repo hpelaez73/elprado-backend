@@ -1,4 +1,4 @@
-﻿using ElPrado.Dto.Configuration;
+﻿using ElPrado.Core.Configuration;
 using ElPrado.Services.Interfaces;
 using Microsoft.Extensions.Options;
 
