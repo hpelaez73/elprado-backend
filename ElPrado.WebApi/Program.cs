@@ -1,11 +1,18 @@
+using ElPrado.Data.Repositories;
 using ElPrado.Reports.Interfaces;
 using ElPrado.Reports.Services;
 using ElPrado.Services.Interfaces;
 using ElPrado.Services.Services;
+using FirebirdSql.Data.FirebirdClient;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.AspNetCore.DataProtection;
+using Microsoft.AspNetCore.DataProtection.KeyManagement;
+using Microsoft.AspNetCore.DataProtection.Repositories;
+using Microsoft.Extensions.Options;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
 using Serilog;
+using System.Data;
 using System.Text;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -102,11 +109,39 @@ builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
         };
     });
 
+
+// Connection factory para Firebird
+builder.Services.AddSingleton<Func<IDbConnection>>(_ =>
+{
+    var connectionString = builder.Configuration.GetConnectionString("DefaultConnection");
+
+    return () =>
+    {
+        var conn = new FbConnection(connectionString);
+        conn.Open();
+        return conn;
+    };
+});
+
+// Repositorio Data Protection
+builder.Services.AddSingleton<IXmlRepository, FirebirdXmlRepository>();
+
+// Data Protection
+builder.Services.AddDataProtection()
+    .SetApplicationName("ElPradoCRM");
+
+// Configuración correcta (sin BuildServiceProvider)
+builder.Services.AddSingleton<IConfigureOptions<KeyManagementOptions>>(sp =>
+    new ConfigureOptions<KeyManagementOptions>(options =>
+    {
+        options.XmlRepository = sp.GetRequiredService<IXmlRepository>();
+    }));
+
+
 builder.Services.AddMemoryCache(); // registra IMemoryCache exigido por ReportImageService
 
 builder.Services.Configure<ElPrado.Core.Configuration.PdfSettings>(builder.Configuration.GetSection("PdfSettings"));
 builder.Services.Configure<ElPrado.Core.Configuration.ImagenSettings>(builder.Configuration.GetSection("ImagenSettings"));
-builder.Services.Configure<ElPrado.Core.Configuration.ImagenSettings>(builder.Configuration.GetSection("BaseUrl"));
 
 // DI
 builder.Services.AddHttpContextAccessor();
