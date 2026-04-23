@@ -1,5 +1,5 @@
 ﻿using ElPrado.Core;
-using ElPrado.Data;
+using ElPrado.Data.Interfaces;
 
 namespace ElPrado.Services.Services
 {

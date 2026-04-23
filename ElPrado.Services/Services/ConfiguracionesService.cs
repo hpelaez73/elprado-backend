@@ -1,4 +1,4 @@
-﻿using ElPrado.Data;
+﻿using ElPrado.Data.Interfaces;
 using ElPrado.Dto.Dtos;
 using ElPrado.Services.Mappers;
 

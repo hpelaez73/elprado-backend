@@ -1,3 +1,4 @@
+using ElPrado.Data.Interfaces;
 using ElPrado.Data.Repositories;
 using Microsoft.Extensions.Configuration;
 
@@ -9,6 +10,7 @@ namespace ElPrado.Data
 
         private CampaniasRepository? _campaniasRepository;
         private ClientesRepository? _clientesRepository;
+        private ColaEnvioFacturaRepository? _colaEnvioFacturaRepository;
         private ComentariosObituariosRepository? _comentariosObituariosRepository;
         private ComprobantesRepository? _comprobantesRepository;
         private CondolenciasObituariosRepository? _condolenciasObituariosRepository;
@@ -45,6 +47,7 @@ namespace ElPrado.Data
 
         public CampaniasRepository Campanias => _campaniasRepository ??= new CampaniasRepository(_dbContext);
         public ClientesRepository Clientes => _clientesRepository ??= new ClientesRepository(_dbContext);
+        public ColaEnvioFacturaRepository ColaEnvioFactura => _colaEnvioFacturaRepository ??= new ColaEnvioFacturaRepository(_dbContext);
         public ComentariosObituariosRepository ComentariosObituarios => _comentariosObituariosRepository ??= new ComentariosObituariosRepository(_dbContext);
         public ComprobantesRepository Comprobantes => _comprobantesRepository ??= new ComprobantesRepository(_dbContext);
         public CondolenciasObituariosRepository CondolenciasObituarios => _condolenciasObituariosRepository ??= new CondolenciasObituariosRepository(_dbContext);

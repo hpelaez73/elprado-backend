@@ -1,12 +1,12 @@
-using ElPrado.Data.Models;
 using ElPrado.Data.Repositories;
 
-namespace ElPrado.Data
+namespace ElPrado.Data.Interfaces
 {
     public interface IUnitOfWork : IDisposable
     {
         CampaniasRepository Campanias { get; }
         ClientesRepository Clientes { get; }
+        ColaEnvioFacturaRepository ColaEnvioFactura { get; }
         ComentariosObituariosRepository ComentariosObituarios { get; }
         ComprobantesRepository Comprobantes { get; }
         CondolenciasObituariosRepository CondolenciasObituarios { get; }

@@ -1,4 +1,4 @@
-﻿using ElPrado.Data;
+﻿using ElPrado.Data.Interfaces;
 using ElPrado.Services;
 using ElPrado.Services.Services;
 using Microsoft.AspNetCore.Authorization;

@@ -1,6 +1,6 @@
 ﻿using ElPrado.Core;
 using ElPrado.Core.Utils;
-using ElPrado.Data;
+using ElPrado.Data.Interfaces;
 using ElPrado.Dto.Documents;
 using ElPrado.Dto.Dtos;
 using ElPrado.Reports.Mappers;

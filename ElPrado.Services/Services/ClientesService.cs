@@ -1,4 +1,4 @@
-﻿using ElPrado.Data;
+﻿using ElPrado.Data.Interfaces;
 using ElPrado.Data.Models;
 using ElPrado.Data.Repositories;
 using ElPrado.Dto.Dtos;

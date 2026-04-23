@@ -1,23 +1,23 @@
 ﻿using Dapper;
+using ElPrado.Data.Interfaces;
 using Microsoft.AspNetCore.DataProtection.Repositories;
 using System.Data;
 using System.Xml.Linq;
 
-namespace ElPrado.Data.Repositories
+namespace ElPrado.Data.Factories
 {
     public class FirebirdXmlRepository : IXmlRepository
     {
-        private readonly Func<IDbConnection> _connectionFactory;
+        private readonly IDbConnectionFactory _connectionFactory;
 
-        public FirebirdXmlRepository(Func<IDbConnection> connectionFactory)
+        public FirebirdXmlRepository(IDbConnectionFactory connectionFactory)
         {
             _connectionFactory = connectionFactory;
         }
 
         public IReadOnlyCollection<XElement> GetAllElements()
         {
-            using var conn = _connectionFactory();
-
+            using var conn = _connectionFactory.Create();
             const string sql = "SELECT XML_DATA FROM DP_KEYS";
 
             var xmlStrings = conn.Query<string>(sql);
@@ -27,7 +27,7 @@ namespace ElPrado.Data.Repositories
 
         public void StoreElement(XElement element, string friendlyName)
         {
-            using var conn = _connectionFactory();
+            using var conn = _connectionFactory.Create();
 
             const string sql = @"
             INSERT INTO DP_KEYS (FRIENDLY_NAME, XML_DATA)
