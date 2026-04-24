@@ -1,5 +1,4 @@
 ﻿using ElPrado.Data.Interfaces;
-using ElPrado.Data.Models;
 using ElPrado.Services.Interfaces;
 
 namespace ElPrado.Services.Services
@@ -15,31 +14,25 @@ namespace ElPrado.Services.Services
 
         public async Task ProcesarAsync()
         {
-            var pendientes = await _uow.ColaEnvioFactura.BuscarPendientesAsync(20);
+            var listPendientes = await _uow.ColaEnvioFactura.BuscarPendientesAsync();
 
-            foreach (var envio in pendientes)
+            foreach (var factura in listPendientes)
             {
                 try
                 {
-                    await _uow.ColaEnvioFactura.MarcarEnviandoAsync(envio.CodColaEnvio);
+                    await _uow.ColaEnvioFactura.MarcarEnviandoAsync(factura.CodColaEnvio);
 
-                    var link = GenerarLink(envio);
-                    await _email.EnviarFacturaAsync(envio.MedioEnvio, link);
+                    await _email.EnviarFacturaAsync(factura);
+                    await Task.Delay(2000);
 
-                    await _uow.ColaEnvioFactura.MarcarEnviadoAsync(envio.CodColaEnvio);
-
-                    // TODO: insertar en HIST_ENVIOS_FACTURAS
+                    await _uow.ColaEnvioFactura.MarcarEnviadoAsync(factura.CodColaEnvio);
                 }
                 catch (Exception ex)
                 {
-                    await _uow.ColaEnvioFactura.MarcarErrorAsync(envio.CodColaEnvio, ex.Message);
+                    await _uow.ColaEnvioFactura.MarcarErrorAsync(factura.CodColaEnvio, ex.Message);
+                    throw;
                 }
             }
-        }
-
-        private string GenerarLink(ColaEnvioFactura envio)
-        {
-            return $"https://tu-api/api/facturas/{envio.CodTalonario}/{envio.NroComprobante}/pdf";
         }
     }
 }

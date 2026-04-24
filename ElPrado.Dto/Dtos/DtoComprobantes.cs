@@ -83,6 +83,8 @@
         public int Anio { get; set; }
         public string NombrePdf { get; set; } = string.Empty;
         public bool Activo { get; set; }
+        public int CodTalonario { get; set; }
+        public string NroComprobante { get; set; } = string.Empty;
     }
 
     public class DtoFacturasEnviarList : DtoBase

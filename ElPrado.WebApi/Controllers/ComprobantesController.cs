@@ -2,14 +2,12 @@
 using ElPrado.Data.Interfaces;
 using ElPrado.Dto.Documents;
 using ElPrado.Dto.Dtos;
-using ElPrado.Reports.Documents;
 using ElPrado.Reports.Interfaces;
 using ElPrado.Services;
 using ElPrado.Services.Interfaces;
 using ElPrado.Services.Services;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using QuestPDF.Companion;
 
 namespace ElPrado.WebApi.Controllers
 {
@@ -98,7 +96,7 @@ namespace ElPrado.WebApi.Controllers
                 SelloPagado = _reportImageService.GetSelloPagado()
             };
 
-            var pdf = _pdfService.GenerarFactura(factura); 
+            var pdf = _pdfService.GenerarFactura(factura);
             return File(pdf, "application/pdf");
         }
 
@@ -110,11 +108,19 @@ namespace ElPrado.WebApi.Controllers
             if (dtoFactura == null) return NotFound("Factura no encontrada");
             if (!dtoFactura.Activo) return NotFound("Enlace inactivo");
 
+            /*
             if (!_pdfStorageService.Exists(dtoFactura.NombrePdf, dtoFactura.Anio.ToString()))
                 return NotFound("Archivo no encontrado.");
 
             var fileBytes = _pdfStorageService.ReadFile(dtoFactura.NombrePdf, dtoFactura.Anio.ToString());
             return File(fileBytes, "application/pdf", dtoFactura.NombrePdf);
+            */
+            DtoComprobanteReq dtoComprobante = new DtoComprobanteReq
+            {
+                CodTalonario = dtoFactura.CodTalonario,
+                NroComprobante = dtoFactura.NroComprobante
+            };
+            return DescargarFactura(dtoComprobante);
         }
 
         #region Envio de facturas

@@ -1,7 +1,9 @@
-﻿namespace ElPrado.Services.Interfaces
+﻿using ElPrado.Dto.Dtos;
+
+namespace ElPrado.Services.Interfaces
 {
     public interface IEmailService
     {
-        Task EnviarFacturaAsync(string destino, string linkFactura);
+        Task EnviarFacturaAsync(DtoColaEnvioFactura dtoFactura);
     }
 }

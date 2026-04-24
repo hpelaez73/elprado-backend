@@ -1,5 +1,6 @@
 ﻿using Dapper;
 using ElPrado.Data.Models;
+using ElPrado.Dto.Dtos;
 
 namespace ElPrado.Data.Repositories
 {
@@ -9,16 +10,11 @@ namespace ElPrado.Data.Repositories
         {
         }
 
-        public async Task<IEnumerable<ColaEnvioFactura>> BuscarPendientesAsync(int limite)
+        public async Task<IEnumerable<DtoColaEnvioFactura>> BuscarPendientesAsync()
         {
-            string sql = $@"SELECT FIRST {limite} *
-                            FROM COLA_ENVIOS_FACTURAS
-                            WHERE ESTADO IN ('Pendiente','Error')
-                            AND INTENTOS < 5
-                            AND POR_EMAIL = 1
-                            ORDER BY FECHA_CREACION";
+            string sql = $@"SELECT * FROM GET_COLA_ENVIO_FACTURAS";
 
-            return await _connection.QueryAsync<ColaEnvioFactura>(sql, null, _transaction);
+            return await _connection.QueryAsync<DtoColaEnvioFactura>(sql, null, _transaction);
         }
 
         public async Task MarcarEnviandoAsync(int codColaEnvio)

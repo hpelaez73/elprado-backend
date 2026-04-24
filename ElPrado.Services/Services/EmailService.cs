@@ -1,5 +1,6 @@
 ﻿using ElPrado.Core.Configuration;
 using ElPrado.Data.Interfaces;
+using ElPrado.Dto.Dtos;
 using ElPrado.Services.Interfaces;
 using MailKit.Net.Smtp;
 using MailKit.Security;
@@ -16,16 +17,29 @@ namespace ElPrado.Services.Services
             _emailSettings = configServicesRepository.BuscarConfigMail() ?? new EmailSettings();
         }
 
-        public async Task EnviarFacturaAsync(string destino, string linkFactura)
+        public async Task EnviarFacturaAsync(DtoColaEnvioFactura dtoFactura)
         {
             var message = new MimeMessage();
-            message.From.Add(new MailboxAddress("Sistema", _emailSettings.SmtpUsuarioCobranza));
-            message.To.Add(MailboxAddress.Parse(destino));
-            message.Subject = "Factura disponible";
+            message.From.Add(new MailboxAddress("El Prado - Facturacion", _emailSettings.SmtpUsuarioCobranza));
+            message.To.Add(MailboxAddress.Parse(dtoFactura.MedioEnvio));
+            message.Subject = "El Prado - Factura electronica";
 
             message.Body = new TextPart("html")
             {
-                Text = $"<p>Descargar factura:</p><a href='{linkFactura}'>Ver factura</a>"
+                Text = @$"  <html><head><meta charset="" ISO-8859-1"" /><title>Factura Electronica</title></head>
+                            <body bgcolor=""#FFFFFF"" text=""#000066"">
+                            Estimado/a <b>{ dtoFactura.Cliente }</b>:<br><br>
+                            En el siguiente enlace encontrara la Factura Electronica:<br>
+                            <a href=""{ dtoFactura.UrlFactura }/{ dtoFactura.IdGuid }"">{ dtoFactura.NroComprobante }</a><br>
+                            <br>Ante cualquier duda contactenos a los siguientes numeros:<br>
+                            { dtoFactura.InformacionContacto1 }<br>
+                            { dtoFactura.InformacionContacto2 }<br>
+                            { dtoFactura.InformacionContacto3 }<br>
+                            Tambien puede descargar todas sus facturas desde <a href=""{ dtoFactura.UrlWeb }/"">{ dtoFactura.UrlWeb }</a><br><br><br>
+                            <font color=""#CC0000""><b>No responda este mensaje.</b></font><br><br><br>
+                            <font color=""#003300""><big><big><big><big><b>El Prado</b></big></big></big></big><br>
+                            Cementerio Parque Privado</font><br>
+                            </body></html>"
             };
 
             using var client = new SmtpClient();
