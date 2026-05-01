@@ -11,5 +11,7 @@
 /ElPrado.Services/obj
 /ElPrado.WebApi/bin
 /ElPrado.WebApi/obj
+/ElPrado.Workers/bin
+/ElPrado.Workers/obj
 appdata
 /ElPrado.WebApi/appsettings.Development.json

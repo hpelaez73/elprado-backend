@@ -6,7 +6,6 @@ using ElPrado.Reports.Services;
 using ElPrado.Services;
 using ElPrado.Services.Interfaces;
 using ElPrado.Services.Services;
-using ElPrado.Services.Workers;
 using ElPrado.WebApi;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.DataProtection;
@@ -149,10 +148,6 @@ builder.Services.AddScoped<IReportImageService, ReportImageService>();
 
 builder.Services.AddScoped<IEmailService, EmailService>();
 builder.Services.AddScoped<ProcesadorEnviosService>();
-
-// Registrar WorkerStateService como Singleton para que sea compartido por todas las instancias
-builder.Services.AddSingleton<IWorkerStateService, WorkerStateService>();
-//builder.Services.AddHostedService<EmailWorker>();
 
 // Configuraciones varias
 ElPrado.Reports.Configuration.DocSettings.Configurar();
