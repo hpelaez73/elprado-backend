@@ -13,19 +13,19 @@ namespace ElPrado.Services.Services
         {
         }
 
-        public DtoComprobantes? Visualizar(int codTalonario, string nroComprobante)
+        public async Task<DtoComprobantes?> VisualizarAsync(int codTalonario, string nroComprobante)
         {
-            return _uow.Comprobantes.Visualizar(codTalonario, nroComprobante);
+            return await _uow.Comprobantes.VisualizarAsync(codTalonario, nroComprobante);
         }
 
-        public IEnumerable<DtoComprobantesFacturasElectronicas> Facturas(int periodo)
+        public async Task<IEnumerable<DtoComprobantesFacturasElectronicas>> FacturasAsync(int periodo)
         {
-            return _uow.Comprobantes.Facturas(_userContext.GetCodCliente(), new DateTime(periodo, 1, 1), new DateTime(periodo, 12, 31));
+            return await _uow.Comprobantes.FacturasAsync(_userContext.GetCodCliente(), new DateTime(periodo, 1, 1), new DateTime(periodo, 12, 31));
         }
 
-        public List<int> PeriodosFacturacion()
+        public async Task<List<int>> PeriodosFacturacionAsync()
         {
-            DtoComprobantesPeriodo? periodo = _uow.Comprobantes.PeriodosFacturacion(_userContext.GetCodCliente());
+            DtoComprobantesPeriodo? periodo = await _uow.Comprobantes.PeriodosFacturacionAsync(_userContext.GetCodCliente());
             if (periodo == null || periodo.MinFecha == DateOnly.MinValue)
             {
                 return new();
@@ -43,53 +43,34 @@ namespace ElPrado.Services.Services
 
 
         #region Envio de facturas
-        public ApiResponseListado<IEnumerable<dynamic>> ListadoFacturasEnviar(DtoOpcionesListados opcionesListado)
+        public async Task<ApiResponseListado<IEnumerable<dynamic>>> ListadoFacturasEnviarAsync(DtoOpcionesListados opcionesListado)
         {
-            ApiResponseListado<IEnumerable<dynamic>> repListFacturas = _uow.Comprobantes.ListadoFacturasEnviar(opcionesListado);
-            if (!opcionesListado.MostrarFiltros)
-            {
-                foreach (DtoFacturasEnviarList item in repListFacturas.Data!.Select(v => (DtoFacturasEnviarList)v))
-                {
-                    string strTelefono = FunUtils.ExtraerDigitos(item.TelefonoMovil);
-                    if (strTelefono[0] == '0') { strTelefono = strTelefono[1..]; }
-                    if (strTelefono.Length < 10) { strTelefono = "341" + strTelefono; }
-                    if (strTelefono.Length > 10) { strTelefono = strTelefono.Remove(strTelefono.IndexOf("15"), 2); }
-                    item.TelefonoMovil = strTelefono;
-
-                    item.LinkWhatsApp = ArmarLinkWs(item.TelefonoMovil, item.Cliente, item.NroComprobante, item.Fecha, item.Propuesta);
-                }
-            }
-            return repListFacturas;
+            return await _uow.Comprobantes.ListadoFacturasEnviarAsync(opcionesListado);
         }
 
-        private string ArmarLinkWs(string telefonoMovil, string cliente, string nroComprobante, DateOnly fecha, int propuesta)
-        {
-            string strTexto = $"Estimado/a%20*{cliente.Replace(" ", "%20")}*%20:%0A%0A" +
-                $"Puede%20descargar%20su%20Factura%20Electronica%20desde:%20{_uow.ConfiguracionGeneral.BuscarUrlFacturasPdf()}/{fecha.Year}/{nroComprobante}-{propuesta.ToString().PadLeft(10, '0')}.pdf%0A%0A" +
-                $"Ante%20cualquier%20duda%20contactenos%20a%20los%20siguientes%20numeros:%0A" +
-                $"{_uow.ConfiguracionGeneral.BuscarInformacionCobranza1().Replace(" ", "%20")}%0A" +
-                $"{_uow.ConfiguracionGeneral.BuscarInformacionCobranza2().Replace(" ", "%20")}%0A" +
-                $"{_uow.ConfiguracionGeneral.BuscarInformacionCobranza3().Replace(" ", "%20")}";
-
-            return $"https://api.whatsapp.com/send?phone=549{telefonoMovil}&text={strTexto}";
-        }
-
-        public Resultados RegistrarEnvio(DtoRegistrarEnvioReq solicitud)
+        public async Task<Resultados> RegistrarEnvioAsync(DtoRegistrarEnvioListReq listSolicitud)
         {
             Resultados resultado = new();
-            if (solicitud.CodTalonario == 0 || solicitud.CodCliente == 0 || string.IsNullOrEmpty(solicitud.NroComprobante) || string.IsNullOrEmpty(solicitud.TelefonoMovil))
+            if (listSolicitud.ListComprobantes == null || listSolicitud.ListComprobantes.Count == 0)
             {
-                resultado.Agregar("Falta ingresar datos del envío");
+                resultado.Agregar("No se han ingresado datos de envío");
                 return resultado;
             }
+
             try
             {
-                _uow.Comprobantes.RegistrarEnvio(solicitud.CodCliente, solicitud.CodTalonario, solicitud.NroComprobante, solicitud.TelefonoMovil, _userContext.GetCodUsuario());
-                RegistrarLog("Envío de facturas a cod_cliente:" + solicitud.CodCliente.ToString());
+                foreach (DtoRegistrarEnvioReq solicitud in listSolicitud.ListComprobantes)
+                {
+                    if (solicitud.CodTalonario == 0 || solicitud.CodCliente == 0 || string.IsNullOrEmpty(solicitud.NroComprobante) || string.IsNullOrEmpty(solicitud.Email))
+                    {
+                        continue;
+                    }
+                    await _uow.ColaEnvioFactura.AgregarAsync(solicitud.CodCliente, solicitud.CodTalonario, solicitud.NroComprobante, solicitud.Email);
+                }
                 _uow.Commit();
             }
             catch
-            {
+            { 
                 _uow.Rollback();
                 throw;
             }
@@ -97,25 +78,30 @@ namespace ElPrado.Services.Services
         }
         #endregion
 
-        public ApiResponseListado<IEnumerable<dynamic>> ListadoComprobantesPropuesta(DtoOpcionesListados opcionesListado)
+        public async Task<ApiResponseListado<IEnumerable<dynamic>>> ListadoComprobantesPropuestaAsync(DtoOpcionesListados opcionesListado)
         {
-            return _uow.Comprobantes.ListadoComprobantesPropuesta(opcionesListado);
+            return await _uow.Comprobantes.ListadoComprobantesPropuestaAsync(opcionesListado);
         }
 
-        public DtoComprobantesFacturasPublicas? BuscarLinkPublicoPdf(string id)
+        public async Task<DtoComprobantesFacturasPublicas?> BuscarLinkPublicoPdfAsync(string id)
         {
-            return _uow.Comprobantes.BuscarLinkPublicoPdf(id);
+            return await _uow.Comprobantes.BuscarLinkPublicoPdfAsync(id);
         }
 
-        public DocFactura? FacturaPdf(int codTalonario, string nroComprobante)
+        public async Task<DocFactura?> FacturaPdfAsync(int codTalonario, string nroComprobante)
         {
-            DtoComprobantes? comprobante = _uow.Comprobantes.Visualizar(codTalonario, nroComprobante);
+            DtoComprobantes? comprobante = await _uow.Comprobantes.VisualizarAsync(codTalonario, nroComprobante);
             if (comprobante == null)
             {
                 return null;
             }
 
             return FacturasMapper.MapToDoc(comprobante);
+        }
+
+        public async Task<ApiResponseListado<IEnumerable<dynamic>>> ListadoColaEnvioEstadosAsync(DtoOpcionesListados opcionesListado)
+        {
+            return await _uow.ColaEnvioFactura.ListadoColaEnvioEstadosAsync(opcionesListado);
         }
     }
 }

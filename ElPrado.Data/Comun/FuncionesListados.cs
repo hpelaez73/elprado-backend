@@ -32,6 +32,19 @@ namespace ElPrado.Data.Comun
             apiResponse.Data = _connection.Query<TDtoList>(sql, null, _transaction);
             return apiResponse;
         }
+        internal async Task<ApiResponseListado<IEnumerable<dynamic>>> ApiResponseAsync(string sql, System.Data.IDbConnection connection, System.Data.IDbTransaction transaction)
+        {
+            ApiResponseListado<IEnumerable<dynamic>> apiResponse = new();
+            if (opcionesListados.MostrarFiltros)
+            {
+                apiResponse.ListFiltros = MapOpcionesListado();
+                return apiResponse;
+            }
+            apiResponse.CantidadPaginas = cantidadPaginas;
+            apiResponse.CantidadRegistros = cantidadRegistros;
+            apiResponse.Data = await connection.QueryAsync<TDtoList>(sql, null, transaction);
+            return apiResponse;
+        }
 
         private List<DtoCamposListado> MapOpcionesListado()
         {

@@ -31,10 +31,10 @@ namespace ElPrado.WebApi.Controllers
         }
 
         [HttpPost("Visualizar")]
-        public ActionResult<ApiResponse<DtoComprobantes>> Visualizar([FromBody] DtoComprobanteReq dtoComprobante)
+        public async Task<ActionResult<ApiResponse<DtoComprobantes>>> VisualizarAsync([FromBody] DtoComprobanteReq dtoComprobante)
         {
             ApiResponse<DtoComprobantes> apiResponse = new();
-            DtoComprobantes? comprobante = comprobantesService.Visualizar(dtoComprobante.CodTalonario, dtoComprobante.NroComprobante);
+            DtoComprobantes? comprobante = await comprobantesService.VisualizarAsync(dtoComprobante.CodTalonario, dtoComprobante.NroComprobante);
             if (comprobante == null)
             {
                 apiResponse.Agregar("No se encontró el comprobante");
@@ -45,11 +45,11 @@ namespace ElPrado.WebApi.Controllers
         }
 
         [HttpGet("PeriodosFacturacion")]
-        public ActionResult<ApiResponse<List<int>>> PeriodosFacturacion()
+        public async Task<ActionResult<ApiResponse<List<int>>>> PeriodosFacturacionAsync()
         {
             ApiResponse<List<int>> apiResponse = new();
 
-            List<int> listPeriodos = comprobantesService.PeriodosFacturacion();
+            List<int> listPeriodos = await comprobantesService.PeriodosFacturacionAsync();
             if (listPeriodos.Count == 0)
             {
                 apiResponse.Agregar("No hay periodos facturados");
@@ -60,11 +60,11 @@ namespace ElPrado.WebApi.Controllers
         }
 
         [HttpGet("Facturas/{periodo}")]
-        public ApiResponse<IEnumerable<DtoComprobantesFacturasElectronicas>> Facturas(int periodo)
+        public async Task<ApiResponse<IEnumerable<DtoComprobantesFacturasElectronicas>>> FacturasAsync(int periodo)
         {
             ApiResponse<IEnumerable<DtoComprobantesFacturasElectronicas>> apiResponse = new()
             {
-                Data = comprobantesService.Facturas(periodo)
+                Data = await comprobantesService.FacturasAsync(periodo)
             };
             return apiResponse;
         }
@@ -80,9 +80,9 @@ namespace ElPrado.WebApi.Controllers
         }
 
         [HttpPost("Factura")]
-        public IActionResult DescargarFactura([FromBody] DtoComprobanteReq dtoComprobante)
+        public async Task<IActionResult> DescargarFacturaAsync([FromBody] DtoComprobanteReq dtoComprobante)
         {
-            DocFactura? factura = comprobantesService.FacturaPdf(dtoComprobante.CodTalonario, dtoComprobante.NroComprobante);
+            DocFactura? factura = await comprobantesService.FacturaPdfAsync(dtoComprobante.CodTalonario, dtoComprobante.NroComprobante);
 
             if (factura == null)
             {
@@ -102,9 +102,9 @@ namespace ElPrado.WebApi.Controllers
 
         [AllowAnonymous]
         [HttpGet("Public/{id}")]
-        public IActionResult DescargarFactura(string id)
+        public async Task<IActionResult> DescargarFacturaPublicaAsync(string id)
         {
-            DtoComprobantesFacturasPublicas? dtoFactura = comprobantesService.BuscarLinkPublicoPdf(id);
+            DtoComprobantesFacturasPublicas? dtoFactura = await comprobantesService.BuscarLinkPublicoPdfAsync(id);
             if (dtoFactura == null) return NotFound("Factura no encontrada");
             if (!dtoFactura.Activo) return NotFound("Enlace inactivo");
 
@@ -120,21 +120,21 @@ namespace ElPrado.WebApi.Controllers
                 CodTalonario = dtoFactura.CodTalonario,
                 NroComprobante = dtoFactura.NroComprobante
             };
-            return DescargarFactura(dtoComprobante);
+            return await DescargarFacturaAsync(dtoComprobante);
         }
 
         #region Envio de facturas
         [HttpPost("ListadoFacturasEnviar")]
-        public ApiResponseListado<IEnumerable<dynamic>> ListadoFacturasEnviar([FromBody] DtoOpcionesListados opcionesListado)
+        public async Task<ApiResponseListado<IEnumerable<dynamic>>> ListadoFacturasEnviarAsync([FromBody] DtoOpcionesListados opcionesListado)
         {
-            return comprobantesService.ListadoFacturasEnviar(opcionesListado);
+            return await comprobantesService.ListadoFacturasEnviarAsync(opcionesListado);
         }
 
         [HttpPost("RegistrarEnvio")]
-        public ActionResult<ApiResponse<int>> RegistrarEnvio([FromBody] DtoRegistrarEnvioReq solicitud)
+        public async Task<ActionResult<ApiResponse<int>>> RegistrarEnvioAsync([FromBody] DtoRegistrarEnvioListReq listSolicitud)
         {
             ApiResponse<int> apiResponse = new();
-            Resultados resultado = comprobantesService.RegistrarEnvio(solicitud);
+            Resultados resultado = await comprobantesService.RegistrarEnvioAsync(listSolicitud);
             if (resultado.HayError)
             {
                 apiResponse.Agregar(resultado);
@@ -143,12 +143,19 @@ namespace ElPrado.WebApi.Controllers
             apiResponse.Message = "Envio registrado";
             return apiResponse;
         }
+
+        [HttpPost("ListadoColaEnvioEstados")]
+        public async Task<ApiResponseListado<IEnumerable<dynamic>>> ListadoColaEnvioEstadosAsync([FromBody] DtoOpcionesListados opcionesListado)
+        {
+            return await comprobantesService.ListadoColaEnvioEstadosAsync(opcionesListado);
+        }
+
         #endregion
 
         [HttpPost("ListadoComprobantesPropuesta")]
-        public ApiResponseListado<IEnumerable<dynamic>> ListadoComprobantesPropuesta([FromBody] DtoOpcionesListados opcionesListado)
+        public async Task<ApiResponseListado<IEnumerable<dynamic>>> ListadoComprobantesPropuestaAsync([FromBody] DtoOpcionesListados opcionesListado)
         {
-            return comprobantesService.ListadoComprobantesPropuesta(opcionesListado);
+            return await comprobantesService.ListadoComprobantesPropuestaAsync(opcionesListado);
         }
 
     }

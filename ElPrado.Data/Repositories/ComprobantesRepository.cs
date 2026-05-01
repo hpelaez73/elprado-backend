@@ -23,36 +23,35 @@ namespace ElPrado.Data.Repositories
                         Campo = "propuesta",
                         Etiqueta = "Propuesta",
                         TipoDato = TipoDatoListado.Entero,
-                        PermiteFiltrar = true,
-                        PermiteOrdenar = true,
-                        OrdenDefault = true,
-                        CampoSql = "P.LEGAJO"
+                        PermiteFiltrar = true
                     },
                     new CamposListado()
                     {
-                        Campo = "fecha",
-                        Etiqueta = "Fecha",
+                        Campo = "fechaDesde",
+                        Etiqueta = "Fecha desde",
                         TipoDato = TipoDatoListado.Fecha,
-                        PermiteFiltrar = true,
-                        PermiteOrdenar = true,
-                        OrdenDefault = true,
-                        CampoSql = "C.FECHA"
+                        PermiteFiltrar = true
+                    },
+                    new CamposListado()
+                    {
+                        Campo = "fechaHasta",
+                        Etiqueta = "Fecha hasta",
+                        TipoDato = TipoDatoListado.Fecha,
+                        PermiteFiltrar = true
                     },
                     new CamposListado()
                     {
                         Campo = "soloNuevo",
                         Etiqueta = "Solo nuevo",
                         TipoDato = TipoDatoListado.Boolean,
-                        PermiteFiltrar = true,
-                        PermiteOrdenar = false
+                        PermiteFiltrar = true
                     },
                     new CamposListado()
                     {
                         Campo = "posteriorSolicitud",
                         Etiqueta = "Posterior a la solicitud",
                         TipoDato = TipoDatoListado.Boolean,
-                        PermiteFiltrar = true,
-                        PermiteOrdenar = false
+                        PermiteFiltrar = true
                     }
                 }
             };
@@ -72,84 +71,104 @@ namespace ElPrado.Data.Repositories
             };
         }
 
-        public DtoComprobantes? Visualizar(int codTalonario, string nroComprobante)
+        public async Task<DtoComprobantes?> VisualizarAsync(int codTalonario, string nroComprobante)
         {
             string sql = "SELECT * FROM GET_DATOS_COMPROBANTE(@codTalonario, @nroComprobante)";
-            DtoComprobantes? comprobante = _connection.QuerySingleOrDefault<DtoComprobantes>(sql, new { codTalonario, nroComprobante }, _transaction);
+            DtoComprobantes? comprobante = await _connection.QuerySingleOrDefaultAsync<DtoComprobantes>(sql, new { codTalonario, nroComprobante }, _transaction);
 
             if (comprobante != null)
             {
                 sql = "SELECT * FROM GET_DATOS_COMPROBANTE_DETALLE(@codTalonario, @nroComprobante)";
-                comprobante.ListDetalles = _connection.Query<DtoComprobantesDetalles>(sql, new { codTalonario, nroComprobante }, _transaction).ToList();
+                var detalles = await _connection.QueryAsync<DtoComprobantesDetalles>(sql, new { codTalonario, nroComprobante }, _transaction);
+                comprobante.ListDetalles = detalles.ToList();
             }
 
             return comprobante;
         }
 
-        public IEnumerable<DtoComprobantesFacturasElectronicas> Facturas(int codCliente, DateTime fechaDesde, DateTime fechaHasta)
+        public async Task<IEnumerable<DtoComprobantesFacturasElectronicas>> FacturasAsync(int codCliente, DateTime fechaDesde, DateTime fechaHasta)
         {
             string sql = "SELECT * FROM GET_FACTURAS_AFIP(@codCliente, @fechaDesde, @fechaHasta)";
-            return _connection.Query<DtoComprobantesFacturasElectronicas>(sql, new { codCliente , fechaDesde, fechaHasta }, _transaction);
+            return await _connection.QueryAsync<DtoComprobantesFacturasElectronicas>(sql, new { codCliente , fechaDesde, fechaHasta }, _transaction);
         }
 
-        public DtoComprobantesPeriodo? PeriodosFacturacion(int codCliente)
+        public async Task<DtoComprobantesPeriodo?> PeriodosFacturacionAsync(int codCliente)
         {
             string sql = "SELECT * FROM GET_PERIODOS_FACTURAS_AFIP(@codCliente)";
-            return _connection.QuerySingleOrDefault<DtoComprobantesPeriodo?>(sql, new { codCliente }, _transaction);
+            return await _connection.QuerySingleOrDefaultAsync<DtoComprobantesPeriodo?>(sql, new { codCliente }, _transaction);
         }
 
-        public ApiResponseListado<IEnumerable<dynamic>> ListadoFacturasEnviar(DtoOpcionesListados opcionesListado)
+        public async Task<ApiResponseListado<IEnumerable<dynamic>>> ListadoFacturasEnviarAsync(DtoOpcionesListados opcionesListado)
         {
             FuncionesListados<DtoFacturasEnviarList> funcionesListados = new(cfgListFacturasEnviar, opcionesListado);
 
-            string sqlWhere = $@"WHERE C.AFIP_CAE IS NOT NULL AND S.FECHA_CANCELACION IS NULL
-                                AND S.POR_WHATSAPP = 1 AND CL.TELEFONO_MOVIL IS NOT NULL
-                                AND T.ES_FACTURA_ELECTRONICA = 1 AND TC.TIPO_COMPROBANTE = '{TipoComprobanteDomain.Factura}'";
+            int codPropuesta = 0;
+            bool soloNuevo = false;
+            bool posteriorSolicitud = false;
+            DateOnly fechaDesde = default;
+            DateOnly fechaHasta = default;
             if (opcionesListado.ListFiltros != null)
             {
-                DtoCamposFiltroListado? campoFiltro = opcionesListado.ListFiltros.Find(x => x.Campo.Equals("soloNuevo", StringComparison.CurrentCultureIgnoreCase));
-                if (campoFiltro != null && !string.IsNullOrEmpty(campoFiltro.Valor) && campoFiltro.TipoComparacion == TipoComparacion.Igual)
+                DtoCamposFiltroListado? campoFiltro = null;
+
+                campoFiltro = opcionesListado.ListFiltros.Find(x => x.Campo.Equals("propuesta", StringComparison.CurrentCultureIgnoreCase));
+                if (campoFiltro != null && !string.IsNullOrEmpty(campoFiltro.Valor)
+                    && campoFiltro.TipoComparacion == TipoComparacion.Igual)
                 {
-                    sqlWhere += @"  AND NOT EXISTS (SELECT 1 FROM HIST_ENVIOS_FACTURAS H
-                                    WHERE H.COD_CLIENTE = S.COD_CLIENTE AND H.COD_TALONARIO = C.COD_TALONARIO AND H.NRO_COMPROBANTE = C.NRO_COMPROBANTE)";
+                    _ = int.TryParse(campoFiltro.Valor, out codPropuesta);
                 }
-                campoFiltro = opcionesListado.ListFiltros.Find(x => x.Campo.Equals("posteriorSolicitud", StringComparison.CurrentCultureIgnoreCase));
-                if (campoFiltro != null && !string.IsNullOrEmpty(campoFiltro.Valor) && campoFiltro.TipoComparacion == TipoComparacion.Igual)
+
+                campoFiltro = opcionesListado.ListFiltros.Find(x => x.Campo.Equals("soloNuevo", StringComparison.CurrentCultureIgnoreCase));
+                if (campoFiltro != null && !string.IsNullOrEmpty(campoFiltro.Valor) 
+                    && campoFiltro.TipoComparacion == TipoComparacion.Igual)
                 {
-                    sqlWhere += @"  AND C.FECHA >= S.FECHA_PEDIDO";
+                    soloNuevo = campoFiltro.Valor.Equals("True", StringComparison.CurrentCultureIgnoreCase);
+                }
+
+                campoFiltro = opcionesListado.ListFiltros.Find(x => x.Campo.Equals("posteriorSolicitud", StringComparison.CurrentCultureIgnoreCase));
+                if (campoFiltro != null && !string.IsNullOrEmpty(campoFiltro.Valor) 
+                    && campoFiltro.TipoComparacion == TipoComparacion.Igual)
+                {
+                    posteriorSolicitud = campoFiltro.Valor.Equals("True", StringComparison.CurrentCultureIgnoreCase);
+                }
+
+                campoFiltro = opcionesListado.ListFiltros.Find(x => x.Campo.Equals("fechaDesde", StringComparison.CurrentCultureIgnoreCase));
+                if (campoFiltro != null && !string.IsNullOrEmpty(campoFiltro.Valor) 
+                    && campoFiltro.TipoComparacion == TipoComparacion.Igual)
+                {
+                    _ = DateOnly.TryParse(campoFiltro.Valor, out fechaDesde);
+                }
+
+                campoFiltro = opcionesListado.ListFiltros.Find(x => x.Campo.Equals("fechaHasta", StringComparison.CurrentCultureIgnoreCase));
+                if (campoFiltro != null && !string.IsNullOrEmpty(campoFiltro.Valor) 
+                    && campoFiltro.TipoComparacion == TipoComparacion.Igual)
+                {
+                    _ = DateOnly.TryParse(campoFiltro.Valor, out fechaHasta);
                 }
             }
-            sqlWhere += funcionesListados.ParseSqlWhere();
 
-            string sqlFrom = @" FROM SOLICITUDES_ENVIOS_FACTURAS S
-                                INNER JOIN CLIENTES CL ON CL.COD_CLIENTE = S.COD_CLIENTE
-                                INNER JOIN COMPROBANTES C ON C.COD_PROPUESTA = S.COD_PROPUESTA AND C.COD_TALONARIO BETWEEN 101 AND 106
-                                INNER JOIN PROPUESTA P ON P.COD_PROPUESTA = S.COD_PROPUESTA
-                                INNER JOIN TALONARIOS T ON T.COD_TALONARIO = C.COD_TALONARIO
-                                INNER JOIN TIPOS_COMPROBANTES TC ON TC.COD_TIPO_COMPROBANTE = C.COD_TIPO_COMPROBANTE";
-            string sqlCant = $@"SELECT COUNT(*)
-                            {sqlFrom} 
-                            {sqlWhere}";
-            string sql = $@"SELECT {funcionesListados.ParseSqlPaginado(sqlCant, _connection, _transaction)}
-                            P.LEGAJO AS PROPUESTA, C.NRO_COMPROBANTE, C.COD_TALONARIO, P.COD_PROPUESTA, 
-                            CL.TELEFONO_MOVIL, CL.NOMBRE AS CLIENTE, C.FECHA, CL.COD_CLIENTE,
-                            (SELECT MAX(H.FECHA_ENVIO) FROM HIST_ENVIOS_FACTURAS H
-                            WHERE H.COD_CLIENTE = S.COD_CLIENTE AND H.COD_TALONARIO = C.COD_TALONARIO AND H.NRO_COMPROBANTE = C.NRO_COMPROBANTE) AS ULTIMO_ENVIO
-                            {sqlFrom} 
-                            {sqlWhere}
-                            {funcionesListados.ParseSqlOrden()}";
+            string sqlFrom = @$"FROM CONSULTA_FACTURAS_ENVIAR_MAIL({codPropuesta},
+                                {(fechaDesde == default ? "NULL" : $"'{fechaDesde:yyyy-MM-dd}'")},
+                                {(fechaHasta == default ? "NULL" : $"'{fechaHasta:yyyy-MM-dd}'")}, 
+                                {(soloNuevo ? 1 : 0)}, {(posteriorSolicitud ? 1 : 0)}) C";
 
-            return funcionesListados.ApiResponse(sql, _connection, _transaction);
+            string sqlCant = $@"SELECT COUNT(*) {sqlFrom}";
+            
+            string sql = $@"SELECT {funcionesListados.ParseSqlPaginado(sqlCant, _connection, _transaction)} C.*
+                            {sqlFrom} 
+                            ORDER BY C.FECHA, C.NRO_COMPROBANTE";
+
+            return await funcionesListados.ApiResponseAsync(sql, _connection, _transaction);
         }
 
-        public void RegistrarEnvio(int codCliente, int codTalonario, string nroComprobante, string medioEnvio, int codUsuario)
+        public async Task RegistrarEnvioAsync(int codCliente, int codTalonario, string nroComprobante, string medioEnvio, int codUsuario)
         {
             string sql = @" INSERT INTO HIST_ENVIOS_FACTURAS (FECHA_ENVIO, POR_WHATSAPP, COD_USUARIO, COD_CLIENTE, COD_TALONARIO, NRO_COMPROBANTE, MEDIO_ENVIO)
                             VALUES (CURRENT_TIMESTAMP, 1, @codUsuario, @codCliente, @codTalonario, @nroComprobante, @medioEnvio)";
-            _connection.Execute(sql, new { codUsuario, codCliente, codTalonario, nroComprobante, medioEnvio }, _transaction);
+            await _connection.ExecuteAsync(sql, new { codUsuario, codCliente, codTalonario, nroComprobante, medioEnvio }, _transaction);
         }
 
-        public ApiResponseListado<IEnumerable<dynamic>> ListadoComprobantesPropuesta(DtoOpcionesListados opcionesListado)
+        public async Task<ApiResponseListado<IEnumerable<dynamic>>> ListadoComprobantesPropuestaAsync(DtoOpcionesListados opcionesListado)
         {
             FuncionesListados<DtoComprobantesPropuestaList> funcionesListados = new(cfgListComprobantesPropuesta, opcionesListado);
 
@@ -177,13 +196,13 @@ namespace ElPrado.Data.Repositories
                             {sqlFrom}
                             {funcionesListados.ParseSqlOrden()}";
 
-            return funcionesListados.ApiResponse(sql, _connection, _transaction);
+            return await funcionesListados.ApiResponseAsync(sql, _connection, _transaction);
         }
 
-        public DtoComprobantesFacturasPublicas? BuscarLinkPublicoPdf(string id)
+        public async Task<DtoComprobantesFacturasPublicas?> BuscarLinkPublicoPdfAsync(string id)
         {
             string sql = "SELECT * FROM GET_LINK_PUBLICOS_PDFS(@id)";
-            return _connection.QuerySingleOrDefault<DtoComprobantesFacturasPublicas?>(sql, new { id }, _transaction);
+            return await _connection.QuerySingleOrDefaultAsync<DtoComprobantesFacturasPublicas?>(sql, new { id }, _transaction);
         }
     }
 }

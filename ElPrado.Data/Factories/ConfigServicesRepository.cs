@@ -13,12 +13,12 @@ namespace ElPrado.Data.Factories
             _connectionFactory = connectionFactory;
         }
 
-        public EmailSettings? BuscarConfigMail()
+        public async Task<EmailSettings?> BuscarConfigMailAsync()
         {
             using var conn = _connectionFactory.Create();
             string sql = @" SELECT C.SMTP_HOST, C.SMTP_PORT, C.SMTP_AUTENTICACION, C.SMTP_USUARIO, C.SMTP_CLAVE, C.SMTP_USUARIO_COBRANZA, C.SMTP_CLAVE_COBRANZA
                             FROM CONFIGURACION_LOCAL C";
-            return conn.QuerySingleOrDefault<EmailSettings>(sql);
+            return await conn.QuerySingleOrDefaultAsync<EmailSettings>(sql);
         }
     }
 }

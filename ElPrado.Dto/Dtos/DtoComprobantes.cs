@@ -90,15 +90,20 @@
     public class DtoFacturasEnviarList : DtoBase
     {
         public int Propuesta { get; set; }
+        public int PropuestaFact { get; set; }
         public string NroComprobante { get; set; } = string.Empty;
         public DateOnly Fecha { get; set; }
         public string Cliente { get; set; } = string.Empty;
-        public string TelefonoMovil { get; set; } = string.Empty;
-        public string LinkWhatsApp { get; set; } = string.Empty;
+        public double Total { get; set; }
+        public string Email { get; set; } = string.Empty;
         public DateOnly? UltimoEnvio { get; set; }
         public int CodTalonario { get; set; }
         public int CodCliente { get; set; }
-        public int CodPropuesta { get; set; }
+    }
+
+    public class DtoRegistrarEnvioListReq
+    {
+        public List<DtoRegistrarEnvioReq>? ListComprobantes { get; set; }
     }
 
     public class DtoRegistrarEnvioReq
@@ -106,7 +111,7 @@
         public int CodCliente { get; set; }
         public int CodTalonario { get; set; }
         public string NroComprobante { get; set; } = string.Empty;
-        public string TelefonoMovil { get; set; } = string.Empty;
+        public string Email { get; set; } = string.Empty;
     }
 
     public class DtoComprobantesPropuestaList : DtoBase

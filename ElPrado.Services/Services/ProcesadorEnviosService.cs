@@ -21,17 +21,17 @@ namespace ElPrado.Services.Services
                 try
                 {
                     await _uow.ColaEnvioFactura.MarcarEnviandoAsync(factura.CodColaEnvio);
-
                     await _email.EnviarFacturaAsync(factura);
-                    await Task.Delay(2000);
-
                     await _uow.ColaEnvioFactura.MarcarEnviadoAsync(factura.CodColaEnvio);
+
+                    await Task.Delay(2000);
                 }
                 catch (Exception ex)
                 {
                     await _uow.ColaEnvioFactura.MarcarErrorAsync(factura.CodColaEnvio, ex.Message);
                     throw;
                 }
+            
             }
         }
     }

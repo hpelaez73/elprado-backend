@@ -4,6 +4,6 @@ namespace ElPrado.Data.Interfaces
 {
     public interface IConfigServicesRepository
     {
-        EmailSettings? BuscarConfigMail();
+        Task<EmailSettings?> BuscarConfigMailAsync();
     }
 }
