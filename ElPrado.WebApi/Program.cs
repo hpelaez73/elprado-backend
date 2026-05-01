@@ -152,7 +152,7 @@ builder.Services.AddScoped<ProcesadorEnviosService>();
 
 // Registrar WorkerStateService como Singleton para que sea compartido por todas las instancias
 builder.Services.AddSingleton<IWorkerStateService, WorkerStateService>();
-builder.Services.AddHostedService<EmailWorker>();
+//builder.Services.AddHostedService<EmailWorker>();
 
 // Configuraciones varias
 ElPrado.Reports.Configuration.DocSettings.Configurar();
