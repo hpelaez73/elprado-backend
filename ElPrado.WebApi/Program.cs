@@ -60,28 +60,7 @@ builder.Services.AddSwaggerGen(c =>
 // CORS dinámico según el entorno
 var allowedOrigins = builder.Configuration.GetSection("AllowedOrigins").Get<string[]>() ?? Array.Empty<string>();
 var policyName = "CorsPolicy";
-/*
-builder.Services.AddCors(options =>
-{
-    options.AddPolicy(name: policyName, corsBuilder =>
-    {
-        if (builder.Environment.IsDevelopment())
-        {
-            corsBuilder
-                .SetIsOriginAllowed(_ => true) // permite cualquier origen en dev
-                .AllowAnyHeader()
-                .AllowAnyMethod();
-        }
-        else
-        {
-            corsBuilder
-                .WithOrigins(allowedOrigins ?? Array.Empty<string>()) // solo orígenes confiables en prod
-                .AllowAnyHeader()
-                .AllowAnyMethod();
-        }
-    });
-});
-*/
+
 builder.Services.AddCors(options =>
 {
     options.AddPolicy("CorsPolicy", policy =>
@@ -146,8 +125,8 @@ builder.Services.AddScoped<IPdfService, PdfService>();
 builder.Services.AddScoped<IImageStorageService, LocalImageStorageService>();
 builder.Services.AddScoped<IReportImageService, ReportImageService>();
 
-builder.Services.AddScoped<IEmailService, EmailService>();
-builder.Services.AddScoped<ProcesadorEnviosService>();
+//builder.Services.AddScoped<IEmailService, EmailService>();
+//builder.Services.AddScoped<ProcesadorEnviosService>();
 
 // Configuraciones varias
 ElPrado.Reports.Configuration.DocSettings.Configurar();
