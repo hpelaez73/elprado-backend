@@ -33,7 +33,8 @@ namespace ElPrado.Services.Workers
 
                 await procesador.ProcesarAsync();
 
-                await Task.Delay(10000, stoppingToken);
+                // Esperar 30s entre ciclos (RateLimiter controla la velocidad dentro del ciclo)
+                await Task.Delay(30000, stoppingToken);
             }
         }
     }
