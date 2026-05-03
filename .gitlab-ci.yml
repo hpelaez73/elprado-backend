@@ -5,7 +5,7 @@ stages:
 before_script:
   - docker info
 
-build_develop:
+.build_develop:
   stage: build
   script:
     - docker build -t "elpradowebapi" .
@@ -18,11 +18,13 @@ build_develop:
 deploy_master:
   stage: deploy
   script:
-    - ssh root@210.1.1.91 'systemctl stop sicoWeb.service'
+    - ssh root@210.1.1.91 'systemctl stop sicoWeb.service || true'
+    - ssh root@210.1.1.91 'systemctl stop elprado-workers.service || true'
     - ssh root@210.1.1.91 'rm -rf /app/*'
     - ssh root@210.1.1.91 'rm -rf /repo/*'
     - scp -r ElPrado.Core/ ElPrado.Data/ ElPrado.DataFactory/ ElPrado.Dto/ ElPrado.Reports/ ElPrado.Services/ ElPrado.WebApi/ ElPrado.Workers/ ElPradoWeb.sln root@210.1.1.91:/repo
-    - ssh root@210.1.1.91 'cd /repo &&  dotnet publish -c release -o /app'
+    - ssh root@210.1.1.91 'cd /repo && dotnet publish -c release -o /app'
     - ssh root@210.1.1.91 'systemctl start sicoWeb.service'
+    - ssh root@210.1.1.91 'systemctl start elprado-workers.service'
   only:
     - master
