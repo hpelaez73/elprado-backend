@@ -1,6 +1,6 @@
 ﻿using ElPrado.Core.Configuration;
 
-namespace ElPrado.Data.Interfaces
+namespace ElPrado.DataFactory.Interfaces
 {
     public interface IConfigServicesRepository
     {

@@ -1,5 +1,4 @@
 using ElPrado.Dto.Dtos;
-using ElPrado.Services.Workers;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
@@ -13,6 +12,7 @@ namespace ElPrado.WebApi.Controllers
     [Authorize]
     public class WorkersController : ControllerBase
     {
+/*
         private readonly IWorkerStateService _workerStateService;
 
         public WorkersController(IWorkerStateService workerStateService)
@@ -56,6 +56,6 @@ namespace ElPrado.WebApi.Controllers
                 Data = "Activo"
             };
             return Ok(response);
-        }
+        }*/
     }
 }

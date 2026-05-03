@@ -1,0 +1,10 @@
+{
+  "profiles": {
+    "ElPrado.Workers": {
+      "commandName": "Project",
+      "environmentVariables": {
+        "DOTNET_ENVIRONMENT": "Development"
+      }
+    }
+  }
+}

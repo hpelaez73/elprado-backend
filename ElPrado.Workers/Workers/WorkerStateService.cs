@@ -1,4 +1,4 @@
-namespace ElPrado.Services.Workers
+namespace ElPrado.Workers.Workers
 {
     /// <summary>
     /// Servicio para controlar el estado (pausado/activo) del EmailWorker

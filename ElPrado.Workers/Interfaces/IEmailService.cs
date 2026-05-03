@@ -1,6 +1,6 @@
 ﻿using ElPrado.Dto.Dtos;
 
-namespace ElPrado.Services.Interfaces
+namespace ElPrado.Workers.Interfaces
 {
     public interface IEmailService
     {

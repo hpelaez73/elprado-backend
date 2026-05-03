@@ -1,10 +1,10 @@
 ﻿using Dapper;
-using ElPrado.Data.Interfaces;
+using ElPrado.DataFactory.Interfaces;
 using Microsoft.AspNetCore.DataProtection.Repositories;
 using System.Data;
 using System.Xml.Linq;
 
-namespace ElPrado.Data.Factories
+namespace ElPrado.DataFactory.Factories
 {
     public class FirebirdXmlRepository : IXmlRepository
     {

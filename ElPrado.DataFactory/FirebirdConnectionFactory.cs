@@ -1,9 +1,10 @@
-﻿using ElPrado.Data.Interfaces;
+﻿using Dapper;
+using ElPrado.DataFactory.Interfaces;
 using FirebirdSql.Data.FirebirdClient;
 using Microsoft.Extensions.Configuration;
 using System.Data;
 
-namespace ElPrado.Data
+namespace ElPrado.DataFactory
 {
     public class FirebirdConnectionFactory : IDbConnectionFactory
     {
@@ -16,6 +17,8 @@ namespace ElPrado.Data
 
         public IDbConnection Create()
         {
+            DefaultTypeMap.MatchNamesWithUnderscores = true;
+
             var conn = new FbConnection(_connectionString);
             conn.Open();
             return conn;

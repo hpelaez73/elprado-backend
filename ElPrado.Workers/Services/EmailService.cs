@@ -1,13 +1,13 @@
 ﻿using ElPrado.Core.Configuration;
-using ElPrado.Data.Interfaces;
+using ElPrado.DataFactory.Interfaces;
 using ElPrado.Dto.Dtos;
-using ElPrado.Services.Interfaces;
+using ElPrado.Workers.Interfaces;
 using MailKit.Net.Smtp;
 using MailKit.Security;
 using Microsoft.Extensions.Caching.Memory;
 using MimeKit;
 
-namespace ElPrado.Services.Services
+namespace ElPrado.Workers.Services
 {
     public class EmailService : IEmailService
     {

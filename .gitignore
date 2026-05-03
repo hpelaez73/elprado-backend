@@ -3,6 +3,8 @@
 /ElPrado.Core/obj
 /ElPrado.Data/bin
 /ElPrado.Data/obj
+/ElPrado.DataFactory/bin
+/ElPrado.DataFactory/obj
 /ElPrado.Dto/bin
 /ElPrado.Dto/obj
 /ElPrado.Reports/bin
@@ -13,5 +15,7 @@
 /ElPrado.WebApi/obj
 /ElPrado.Workers/bin
 /ElPrado.Workers/obj
-appdata
 /ElPrado.WebApi/appsettings.Development.json
+/ElPrado.Workers/appsettings.Development.json
+appdata
+logs

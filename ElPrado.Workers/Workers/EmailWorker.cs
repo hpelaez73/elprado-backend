@@ -1,8 +1,6 @@
-﻿using ElPrado.Services.Services;
-using Microsoft.Extensions.DependencyInjection;
-using Microsoft.Extensions.Hosting;
+﻿using ElPrado.Workers.Services;
 
-namespace ElPrado.Services.Workers
+namespace ElPrado.Workers.Workers
 {
     public class EmailWorker : BackgroundService
     {

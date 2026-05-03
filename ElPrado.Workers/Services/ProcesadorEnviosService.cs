@@ -1,23 +1,25 @@
-﻿using ElPrado.Data.Interfaces;
-using ElPrado.Services.Interfaces;
+﻿using ElPrado.DataFactory.Interfaces;
+using ElPrado.Workers.Interfaces;
 
-namespace ElPrado.Services.Services
+namespace ElPrado.Workers.Services
 {
-    public class ProcesadorEnviosService : ServiceBase
+    public class ProcesadorEnviosService
     {
+        private readonly IColaEnvioFacturaRepository _repo;
         private readonly IEmailService _email;
         private static readonly SemaphoreSlim _throttle = new(10, 10); // Máximo 10 emails concurrentes
         private static DateTime _lastEmailTime = DateTime.MinValue;
         private static readonly TimeSpan _minIntervalBetweenEmails = TimeSpan.FromSeconds(1); // Mínimo 1 segundo entre emails
 
-        public ProcesadorEnviosService(IUnitOfWork unitOfWork, IUserContextService userContext, IEmailService email) : base(unitOfWork, userContext)
+        public ProcesadorEnviosService(IColaEnvioFacturaRepository repo, IEmailService email)
         {
+            _repo = repo;
             _email = email;
         }
 
         public async Task ProcesarAsync()
         {
-            var listPendientes = await _uow.ColaEnvioFactura.BuscarPendientesAsync();
+            var listPendientes = await _repo.BuscarPendientesAsync();
 
             // Limitar a 5 concurrentes por ciclo
             var tasks = new List<Task>();
@@ -47,7 +49,7 @@ namespace ElPrado.Services.Services
                         await Task.Delay(_minIntervalBetweenEmails - timeSinceLastEmail);
                     }
 
-                    await _uow.ColaEnvioFactura.MarcarEnviandoAsync(factura.CodColaEnvio);
+                    await _repo.MarcarEnviandoAsync(factura.CodColaEnvio);
 
                     // Timeout de 30 segundos para evitar bloqueos indefinidos
                     using (var cts = new CancellationTokenSource(TimeSpan.FromSeconds(30)))
@@ -64,7 +66,7 @@ namespace ElPrado.Services.Services
                     }
 
                     _lastEmailTime = DateTime.UtcNow;
-                    await _uow.ColaEnvioFactura.MarcarEnviadoAsync(factura.CodColaEnvio);
+                    await _repo.MarcarEnviadoAsync(factura.CodColaEnvio);
                 }
                 finally
                 {
@@ -73,7 +75,7 @@ namespace ElPrado.Services.Services
             }
             catch (Exception ex)
             {
-                await _uow.ColaEnvioFactura.MarcarErrorAsync(factura.CodColaEnvio, ex.Message);
+                await _repo.MarcarErrorAsync(factura.CodColaEnvio, ex.Message);
             }
         }
     }

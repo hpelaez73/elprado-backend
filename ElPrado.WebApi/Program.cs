@@ -1,6 +1,8 @@
 using ElPrado.Data;
-using ElPrado.Data.Factories;
 using ElPrado.Data.Interfaces;
+using ElPrado.DataFactory;
+using ElPrado.DataFactory.Factories;
+using ElPrado.DataFactory.Interfaces;
 using ElPrado.Reports.Interfaces;
 using ElPrado.Reports.Services;
 using ElPrado.Services;
@@ -124,9 +126,6 @@ builder.Services.AddScoped<IPdfStorageService, PdfStorageService>();
 builder.Services.AddScoped<IPdfService, PdfService>();
 builder.Services.AddScoped<IImageStorageService, LocalImageStorageService>();
 builder.Services.AddScoped<IReportImageService, ReportImageService>();
-
-//builder.Services.AddScoped<IEmailService, EmailService>();
-//builder.Services.AddScoped<ProcesadorEnviosService>();
 
 // Configuraciones varias
 ElPrado.Reports.Configuration.DocSettings.Configurar();

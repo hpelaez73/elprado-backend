@@ -1,8 +1,8 @@
 ﻿using Dapper;
 using ElPrado.Core.Configuration;
-using ElPrado.Data.Interfaces;
+using ElPrado.DataFactory.Interfaces;
 
-namespace ElPrado.Data.Factories
+namespace ElPrado.DataFactory.Factories
 {
     public class ConfigServicesRepository : IConfigServicesRepository
     {

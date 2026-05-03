@@ -7,7 +7,11 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <PackageReference Include="MailKit" Version="4.16.0" />
+    <PackageReference Include="Microsoft.Extensions.Caching.Abstractions" Version="10.0.7" />
+    <PackageReference Include="Microsoft.Extensions.Caching.Memory" Version="7.0.0" />
     <PackageReference Include="Microsoft.Extensions.Hosting" Version="7.0.0" />
+    <PackageReference Include="Microsoft.Extensions.Hosting.Systemd" Version="7.0.0" />
     <PackageReference Include="Microsoft.Extensions.Hosting.WindowsServices" Version="7.0.0" />
     <PackageReference Include="Serilog.Extensions.Hosting" Version="7.0.0" />
     <PackageReference Include="Serilog.Sinks.Console" Version="5.0.1" />
@@ -15,9 +19,20 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\ElPrado.Data\ElPrado.Data.csproj" />
-    <ProjectReference Include="..\ElPrado.Services\ElPrado.Services.csproj" />
-    <ProjectReference Include="..\ElPrado.Core\ElPrado.Core.csproj" />
+    <ProjectReference Include="..\ElPrado.DataFactory\ElPrado.DataFactory.csproj" />
+    <ProjectReference Include="..\ElPrado.Dto\ElPrado.Dto.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <None Update="appsettings.json">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Update="appsettings.*.json">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Update="elprado-workers.service">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
   </ItemGroup>
 
 </Project>

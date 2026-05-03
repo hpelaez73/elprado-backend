@@ -67,39 +67,11 @@ namespace ElPrado.Data.Repositories
 
         }
 
-        public async Task<IEnumerable<DtoColaEnvioFactura>> BuscarPendientesAsync()
-        {
-            string sql = $@"SELECT * FROM GET_COLA_ENVIO_FACTURAS";
-
-            return await _connection.QueryAsync<DtoColaEnvioFactura>(sql, null, _transaction);
-        }
-
         public async Task AgregarAsync(int codCliente, int codTalonario, string nroComprobante, string medioEnvio)
         {
             string sql = @" EXECUTE PROCEDURE POST_COLA_ENVIO_FACTURAS(@codCliente, @codTalonario, @nroComprobante, @medioEnvio)";
             
             await _connection.ExecuteAsync(sql, new { codCliente, codTalonario, nroComprobante, medioEnvio }, _transaction);
-        }
-
-        public async Task MarcarEnviandoAsync(int codColaEnvio)
-        {
-            string sql = "EXECUTE PROCEDURE PUT_COLA_ENVIO_FACTURAS(@codColaEnvio, @estado, NULL)";
-
-            await _connection.ExecuteAsync(sql, new { codColaEnvio, estado = EstadoEnvioDomain.Enviando }, _transaction);
-        }
-
-        public async Task MarcarEnviadoAsync(int codColaEnvio)
-        {
-            string sql = "EXECUTE PROCEDURE PUT_COLA_ENVIO_FACTURAS(@codColaEnvio, @estado, NULL)";
-
-            await _connection.ExecuteAsync(sql, new { codColaEnvio, estado = EstadoEnvioDomain.Enviado }, _transaction);
-        }
-
-        public async Task MarcarErrorAsync(int codColaEnvio, string error)
-        {
-            string sql = "EXECUTE PROCEDURE PUT_COLA_ENVIO_FACTURAS(@codColaEnvio, @estado, @error)";
-
-            await _connection.ExecuteAsync(sql, new { codColaEnvio, estado = EstadoEnvioDomain.Error, error }, _transaction);
         }
 
         public async Task<ApiResponseListado<IEnumerable<dynamic>>> ListadoColaEnvioEstadosAsync(DtoOpcionesListados opcionesListado)

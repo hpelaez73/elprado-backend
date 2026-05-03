@@ -1,6 +1,6 @@
 ﻿using System.Data;
 
-namespace ElPrado.Data.Interfaces
+namespace ElPrado.DataFactory.Interfaces
 {
     public interface IDbConnectionFactory
     {

@@ -19,6 +19,7 @@
 
   <ItemGroup>
     <ProjectReference Include="..\ElPrado.Core\ElPrado.Core.csproj" />
+    <ProjectReference Include="..\ElPrado.DataFactory\ElPrado.DataFactory.csproj" />
     <ProjectReference Include="..\ElPrado.Data\ElPrado.Data.csproj" />
     <ProjectReference Include="..\ElPrado.Dto\ElPrado.Dto.csproj" />
     <ProjectReference Include="..\ElPrado.Services\ElPrado.Services.csproj" />
