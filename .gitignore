@@ -16,6 +16,6 @@
 /ElPrado.Workers/bin
 /ElPrado.Workers/obj
 /ElPrado.WebApi/appsettings.Development.json
-/ElPrado.Workers/appsettings.Development.json
+/ElPrado.Workers/workersettings.Development.json
 appdata
 logs

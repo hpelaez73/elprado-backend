@@ -21,8 +21,8 @@ var host = Host.CreateDefaultBuilder(args)
         var env = context.HostingEnvironment;
 
         config.SetBasePath(Directory.GetCurrentDirectory())
-            .AddJsonFile("appsettings.json", optional: false, reloadOnChange: true)
-            .AddJsonFile($"appsettings.{env.EnvironmentName}.json", optional: true, reloadOnChange: true)
+            .AddJsonFile("workersettings.json", optional: false, reloadOnChange: true)
+            .AddJsonFile($"workersettings.{env.EnvironmentName}.json", optional: true, reloadOnChange: true)
             .AddEnvironmentVariables();
     })
     .UseWindowsService(options => options.ServiceName = "ElPrado.Workers")
