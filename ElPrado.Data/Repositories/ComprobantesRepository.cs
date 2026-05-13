@@ -204,5 +204,11 @@ namespace ElPrado.Data.Repositories
             string sql = "SELECT * FROM GET_LINK_PUBLICOS_PDFS(@id)";
             return await _connection.QuerySingleOrDefaultAsync<DtoComprobantesFacturasPublicas?>(sql, new { id }, _transaction);
         }
+
+        public async Task RegistrarDescargaPdfAsync(int codTalonario, string nroComprobante, int codCliente)
+        {
+            string sql = @" EXECUTE PROCEDURE POST_REGISTRO_DESCARGA_FACTURA(@codCliente, @codTalonario, @nroComprobante)";
+            await _connection.ExecuteAsync(sql, new { codCliente, codTalonario, nroComprobante }, _transaction);
+        }
     }
 }

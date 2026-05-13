@@ -96,6 +96,17 @@ namespace ElPrado.Services.Services
                 return null;
             }
 
+            try
+            {
+                await _uow.Comprobantes.RegistrarDescargaPdfAsync(codTalonario, nroComprobante, _userContext.GetCodCliente());
+                await _uow.CommitAsync();
+            }
+            catch
+            {
+                await _uow.RollbackAsync();
+                throw;
+            }
+
             return FacturasMapper.MapToDoc(comprobante);
         }
 

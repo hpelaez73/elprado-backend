@@ -37,6 +37,18 @@ namespace ElPrado.Data
             transaccionActiva = false;
         }
 
+        public async Task CommitAsync()
+        {
+            await Task.Run(() => _transaction.Commit());
+            transaccionActiva = false;
+        }
+
+        public async Task RollbackAsync()
+        {
+            if (transaccionActiva) await Task.Run(() => _transaction.Rollback());
+            transaccionActiva = false;
+        }
+
         public void Dispose()
         {
             if (transaccionActiva) _transaction.Commit();

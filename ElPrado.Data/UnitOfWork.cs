@@ -88,6 +88,16 @@ namespace ElPrado.Data
             _dbContext.Rollback();
         }
 
+        public async Task CommitAsync()
+        { 
+            await _dbContext.CommitAsync(); 
+        }
+
+        public async Task RollbackAsync()
+        {
+            await _dbContext.RollbackAsync();
+        }
+
         public void Dispose()
         {
             _dbContext.Dispose();

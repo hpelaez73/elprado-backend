@@ -38,5 +38,8 @@ namespace ElPrado.Data.Interfaces
 
         void Commit();
         void Rollback();
+
+        Task CommitAsync();
+        Task RollbackAsync();
     }
 }
