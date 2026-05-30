@@ -36,21 +36,21 @@ namespace ElPrado.Services.Services
             return resultado;
         }
 
-        public Resultados<string> SolicitudMercadoPago(List<DtoCuotasMercadoPago> listCuotas)
+        public async Task<Resultados<string>> SolicitudMercadoPagoAsync(List<DtoCuotasMercadoPago> listCuotas)
         {
-            Resultados<string> resultado = GenerarSolicitudMercadoPago(listCuotas, _userContext.GetCodCliente(), null);
+            Resultados<string> resultado = await GenerarSolicitudMercadoPagoAsync(listCuotas, _userContext.GetCodCliente(), null);
 
             return resultado;
         }
 
-        public Resultados<string> SolicitudMercadoPagoLink(DtoSolicitudMercadoPago dtoSolicitud)
+        public async Task<Resultados<string>> SolicitudMercadoPagoLinkAsync(DtoSolicitudMercadoPago dtoSolicitud)
         {
-            Resultados<string> resultado = GenerarSolicitudMercadoPago(dtoSolicitud.ListCuotas, dtoSolicitud.CodCliente, dtoSolicitud.VencimientoLink);
+            Resultados<string> resultado = await GenerarSolicitudMercadoPagoAsync(dtoSolicitud.ListCuotas, dtoSolicitud.CodCliente, dtoSolicitud.VencimientoLink);
 
             return resultado;
         }
 
-        private Resultados<string> GenerarSolicitudMercadoPago(List<DtoCuotasMercadoPago> listCuotas, int codCliente, DateTime? fechaVencimiento)
+        private async Task<Resultados<string>> GenerarSolicitudMercadoPagoAsync(List<DtoCuotasMercadoPago> listCuotas, int codCliente, DateTime? fechaVencimiento)
         {
             Resultados<string> resultado = new();
             if (listCuotas.Count == 0) resultado.Agregar("No hay cuotas seleccionadas");
@@ -100,7 +100,7 @@ namespace ElPrado.Services.Services
 
             using MercadoPagoService mercadoPagoService = new(_uow, _userContext);
 
-            resultado = mercadoPagoService.ArmarPago(listCuotasSolicitud, codCliente, fechaVencimiento);
+            resultado = await mercadoPagoService.ArmarPagoAsync(listCuotasSolicitud, codCliente, fechaVencimiento);
             RegistrarLog("Se generó una solicitud MP para cod_cliente: " + codCliente.ToString());
 
             if (resultado.EstaOK) _uow.Commit();

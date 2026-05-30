@@ -11,7 +11,7 @@ namespace ElPrado.Services.Services
         {
         }
 
-        internal Resultados<string> ArmarPago(List<DtoCuentasCorrientes> listCuotas, int codCliente, DateTime? fechaVencimiento)
+        internal async Task<Resultados<string>> ArmarPagoAsync(List<DtoCuentasCorrientes> listCuotas, int codCliente, DateTime? fechaVencimiento)
         {
             Resultados<string> resultado = new();
 
@@ -58,6 +58,21 @@ namespace ElPrado.Services.Services
                 FechaCreacion = DateTime.Now,
                 FechaVencimiento = fechaVencimiento
             };
+
+            var listCP = listCuotas
+                .Where(x => x.Tipo == "CP")
+                .GroupBy(x => x.Codigo)
+                .Select(g => new
+                {
+                    Codigo = g.Key,
+                    FechaMaxima = g.Max(x => x.FechaCuota)
+                })
+                .ToList();
+
+            foreach (var item in listCP)
+            {
+                await _uow.ConfigCuotasPeriodicas.GenerarCuotasPeriodicasAsync(item.Codigo, item.FechaMaxima);
+            }
 
             _uow.MercadoPago.Agregar(preferenciasMercadopago);
             foreach (DtoCuentasCorrientes dtoCuenta in listCuotas)

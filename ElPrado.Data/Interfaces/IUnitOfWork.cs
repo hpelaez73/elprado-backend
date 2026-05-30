@@ -10,6 +10,7 @@ namespace ElPrado.Data.Interfaces
         ComentariosObituariosRepository ComentariosObituarios { get; }
         ComprobantesRepository Comprobantes { get; }
         CondolenciasObituariosRepository CondolenciasObituarios { get; }
+        ConfigCuotasPeriodicasRepository ConfigCuotasPeriodicas { get; }
         ConfiguracionGeneralRepository ConfiguracionGeneral { get; }
         ContratosRepository Contratos { get; }
         CuentasCorrientesRepository CuentasCorrientes { get; }
