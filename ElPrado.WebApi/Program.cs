@@ -60,9 +60,33 @@ builder.Services.AddSwaggerGen(c =>
 });
 
 // CORS dinámico según el entorno
-var allowedOrigins = builder.Configuration.GetSection("AllowedOrigins").Get<string[]>() ?? Array.Empty<string>();
 var policyName = "CorsPolicy";
+var allowedOrigins =
+    builder.Configuration.GetSection("AllowedOrigins").Get<string[]>() ??
+    Array.Empty<string>();
 
+builder.Services.AddCors(options =>
+{
+    options.AddPolicy(policyName, policy =>
+    {
+        policy
+            .SetIsOriginAllowed(origin =>
+            {
+                if (string.IsNullOrEmpty(origin))
+                    return false;
+
+                var host = new Uri(origin).Host;
+
+                return allowedOrigins.Any(x =>
+                    host.Equals(x, StringComparison.OrdinalIgnoreCase) ||
+                    host.EndsWith("." + x, StringComparison.OrdinalIgnoreCase));
+            })
+            .AllowAnyHeader()
+            .AllowAnyMethod();
+    });
+});
+
+/* Versión anterior de CORS, menos segura porque no valida subdominios ni esquemas
 builder.Services.AddCors(options =>
 {
     options.AddPolicy("CorsPolicy", policy =>
@@ -73,6 +97,7 @@ builder.Services.AddCors(options =>
             .AllowAnyMethod();
     });
 });
+*/
 
 // JWT
 builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
