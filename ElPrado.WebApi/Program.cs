@@ -6,6 +6,7 @@ using ElPrado.DataFactory.Interfaces;
 using ElPrado.Reports.Interfaces;
 using ElPrado.Reports.Services;
 using ElPrado.Services;
+using ElPrado.Services.Agents;
 using ElPrado.Services.Interfaces;
 using ElPrado.Services.Services;
 using ElPrado.WebApi;
@@ -18,6 +19,7 @@ using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
 using Serilog;
 using System.Text;
+using System.Text.Json.Serialization;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -36,7 +38,14 @@ builder.WebHost.UseConfiguration(configBuilder)
 builder.Host.UseSerilog((ctx, lc) => lc.ReadFrom.Configuration(ctx.Configuration));
 
 // Add services
-builder.Services.AddControllers();
+builder.Services
+    .AddControllers()
+    .AddJsonOptions(options =>
+     {
+         options.JsonSerializerOptions.Converters.Add(
+             new JsonStringEnumConverter());
+     });
+
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen(c =>
 {
@@ -101,18 +110,6 @@ else
         });
     });
 }
-/* Versión anterior de CORS, menos segura porque no valida subdominios ni esquemas
-builder.Services.AddCors(options =>
-{
-    options.AddPolicy("CorsPolicy", policy =>
-    {
-        policy
-            .WithOrigins(allowedOrigins)
-            .AllowAnyHeader()
-            .AllowAnyMethod();
-    });
-});
-*/
 
 // JWT
 builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
@@ -169,6 +166,22 @@ builder.Services.AddScoped<IReportImageService, ReportImageService>();
 
 // Configuraciones varias
 ElPrado.Reports.Configuration.DocSettings.Configurar();
+
+// Registrar los servicios IA
+builder.Services.AddHttpClient<GeminiAgente>();
+builder.Services.AddHttpClient<OpenAIAgente>();
+
+// Registrar una "Fábrica" o selector simple
+builder.Services.AddTransient<Func<string, IAgenteIA>>(serviceProvider => key =>
+{
+    return key switch
+    {
+        "Gemini" => serviceProvider.GetRequiredService<GeminiAgente>(),
+        "OpenAI" => serviceProvider.GetRequiredService<OpenAIAgente>(),
+        _ => throw new NotImplementedException()
+    };
+});
+
 
 var app = builder.Build();
 
