@@ -14,6 +14,7 @@ namespace ElPrado.Data
         private ComentariosObituariosRepository? _comentariosObituariosRepository;
         private ComprobantesRepository? _comprobantesRepository;
         private CondolenciasObituariosRepository? _condolenciasObituariosRepository;
+        private ConfigCuotasPeriodicasRepository? _configCuotasPeriodicasRepository;
         private ConfiguracionGeneralRepository? _configuracionGeneralRepository;
         private ContratosRepository? _contratosRepository;
         private CuentasCorrientesRepository? _cuentasCorrientesRepository;
@@ -51,6 +52,7 @@ namespace ElPrado.Data
         public ComentariosObituariosRepository ComentariosObituarios => _comentariosObituariosRepository ??= new ComentariosObituariosRepository(_dbContext);
         public ComprobantesRepository Comprobantes => _comprobantesRepository ??= new ComprobantesRepository(_dbContext);
         public CondolenciasObituariosRepository CondolenciasObituarios => _condolenciasObituariosRepository ??= new CondolenciasObituariosRepository(_dbContext);
+        public ConfigCuotasPeriodicasRepository ConfigCuotasPeriodicas => _configCuotasPeriodicasRepository ??= new ConfigCuotasPeriodicasRepository(_dbContext);
         public ConfiguracionGeneralRepository ConfiguracionGeneral => _configuracionGeneralRepository ??= new ConfiguracionGeneralRepository(_dbContext);
         public ContratosRepository Contratos => _contratosRepository ??= new ContratosRepository(_dbContext);
         public CuentasCorrientesRepository CuentasCorrientes => _cuentasCorrientesRepository ??= new CuentasCorrientesRepository(_dbContext);

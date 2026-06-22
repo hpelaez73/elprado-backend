@@ -9,6 +9,8 @@
         public int Cuota { get; set; }
         public int Pago { get; set; }
         public DateTime FechaCuota { get; set; }
+        public double Monto { get; set; }
+        public double Descuento { get; set; }
         public double Total { get; set; }
         public int CodGrupo { get; set; }
         public bool EsIndependiente { get; set; }

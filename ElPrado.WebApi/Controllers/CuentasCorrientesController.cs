@@ -50,10 +50,10 @@ namespace ElPrado.WebApi.Controllers
         }
 
         [HttpPost("SolicitudMercadoPago")]
-        public ActionResult<ApiResponse<string>> SolicitudMercadoPago([FromBody] List<DtoCuotasMercadoPago> listCuotas)
+        public async Task<ActionResult<ApiResponse<string>>> SolicitudMercadoPagoAsync([FromBody] List<DtoCuotasMercadoPago> listCuotas)
         {
             ApiResponse<string> apiResponse = new();
-            Resultados<string> resultado = cuentasCorrientesService.SolicitudMercadoPago(listCuotas);
+            Resultados<string> resultado = await cuentasCorrientesService.SolicitudMercadoPagoAsync(listCuotas);
             if (resultado.HayError || string.IsNullOrEmpty(resultado.Valor))
             {
                 apiResponse.Agregar(resultado);
@@ -64,10 +64,10 @@ namespace ElPrado.WebApi.Controllers
         }
 
         [HttpPost("SolicitudMercadoPagoLink")]
-        public ActionResult<ApiResponse<string>> SolicitudMercadoPagoLink([FromBody] DtoSolicitudMercadoPago dtoSolicitud)
+        public async Task<ActionResult<ApiResponse<string>>> SolicitudMercadoPagoLinkAsync([FromBody] DtoSolicitudMercadoPago dtoSolicitud)
         {
             ApiResponse<string> apiResponse = new();
-            Resultados<string> resultado = cuentasCorrientesService.SolicitudMercadoPagoLink(dtoSolicitud);
+            Resultados<string> resultado = await cuentasCorrientesService.SolicitudMercadoPagoLinkAsync(dtoSolicitud);
             if (resultado.HayError || string.IsNullOrEmpty(resultado.Valor))
             {
                 apiResponse.Agregar(resultado);

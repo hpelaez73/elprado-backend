@@ -6,6 +6,7 @@ using ElPrado.DataFactory.Interfaces;
 using ElPrado.Reports.Interfaces;
 using ElPrado.Reports.Services;
 using ElPrado.Services;
+using ElPrado.Services.Agents;
 using ElPrado.Services.Interfaces;
 using ElPrado.Services.Services;
 using ElPrado.WebApi;
@@ -18,6 +19,7 @@ using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
 using Serilog;
 using System.Text;
+using System.Text.Json.Serialization;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -36,7 +38,14 @@ builder.WebHost.UseConfiguration(configBuilder)
 builder.Host.UseSerilog((ctx, lc) => lc.ReadFrom.Configuration(ctx.Configuration));
 
 // Add services
-builder.Services.AddControllers();
+builder.Services
+    .AddControllers()
+    .AddJsonOptions(options =>
+     {
+         options.JsonSerializerOptions.Converters.Add(
+             new JsonStringEnumConverter());
+     });
+
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen(c =>
 {
@@ -60,19 +69,47 @@ builder.Services.AddSwaggerGen(c =>
 });
 
 // CORS dinámico según el entorno
-var allowedOrigins = builder.Configuration.GetSection("AllowedOrigins").Get<string[]>() ?? Array.Empty<string>();
 var policyName = "CorsPolicy";
+var allowedOrigins =
+    builder.Configuration.GetSection("AllowedOrigins").Get<string[]>() ??
+    Array.Empty<string>();
 
-builder.Services.AddCors(options =>
+if (builder.Environment.IsDevelopment())
 {
-    options.AddPolicy("CorsPolicy", policy =>
+    builder.Services.AddCors(options =>
     {
-        policy
-            .WithOrigins(allowedOrigins)
-            .AllowAnyHeader()
-            .AllowAnyMethod();
+        options.AddPolicy(policyName, policy =>
+        {
+            policy
+                .WithOrigins(allowedOrigins)
+                .AllowAnyHeader()
+                .AllowAnyMethod();
+        });
     });
-});
+}
+else
+{
+    builder.Services.AddCors(options =>
+    {
+        options.AddPolicy(policyName, policy =>
+        {
+            policy
+                .SetIsOriginAllowed(origin =>
+                {
+                    if (string.IsNullOrEmpty(origin))
+                        return false;
+
+                    var host = new Uri(origin).Host;
+
+                    return allowedOrigins.Any(x =>
+                        host.Equals(x, StringComparison.OrdinalIgnoreCase) ||
+                        host.EndsWith("." + x, StringComparison.OrdinalIgnoreCase));
+                })
+                .AllowAnyHeader()
+                .AllowAnyMethod();
+        });
+    });
+}
 
 // JWT
 builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
@@ -135,6 +172,22 @@ builder.Services.AddHttpClient<IAfipWsfeGateway, AfipWsfeGateway>(client =>
 
 // Configuraciones varias
 ElPrado.Reports.Configuration.DocSettings.Configurar();
+
+// Registrar los servicios IA
+builder.Services.AddHttpClient<GeminiAgente>();
+builder.Services.AddHttpClient<OpenAIAgente>();
+
+// Registrar una "Fábrica" o selector simple
+builder.Services.AddTransient<Func<string, IAgenteIA>>(serviceProvider => key =>
+{
+    return key switch
+    {
+        "Gemini" => serviceProvider.GetRequiredService<GeminiAgente>(),
+        "OpenAI" => serviceProvider.GetRequiredService<OpenAIAgente>(),
+        _ => throw new NotImplementedException()
+    };
+});
+
 
 var app = builder.Build();
 
