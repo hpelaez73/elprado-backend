@@ -176,6 +176,14 @@ chown -R apiwsfe:apiwsfe /opt/apiwsfe/certificados
 chmod -R 700 /opt/apiwsfe/certificados
 ```
 
+Configurar OpenSSL:
+Editar el archivo `/etc/ssl/openssl.cnf` y cambiar:
+```ini
+[system_default_sect]
+MinProtocol = TLSv1.2
+CipherString = DEFAULT@SECLEVEL=0
+```
+
 ---
 
 # Instalación como servicio Linux

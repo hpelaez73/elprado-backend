@@ -210,5 +210,11 @@ namespace ElPrado.Data.Repositories
             string sql = @" EXECUTE PROCEDURE POST_REGISTRO_DESCARGA_FACTURA(@codCliente, @codTalonario, @nroComprobante)";
             await _connection.ExecuteAsync(sql, new { codCliente, codTalonario, nroComprobante }, _transaction);
         }
+
+        public async Task<List<DtoComprobantesSinCae>> ComprobantesSinCaeAsync()
+        {
+            string sql = "SELECT * FROM GET_COMPROBANTES_SIN_CAE";
+            return (await _connection.QueryAsync<DtoComprobantesSinCae>(sql, transaction: _transaction)).ToList();
+        }
     }
 }

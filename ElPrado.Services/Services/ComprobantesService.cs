@@ -1,9 +1,9 @@
 ﻿using ElPrado.Core;
-using ElPrado.Core.Utils;
 using ElPrado.Data.Interfaces;
 using ElPrado.Dto.Documents;
 using ElPrado.Dto.Dtos;
 using ElPrado.Reports.Mappers;
+using ElPrado.Services.Interfaces;
 
 namespace ElPrado.Services.Services
 {
@@ -70,7 +70,7 @@ namespace ElPrado.Services.Services
                 _uow.Commit();
             }
             catch
-            { 
+            {
                 _uow.Rollback();
                 throw;
             }
@@ -113,6 +113,75 @@ namespace ElPrado.Services.Services
         public async Task<ApiResponseListado<IEnumerable<dynamic>>> ListadoColaEnvioEstadosAsync(DtoOpcionesListados opcionesListado)
         {
             return await _uow.ColaEnvioFactura.ListadoColaEnvioEstadosAsync(opcionesListado);
+        }
+
+        public async Task<IEnumerable<DtoComprobantesSinCae>> ComprobantesSinCaeAsync(IAfipWsfeGateway _afipWsfeGateway)
+        {
+            List<DtoComprobantesSinCae> listComprobantes = await _uow.Comprobantes.ComprobantesSinCaeAsync();
+
+            if (listComprobantes.Count == 0)
+            {
+                return listComprobantes;
+            }
+
+            var ultimoComprobanteCache = new Dictionary<string, string>();
+
+            foreach (var comprobante in listComprobantes)
+            {
+                string cacheKey = $"{comprobante.CodTalonario}";
+
+                if (!ultimoComprobanteCache.ContainsKey(cacheKey))
+                {
+                    var response = await _afipWsfeGateway.ConsultarUltimoComprobanteAsync(comprobante.CodTipoComprobante, comprobante.CodTalonario);
+
+                    if (response.Success && response.Data != null)
+                    {
+                        ultimoComprobanteCache[cacheKey] = response.Data.NroComprobante;
+                    }
+                    else
+                    {
+                        ultimoComprobanteCache[cacheKey] = string.Empty;
+                    }
+                }
+
+                comprobante.AfipUltimoComprobante = ultimoComprobanteCache[cacheKey];
+            }
+
+            return listComprobantes;
+        }
+
+        public async Task<Resultados> SolicitarCaeAsync(IAfipWsfeGateway afipWsfeGateway)
+        {
+            Resultados resultado = new();
+
+            List<DtoComprobantesSinCae> listComprobantes = await _uow.Comprobantes.ComprobantesSinCaeAsync();
+
+            if (listComprobantes == null || listComprobantes.Count == 0)
+            {
+                resultado.Agregar("No se han ingresado comprobantes para solicitar CAE");
+                return resultado;
+            }
+
+            foreach (var comprobante in listComprobantes)
+            {
+                ApiResponse<DtoAfipWsfe> response;
+
+                if (string.Compare(comprobante.NroComprobante, comprobante.AfipUltimoComprobante, StringComparison.Ordinal) <= 0)
+                {
+                    response = await afipWsfeGateway.ActualizarCAEAsync(comprobante.CodTalonario, comprobante.NroComprobante);
+                }
+                else
+                {
+                    response = await afipWsfeGateway.SolicitarCAEAsync(comprobante.CodTalonario, comprobante.NroComprobante);
+                }
+
+                if (!response.Success)
+                {
+                    resultado.Agregar($"Comprobante {comprobante.NroComprobante}: {response.Message}");
+                }
+            }
+
+            return resultado;
         }
     }
 }
