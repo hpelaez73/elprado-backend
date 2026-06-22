@@ -135,4 +135,19 @@
         public int CodMovimientoFondo { get; set; }
     }
 
+    public class DtoComprobantesSinCae
+    {
+        public string TipoComprobante { get; set; } = string.Empty;
+        public string Talonario { get; set; } = string.Empty;
+        public string NroComprobante { get; set; } = string.Empty;
+        public DateOnly Fecha { get; set; }
+        public string Cliente { get; set; } = string.Empty;
+        public double Total { get; set; }
+        public int Propuesta { get; set; }
+        public string AfipResultado { get; set; } = string.Empty;
+        public string AfipObservaciones { get; set; } = string.Empty;
+        public string AfipUltimoComprobante { get; set; } = string.Empty;
+        public int CodTalonario { get; set; }
+        public int CodTipoComprobante { get; set; }
+    }
 }

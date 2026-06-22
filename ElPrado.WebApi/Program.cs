@@ -163,6 +163,12 @@ builder.Services.AddScoped<IPdfStorageService, PdfStorageService>();
 builder.Services.AddScoped<IPdfService, PdfService>();
 builder.Services.AddScoped<IImageStorageService, LocalImageStorageService>();
 builder.Services.AddScoped<IReportImageService, ReportImageService>();
+builder.Services.AddHttpClient<IAfipWsfeGateway, AfipWsfeGateway>(client =>
+{
+    string baseUrl = builder.Configuration["AfipWebApi:BaseUrl"] ?? "http://localhost:5000";
+    client.BaseAddress = new Uri(baseUrl);
+    client.Timeout = TimeSpan.FromSeconds(60);
+});
 
 // Configuraciones varias
 ElPrado.Reports.Configuration.DocSettings.Configurar();

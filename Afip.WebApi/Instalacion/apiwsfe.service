@@ -1,0 +1,15 @@
+[Unit]
+Description=Servidor AFIP
+After=network.target firebird3.0.service
+
+[Service]
+WorkingDirectory=/opt/apiwsfe
+ExecStart=/opt/apiwsfe/Afip.WebApi
+Restart=always
+RestartSec=5
+
+User=apiwsfe
+Group=apiwsfe
+
+[Install]
+WantedBy=multi-user.target

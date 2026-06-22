@@ -1,4 +1,11 @@
+/.codex
 /.vs
+/Afip.Data/bin
+/Afip.Data/obj
+/Afip.Services/bin
+/Afip.Services/obj
+/Afip.WebApi/bin
+/Afip.WebApi/obj
 /ElPrado.Core/bin
 /ElPrado.Core/obj
 /ElPrado.Data/bin

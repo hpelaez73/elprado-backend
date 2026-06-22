@@ -17,12 +17,14 @@ namespace ElPrado.WebApi.Controllers
         private readonly IPdfStorageService _pdfStorageService;
         private readonly IPdfService _pdfService;
         private readonly IReportImageService _reportImageService;
+        private readonly IAfipWsfeGateway _afipWsfeGateway;
 
-        public ComprobantesController(IUnitOfWork unitOfWork, IUserContextService userContext, IPdfStorageService pdfStorageService, IPdfService pdfService, IReportImageService reportImageService) : base(unitOfWork, userContext)
+        public ComprobantesController(IUnitOfWork unitOfWork, IUserContextService userContext, IPdfStorageService pdfStorageService, IPdfService pdfService, IReportImageService reportImageService, IAfipWsfeGateway afipWsfeGateway) : base(unitOfWork, userContext)
         {
             _pdfStorageService = pdfStorageService;
             _pdfService = pdfService;
             _reportImageService = reportImageService;
+            _afipWsfeGateway = afipWsfeGateway;
         }
 
         protected override ServiceBase CrearServicio()
@@ -157,6 +159,58 @@ namespace ElPrado.WebApi.Controllers
         {
             return await comprobantesService.ListadoComprobantesPropuestaAsync(opcionesListado);
         }
+
+        [HttpGet("ComprobantesSinCae")]
+        public async Task<ApiResponse<IEnumerable<DtoComprobantesSinCae>>> ComprobantesSinCaeAsync()
+        {
+            ApiResponse<IEnumerable<DtoComprobantesSinCae>> apiResponse = new()
+            {
+                Data = await comprobantesService.ComprobantesSinCaeAsync(_afipWsfeGateway)
+            };
+            return apiResponse;
+        }
+
+        [HttpPost("SolicitarCae")]
+        public async Task<ActionResult<ApiResponse<int>>> SolicitarCaeAsync()
+        {
+            ApiResponse<int> apiResponse = new();
+            Resultados resultado = await comprobantesService.SolicitarCaeAsync(_afipWsfeGateway);
+            if (resultado.HayError)
+            {
+                apiResponse.Agregar(resultado);
+                return BadRequest(apiResponse);
+            }
+            apiResponse.Message = "CAE solicitado";
+            return Ok(apiResponse);
+        }
+
+        #region AFIP
+
+        [HttpGet("Afip/EstadoServicio")]
+        public async Task<ApiResponse<DtoAfipWsfe>> AfipEstadoServicioAsync()
+        {
+            return await _afipWsfeGateway.ConsultarEstadoServicioAsync();
+        }
+
+        [HttpGet("Afip/UltimoComprobante")]
+        public async Task<ApiResponse<DtoAfipWsfe>> AfipUltimoComprobanteAsync([FromBody] DtoAfipWsfeUltimoReq dtoUltimoReq)
+        {
+            return await _afipWsfeGateway.ConsultarUltimoComprobanteAsync(dtoUltimoReq.CodTipoComprobante, dtoUltimoReq.CodTalonario);
+        }
+
+        [HttpPost("Afip/ActualizarCAE")]
+        public async Task<ApiResponse<DtoAfipWsfe>> AfipActualizarCAEAsync([FromBody] DtoAfipWsfeSolicitarReq dtoAfipWsfe)
+        {
+            return await _afipWsfeGateway.ActualizarCAEAsync(dtoAfipWsfe.CodTalonario, dtoAfipWsfe.NroComprobante);
+        }
+
+        [HttpPost("Afip/SolicitarCAE")]
+        public async Task<ApiResponse<DtoAfipWsfe>> AfipSolicitarCAEAsync([FromBody] DtoAfipWsfeSolicitarReq dtoAfipWsfe)
+        {
+            return await _afipWsfeGateway.SolicitarCAEAsync(dtoAfipWsfe.CodTalonario, dtoAfipWsfe.NroComprobante);
+        }
+
+        #endregion
 
     }
 }
