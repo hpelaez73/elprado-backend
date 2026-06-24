@@ -115,7 +115,7 @@ namespace ElPrado.Services.Services
             return await _uow.ColaEnvioFactura.ListadoColaEnvioEstadosAsync(opcionesListado);
         }
 
-        public async Task<IEnumerable<DtoComprobantesSinCae>> ComprobantesSinCaeAsync(IAfipWsfeGateway _afipWsfeGateway)
+        public async Task<List<DtoComprobantesSinCae>> ComprobantesSinCaeAsync(IAfipWsfeGateway _afipWsfeGateway)
         {
             List<DtoComprobantesSinCae> listComprobantes = await _uow.Comprobantes.ComprobantesSinCaeAsync();
 
@@ -154,7 +154,7 @@ namespace ElPrado.Services.Services
         {
             Resultados resultado = new();
 
-            List<DtoComprobantesSinCae> listComprobantes = await _uow.Comprobantes.ComprobantesSinCaeAsync();
+            List<DtoComprobantesSinCae> listComprobantes = await ComprobantesSinCaeAsync(afipWsfeGateway);
 
             if (listComprobantes == null || listComprobantes.Count == 0)
             {

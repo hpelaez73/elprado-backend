@@ -20,11 +20,18 @@ deploy_master:
   script:
     - ssh root@210.1.1.91 'systemctl stop sicoWeb.service || true'
     - ssh root@210.1.1.91 'systemctl stop elprado-workers.service || true'
+    - ssh root@210.1.1.91 'systemctl stop apiwsfe.service || true'
     - ssh root@210.1.1.91 'rm -rf /app/*'
     - ssh root@210.1.1.91 'rm -rf /repo/*'
+    # Copiar todos los proyectos necesarios
     - scp -r ElPrado.Core/ ElPrado.Data/ ElPrado.DataFactory/ ElPrado.Dto/ ElPrado.Reports/ ElPrado.Services/ ElPrado.WebApi/ ElPrado.Workers/ Afip.Data/ Afip.Services/ Afip.WebApi/ ElPradoWeb.sln root@210.1.1.91:/repo
-    - ssh root@210.1.1.91 'cd /repo && dotnet publish -c release -o /app'
+    # Publicar cada proyecto a su propia carpeta
+    - ssh root@210.1.1.91 'cd /repo && dotnet publish ElPrado.WebApi/ElPrado.WebApi.csproj -c release -o /app/webapi'
+    - ssh root@210.1.1.91 'cd /repo && dotnet publish ElPrado.Workers/ElPrado.Workers.csproj -c release -o /app/workers'
+    - ssh root@210.1.1.91 'cd /repo && dotnet publish Afip.WebApi/Afip.WebApi.csproj -c release -o /app/apiwsfe'
+    # Iniciar servicios
     - ssh root@210.1.1.91 'systemctl start sicoWeb.service'
     - ssh root@210.1.1.91 'systemctl start elprado-workers.service'
+    - ssh root@210.1.1.91 'systemctl start apiwsfe.service'
   only:
     - master
