@@ -28,6 +28,12 @@ namespace ElPrado.Services.Services
             return SendAsync(HttpMethod.Get, $"api/wsfe/ultimo-comprobante/{codTipoComprobante}/{codTalonario}");
         }
 
+        public Task<ApiResponse<DtoAfipWsfeConsultaDetalle>> ConsultarComprobanteAsync(int codTalonario, string nroComprobante)
+        {
+            string comprobante = Uri.EscapeDataString(nroComprobante);
+            return SendAsyncDetalle(HttpMethod.Get, $"api/wsfe/comprobante/{codTalonario}/{comprobante}");
+        }
+
         public Task<ApiResponse<DtoAfipWsfe>> ActualizarCAEAsync(int codTalonario, string nroComprobante)
         {
             string comprobante = Uri.EscapeDataString(nroComprobante);
@@ -65,6 +71,41 @@ namespace ElPrado.Services.Services
                     NroCAE = afipResponse.NroCAE
                 };
                 return apiResponse;
+            }
+            catch (HttpRequestException)
+            {
+                apiResponse.Agregar("No se pudo conectar con Afip.WebApi.");
+                return apiResponse;
+            }
+            catch (TaskCanceledException)
+            {
+                apiResponse.Agregar("Afip.WebApi no respondio dentro del tiempo esperado.");
+                return apiResponse;
+            }
+            catch (JsonException)
+            {
+                apiResponse.Agregar("Afip.WebApi devolvio una respuesta invalida.");
+                return apiResponse;
+            }
+        }
+
+        private async Task<ApiResponse<DtoAfipWsfeConsultaDetalle>> SendAsyncDetalle(HttpMethod method, string requestUri)
+        {
+            ApiResponse<DtoAfipWsfeConsultaDetalle> apiResponse = new();
+            try
+            {
+                using HttpRequestMessage request = new(method, requestUri);
+                using HttpResponseMessage response = await _httpClient.SendAsync(request);
+                string content = await response.Content.ReadAsStringAsync();
+
+                ApiResponse<DtoAfipWsfeConsultaDetalle>? afipResponse = JsonSerializer.Deserialize<ApiResponse<DtoAfipWsfeConsultaDetalle>>(content, JsonOptions);
+                if (afipResponse == null)
+                {
+                    apiResponse.Agregar("Afip.WebApi devolvio una respuesta vacia o invalida");
+                    return apiResponse;
+                }
+
+                return afipResponse;
             }
             catch (HttpRequestException)
             {

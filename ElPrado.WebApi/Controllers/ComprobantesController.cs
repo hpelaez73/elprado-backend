@@ -210,6 +210,12 @@ namespace ElPrado.WebApi.Controllers
             return await _afipWsfeGateway.SolicitarCAEAsync(dtoAfipWsfe.CodTalonario, dtoAfipWsfe.NroComprobante);
         }
 
+        [HttpPost("Afip/Comprobante")]
+        public async Task<ApiResponse<DtoAfipWsfeConsultaDetalle>> AfipComprobanteAsync([FromBody] DtoAfipWsfeSolicitarReq dtoAfipWsfe)
+        {
+            return await _afipWsfeGateway.ConsultarComprobanteAsync(dtoAfipWsfe.CodTalonario, dtoAfipWsfe.NroComprobante);
+        }
+
         #endregion
 
     }

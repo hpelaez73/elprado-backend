@@ -15,25 +15,31 @@ var app = builder.Build();
 
 app.MapGet("/api/wsfe/estado-servicio", (Wsfe wsfe) =>
 {
-    ApiResponse res = wsfe.ConsultarEstadoServicio();
+    ApiResponse<object> res = wsfe.ConsultarEstadoServicio();
     return res.Success ? Results.Ok(res) : Results.BadRequest(res);
 });
 
 app.MapGet("/api/wsfe/ultimo-comprobante/{codTipoComprobante:int}/{codTalonario:int}", async (int codTipoComprobante, int codTalonario, Wsfe wsfe) =>
 {
-    ApiResponse res = await wsfe.ConsultarUltimoComprobanteAsync(codTipoComprobante, codTalonario);
+    ApiResponse<object> res = await wsfe.ConsultarUltimoComprobanteAsync(codTipoComprobante, codTalonario);
+    return res.Success ? Results.Ok(res) : Results.BadRequest(res);
+});
+
+app.MapGet("/api/wsfe/comprobante/{codTalonario:int}/{nroComprobante}", async (int codTalonario, string nroComprobante, Wsfe wsfe) =>
+{
+    ApiResponse<ElPrado.Dto.Dtos.DtoAfipWsfeConsultaDetalle> res = await wsfe.ConsultarComprobanteAsync(codTalonario, nroComprobante);
     return res.Success ? Results.Ok(res) : Results.BadRequest(res);
 });
 
 app.MapPost("/api/wsfe/actualizar-cae/{codTalonario:int}/{nroComprobante}", async (int codTalonario, string nroComprobante, Wsfe wsfe) =>
 {
-    ApiResponse res = await wsfe.ActualizarCAEComprobanteEmitidoAsync(codTalonario, nroComprobante);
+    ApiResponse<object> res = await wsfe.ActualizarCAEComprobanteEmitidoAsync(codTalonario, nroComprobante);
     return res.Success ? Results.Ok(res) : Results.BadRequest(res);
 });
 
 app.MapPost("/api/wsfe/solicitar-cae/{codTalonario:int}/{nroComprobante}", async (int codTalonario, string nroComprobante, Wsfe wsfe) =>
 {
-    ApiResponse res = await wsfe.SolicitarCAEAsync(codTalonario, nroComprobante);
+    ApiResponse<object> res = await wsfe.SolicitarCAEAsync(codTalonario, nroComprobante);
     return res.Success ? Results.Ok(res) : Results.BadRequest(res);
 });
 

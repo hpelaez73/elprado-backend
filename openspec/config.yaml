@@ -8,6 +8,12 @@ schema: spec-driven
 #     Tech stack: TypeScript, React, Node.js
 #     We use conventional commits
 #     Domain: e-commerce platform
+context: |
+  Backend .NET 7 para ElPrado, organizado por capas y proyectos.
+  Stack principal: ASP.NET Core Web API, Firebird, Dapper, Serilog, Swagger/OpenAPI.
+  Hay dos fachadas API: ElPrado.WebApi para el frontend y Afip.WebApi para WSFE/AFIP.
+  Dominio fuerte en comprobantes, clientes, parcelas, obituarios, servicios, pagos y reportes.
+  El frontend debe consumir ElPrado.WebApi; no exponer Afip.WebApi directo.
 
 # Per-artifact rules (optional)
 # Add custom rules for specific artifacts.
@@ -18,3 +24,33 @@ schema: spec-driven
 #       - Always include a "Non-goals" section
 #     tasks:
 #       - Break tasks into chunks of max 2 hours
+rules:
+  proposal:
+    - Mantener propuestas breves y concretas; priorizar alcance, impacto y
+      riesgos.
+    - No duplicar detalles de implementación salvo que cambien decisiones de
+      arquitectura.
+
+  specs:
+    - Describir comportamiento observable y contratos, no clases ni
+      implementación interna.
+    - Separar claramente el comportamiento de ElPrado.WebApi y Afip.WebApi.
+    - Identificar entradas, salidas y condiciones de error.
+    - No asumir cambios en stored procedures sin verificar primero el
+      comportamiento existente.
+    - Considerar compatibilidad con el comportamiento actual del sistema.
+
+  design:
+    - Respetar la separación entre ElPrado.WebApi y Afip.WebApi.
+    - Preferir cambios pequeños sobre refactors amplios.
+    - Revisar primero los patrones existentes antes de introducir nuevas
+      abstracciones.
+    - Considerar el impacto sobre Firebird, stored procedures y contratos API.
+
+  tasks:
+    - Dividir en pasos cortos y verificables.
+    - Evitar tareas demasiado genéricas.
+    - Nombrar proyectos, controladores, servicios o stored procedures concretos
+      cuando corresponda.
+githubCopilot:
+  cloudAgent: true

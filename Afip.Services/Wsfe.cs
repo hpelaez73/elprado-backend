@@ -2,9 +2,12 @@ using Afip.Data.Interfaces;
 using Afip.Data.Models;
 using Afip.Services.Logger;
 using Afip.Services.Wsfev1;
+using ElPrado.Dto.Dtos;
 using Microsoft.Extensions.Configuration;
 using Newtonsoft.Json;
 using System.ServiceModel;
+using AfipApiResponse = Afip.Data.Models.ApiResponse<object>;
+using AfipConsultaResponse = Afip.Data.Models.ApiResponse<ElPrado.Dto.Dtos.DtoAfipWsfeConsultaDetalle>;
 
 namespace Afip.Services;
 
@@ -43,7 +46,7 @@ public class Wsfe : IDisposable
         InicializarClienteSoap(Constantes.URL_WSFEV1_WSDL_PRUEBA);
     }
 
-    public ApiResponse ConsultarEstadoServicio()
+    public AfipApiResponse ConsultarEstadoServicio()
     {
         if (_ws == null)
         {
@@ -78,7 +81,7 @@ public class Wsfe : IDisposable
         }
     }
 
-    public async Task<ApiResponse> ConsultarUltimoComprobanteAsync(int codTipoComprobante, int codTalonario)
+    public async Task<AfipApiResponse> ConsultarUltimoComprobanteAsync(int codTipoComprobante, int codTalonario)
     {
         await ConfigurarFEAuthRequestAsync();
 
@@ -136,7 +139,7 @@ public class Wsfe : IDisposable
         
     }
 
-    public async Task<ApiResponse> ActualizarCAEComprobanteEmitidoAsync(int codTalonario, string nroComprobante)
+    public async Task<AfipApiResponse> ActualizarCAEComprobanteEmitidoAsync(int codTalonario, string nroComprobante)
     {
         await ConfigurarFEAuthRequestAsync();
 
@@ -231,7 +234,78 @@ public class Wsfe : IDisposable
         }
     }
 
-    public async Task<ApiResponse> SolicitarCAEAsync(int codTalonario, string nroComprobante)
+    public async Task<AfipConsultaResponse> ConsultarComprobanteAsync(int codTalonario, string nroComprobante)
+    {
+        await ConfigurarFEAuthRequestAsync();
+
+        if (_ws == null)
+        {
+            Console.WriteLine("Error: El cliente SOAP no esta inicializado");
+            return new ApiResponse
+            {
+                Success = false,
+                Message = "Cliente SOAP no inicializado"
+            };
+        }
+
+        var comprobante = await _repo.GetComprobanteParaCAEAsync(codTalonario, nroComprobante);
+        if (comprobante == null)
+        {
+            return new ApiResponse
+            {
+                Success = false,
+                Message = "El comprobante no esta generado"
+            };
+        }
+
+        string nroComprobanteNumerico = ObtenerNumeroComprobante(nroComprobante);
+        if (!long.TryParse(nroComprobanteNumerico, out long cbteNro))
+        {
+            return new ApiResponse
+            {
+                Success = false,
+                Message = "El numero de comprobante es invalido"
+            };
+        }
+
+        FECompConsultaReq request = new()
+        {
+            CbteNro = cbteNro,
+            CbteTipo = comprobante.AfipTipoComprobante,
+            PtoVta = comprobante.PuntoVenta
+        };
+
+        FECompConsultaResponse response = _ws.FECompConsultar(_feAuthRequest, request);
+        if (response.Errors != null && response.Errors.Length > 0)
+        {
+            return new ApiResponse
+            {
+                Success = false,
+                Message = response.Errors[0].Msg
+            };
+        }
+
+        if (response.ResultGet == null)
+        {
+            return new ApiResponse
+            {
+                Success = false,
+                Message = "Afip no devolvio informacion para el comprobante consultado"
+            };
+        }
+
+        return new ApiResponse
+        {
+            Success = true,
+            Message = "Comprobante consultado correctamente",
+            CodTalonario = codTalonario,
+            NroComprobante = nroComprobante,
+            NroCAE = response.ResultGet.CodAutorizacion,
+            Data = MapearDetalleConsulta(codTalonario, nroComprobante, request, response, comprobante)
+        };
+    }
+
+    public async Task<AfipApiResponse> SolicitarCAEAsync(int codTalonario, string nroComprobante)
     {
         await ConfigurarFEAuthRequestAsync();
 
@@ -425,6 +499,77 @@ public class Wsfe : IDisposable
         }
     }
 
+    private static string ObtenerNumeroComprobante(string nroComprobante)
+    {
+        ReadOnlySpan<char> span = nroComprobante.AsSpan();
+        for (int i = span.Length - 1; i >= 0; i--)
+        {
+            if (span[i] == '-')
+            {
+                return span[(i + 1)..].ToString();
+            }
+        }
+
+        return nroComprobante;
+    }
+
+    private static DtoAfipWsfeConsultaDetalle MapearDetalleConsulta(
+        int codTalonario,
+        string nroComprobante,
+        FECompConsultaReq request,
+        FECompConsultaResponse response,
+        AfipComprobante comprobante)
+    {
+        FECompConsultaResultGet result = response.ResultGet!;
+
+        return new DtoAfipWsfeConsultaDetalle
+        {
+            CodTalonario = codTalonario,
+            NroComprobante = nroComprobante,
+            Concepto = comprobante.AfipConcepto,
+            DocTipo = comprobante.AfipTipoDocumento ?? 0,
+            DocNro = long.TryParse(comprobante.NroDocumento, out long docNro) ? docNro : (comprobante.Cuit ?? 0),
+            CbteDesde = request.CbteNro,
+            CbteHasta = request.CbteNro,
+            CbteFch = comprobante.Fecha.ToString("yyyyMMdd"),
+            ImpTotal = Convert.ToDouble(comprobante.Total),
+            ImpTotConc = Convert.ToDouble(comprobante.NoGravado),
+            ImpNeto = Convert.ToDouble(comprobante.Neto),
+            ImpOpEx = 0,
+            ImpTrib = 0,
+            ImpIVA = Convert.ToDouble(comprobante.Iva),
+            FchServDesde = comprobante.AfipServicioDesde?.ToString("yyyyMMdd") ?? string.Empty,
+            FchServHasta = comprobante.AfipServicioHasta?.ToString("yyyyMMdd") ?? string.Empty,
+            FchVtoPago = comprobante.Fecha.ToString("yyyyMMdd"),
+            MonId = cMoneda,
+            MonCotiz = 1,
+            Resultado = result.Resultado,
+            CodAutorizacion = result.CodAutorizacion,
+            EmisionTipo = string.Empty,
+            FchVto = result.FchVto,
+            FchProceso = result.FchProceso,
+            PtoVta = request.PtoVta,
+            CbteTipo = request.CbteTipo,
+            CbtesAsoc = new List<DtoAfipWsfeCbteAsoc>(),
+            Tributos = new List<DtoAfipWsfeTributo>(),
+            Iva = new List<DtoAfipWsfeIva>(),
+            Opcionales = new List<DtoAfipWsfeOpcional>(),
+            Compradores = new List<DtoAfipWsfeComprador>(),
+            PeriodoAsoc = new List<DtoAfipWsfePeriodoAsoc>(),
+            Observaciones = result.Observaciones?.Select(obs => new DtoAfipWsfeObservacion
+            {
+                Code = obs.Code,
+                Msg = obs.Msg
+            }).ToList() ?? new List<DtoAfipWsfeObservacion>(),
+            Errors = response.Errors?.Select(err => new DtoAfipWsfeError
+            {
+                Code = err.Code,
+                Msg = err.Msg
+            }).ToList() ?? new List<DtoAfipWsfeError>(),
+            Events = new List<DtoAfipWsfeEvent>()
+        };
+    }
+
     private async Task GenerarErrorAsync(int codError, string msgError)
     {
         Console.WriteLine("Error: " + msgError);
@@ -466,3 +611,5 @@ public class Wsfe : IDisposable
         }
     }
 }
+
+
