@@ -33,6 +33,7 @@ namespace ElPrado.Data
         private PropuestasRepository? _propuestasRepository;
         private ProcesosSistemasRepository? _procesosSistemasRepository;
         private RefreshTokensRepository? _refreshTokensRepository;
+        private RecuperacionesClaveRepository? _recuperacionesClaveRepository;
 
         private ServiciosModelosRepository? _serviciosModelosRepository;
         private ServiciosObituariosRepository? _serviciosObituariosRepository;
@@ -71,6 +72,7 @@ namespace ElPrado.Data
         public PropuestasRepository Propuestas => _propuestasRepository ??= new PropuestasRepository(_dbContext);
         public ProcesosSistemasRepository ProcesosSistemas => _procesosSistemasRepository ??= new ProcesosSistemasRepository(_dbContext);
         public RefreshTokensRepository RefreshTokens => _refreshTokensRepository ??= new RefreshTokensRepository(_dbContext);
+        public RecuperacionesClaveRepository RecuperacionesClave => _recuperacionesClaveRepository ??= new RecuperacionesClaveRepository(_dbContext);
 
         public ServiciosModelosRepository ServiciosModelos => _serviciosModelosRepository ??= new ServiciosModelosRepository(_dbContext);
         public ServiciosObituariosRepository ServiciosObituarios => _serviciosObituariosRepository ??= new ServiciosObituariosRepository(_dbContext);

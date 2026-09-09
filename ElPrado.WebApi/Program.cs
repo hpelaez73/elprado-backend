@@ -23,7 +23,7 @@ using System.Text.Json.Serialization;
 
 var builder = WebApplication.CreateBuilder(args);
 
-// Usar el archivo de configuración según el entorno
+// Usar el archivo de configuraciÃ³n segÃºn el entorno
 var configBuilder = new ConfigurationBuilder()
     .SetBasePath(Directory.GetCurrentDirectory())
     .AddJsonFile("appsettings.json", optional: false, reloadOnChange: true)
@@ -68,7 +68,7 @@ builder.Services.AddSwaggerGen(c =>
     });
 });
 
-// CORS dinámico según el entorno
+// CORS dinÃ¡mico segÃºn el entorno
 var policyName = "CorsPolicy";
 var allowedOrigins =
     builder.Configuration.GetSection("AllowedOrigins").Get<string[]>() ??
@@ -141,7 +141,7 @@ builder.Services.AddSingleton<IXmlRepository, FirebirdXmlRepository>(); //Data P
 builder.Services.AddDataProtection()
     .SetApplicationName("ElPradoCRM");
 
-// Configuración correcta (sin BuildServiceProvider)
+// ConfiguraciÃ³n correcta (sin BuildServiceProvider)
 builder.Services.AddSingleton<IConfigureOptions<KeyManagementOptions>>(sp =>
     new ConfigureOptions<KeyManagementOptions>(options =>
     {
@@ -154,11 +154,13 @@ builder.Services.AddMemoryCache(); // registra IMemoryCache exigido por ReportIm
 // Configuraciones fuertemente tipadas
 builder.Services.Configure<ElPrado.Core.Configuration.PdfSettings>(builder.Configuration.GetSection("PdfSettings"));
 builder.Services.Configure<ElPrado.Core.Configuration.ImagenSettings>(builder.Configuration.GetSection("ImagenSettings"));
+builder.Services.Configure<ElPrado.Core.Configuration.FrontendSettings>(builder.Configuration.GetSection("FrontendSettings"));
 
 // DI
 builder.Services.AddHttpContextAccessor();
 builder.Services.AddScoped<IUnitOfWork, UnitOfWork>();
 builder.Services.AddScoped<IUserContextService, UserContextService>();
+builder.Services.AddScoped<IRecuperacionClaveEmailService, RecuperacionClaveEmailService>();
 builder.Services.AddScoped<IPdfStorageService, PdfStorageService>();
 builder.Services.AddScoped<IPdfService, PdfService>();
 builder.Services.AddScoped<IImageStorageService, LocalImageStorageService>();
@@ -177,7 +179,7 @@ ElPrado.Reports.Configuration.DocSettings.Configurar();
 builder.Services.AddHttpClient<GeminiAgente>();
 builder.Services.AddHttpClient<OpenAIAgente>();
 
-// Registrar una "Fábrica" o selector simple
+// Registrar una "FÃ¡brica" o selector simple
 builder.Services.AddTransient<Func<string, IAgenteIA>>(serviceProvider => key =>
 {
     return key switch
@@ -202,7 +204,7 @@ if (app.Environment.IsDevelopment() || app.Environment.IsStaging())
 }
 else
 {
-    app.UseHttpsRedirection(); // Forzar HTTPS en producción
+    app.UseHttpsRedirection(); // Forzar HTTPS en producciÃ³n
 }
 
 app.UseCors(policyName);

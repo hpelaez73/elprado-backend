@@ -49,6 +49,25 @@ namespace ElPrado.Data.Repositories
             return _connection.QuerySingleOrDefault<Clientes?>(sql, new { dniCuit, legajo }, _transaction);
         }
 
+        public async Task<Clientes?> BuscarParaRecuperacionAsync(int propuesta, long dniCuit)
+        {
+            long dni = dniCuit.ToString().Length <= 8 ? dniCuit : 0;
+            long cuit = dniCuit.ToString().Length > 8 ? dniCuit : 0;
+            const string sql = @"SELECT FIRST 1 C.*
+                FROM CLIENTES C
+                INNER JOIN PROPUESTAS_TITULARES PT ON PT.COD_CLIENTE = C.COD_CLIENTE
+                INNER JOIN PROPUESTA P ON P.COD_PROPUESTA = PT.COD_PROPUESTA
+                INNER JOIN ESTADOS_DEUDAS ED ON ED.COD_ESTADO_DEUDA = P.COD_ESTADO_DEUDA
+                WHERE (C.NRO_DOCUMENTO = @dni OR C.CUIT = @cuit)
+                  AND C.FECHA_BAJA IS NULL
+                  AND C.FECHA_FALLECIMIENTO IS NULL
+                  AND PT.FECHA_BAJA IS NULL
+                  AND P.FECHA_BAJA IS NULL
+                  AND ED.ACTIVA = 1
+                  AND P.LEGAJO = @propuesta";
+            return await _connection.QuerySingleOrDefaultAsync<Clientes>(sql, new { propuesta, dni, cuit }, _transaction);
+        }
+
         public List<DtoClientesPropuestas> BuscarTitulares(int codPropuesta)
         {
             string sql = "SELECT * FROM GET_DATOS_TITULARES(@codPropuesta)";

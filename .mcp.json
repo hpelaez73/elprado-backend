@@ -1,0 +1,17 @@
+{
+  "mcpServers": {
+    "mcp-firebird": {
+      "command": "npx",
+      "args": [
+        "-y",
+        "mcp-firebird",
+        "--host", "localhost",
+        "--port", "3050",
+        "--database", "D:\\Desarrollo\\Base\\ELPRADO_PEREZ_DEV.FDB",
+        "--user", "SYSDBA",
+        "--password", "masterkey"
+      ],
+      "type": "stdio"
+    }
+  }
+}

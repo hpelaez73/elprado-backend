@@ -106,10 +106,9 @@ namespace ElPrado.Services.Services
         public Resultados Registrar(DtoLoginClienteAlta altaCliente)
         {
             Resultados resultado = new();
-            if (altaCliente.Clave.Trim() == string.Empty) resultado.Agregar("La clave está vacia");
             if (altaCliente.Clave.Trim() != altaCliente.ClaveConfirmacion.Trim()) resultado.Agregar("La clave de confimación no coincide");
             if (!FunUtils.EsMailValido(altaCliente.Email)) resultado.Agregar("La direccón de correo no es válida");
-            if (altaCliente.Clave.Trim().Length < 6) resultado.Agregar("La clave debe tener al menos 6 caracteres");
+            resultado.Agregar(ValidarClave(altaCliente.Clave));
 
             if (resultado.HayError) return resultado;
 
@@ -122,7 +121,7 @@ namespace ElPrado.Services.Services
 
             try
             {
-                cliente.ClaveAcceso = FunUtils.SHA1(altaCliente.Clave.Trim());
+                cliente.ClaveAcceso = HashearClave(altaCliente.Clave);
                 cliente.Email = altaCliente.Email.Trim();
                 cliente.TipoDocumento = (cliente.TipoDocumento == string.Empty) ? null : cliente.TipoDocumento;
                 _uow.Clientes.Modificar(cliente);
@@ -135,6 +134,123 @@ namespace ElPrado.Services.Services
                 throw;
             }
             return resultado;
+        }
+
+        public async Task<Resultados<DtoEmailRecuperacionClave>> SolicitarRecuperacionClienteAsync(DtoSolicitudRecuperacionCliente solicitud, string? ipSolicitud)
+        {
+            Resultados<DtoEmailRecuperacionClave> resultado = new();
+            DateTime ahora = DateTime.Now;
+
+            if (await _uow.RecuperacionesClave.ContarPorPropuestaDesdeAsync(solicitud.Propuesta, ahora.AddMinutes(-15)) >= 3 ||
+                (!string.IsNullOrWhiteSpace(ipSolicitud) &&
+                 await _uow.RecuperacionesClave.ContarPorIpDesdeAsync(ipSolicitud, ahora.AddHours(-1)) >= 10))
+            {
+                return resultado;
+            }
+
+            Clientes? cliente = await _uow.Clientes.BuscarParaRecuperacionAsync(solicitud.Propuesta, solicitud.DniCuit);
+            if (cliente == null || string.IsNullOrWhiteSpace(cliente.ClaveAcceso) || !FunUtils.EsMailValido(cliente.Email ?? string.Empty))
+            {
+                return resultado;
+            }
+
+            string token = GenerarTokenRecuperacion();
+            RecuperacionesClave recuperacion = new()
+            {
+                CodCliente = cliente.CodCliente,
+                Propuesta = solicitud.Propuesta,
+                TokenHash = HashearToken(token),
+                FechaCreacion = ahora,
+                FechaVencimiento = ahora.AddMinutes(30),
+                IpSolicitud = ipSolicitud
+            };
+
+            try
+            {
+                await _uow.RecuperacionesClave.AgregarAsync(recuperacion);
+                RegistrarLogCliente($"CLIENTE_PASSWORD_RESET_REQUESTED propuesta={solicitud.Propuesta} ip={ipSolicitud ?? "no-disponible"}", cliente.CodCliente);
+                _uow.Commit();
+                resultado.Valor = new DtoEmailRecuperacionClave
+                {
+                    Email = cliente.Email!,
+                    Token = token
+                };
+            }
+            catch
+            {
+                _uow.Rollback();
+                throw;
+            }
+
+            return resultado;
+        }
+
+        public async Task<Resultados<DtoEmailAvisoClave>> RestablecerClaveClienteAsync(DtoRestablecerClaveCliente solicitud, string? ipSolicitud)
+        {
+            Resultados<DtoEmailAvisoClave> resultado = new();
+            if (string.IsNullOrWhiteSpace(solicitud.Token))
+            {
+                resultado.Agregar("El token de recuperación es inválido o venció");
+                return resultado;
+            }
+
+            DateTime ahora = DateTime.Now;
+            RecuperacionesClave? recuperacion = await _uow.RecuperacionesClave.BuscarTokenActivoAsync(HashearToken(solicitud.Token), ahora);
+            if (recuperacion == null)
+            {
+                resultado.Agregar("El token de recuperación es inválido o venció");
+                return resultado;
+            }
+
+            resultado.Agregar(ValidarClave(solicitud.NuevaClave));
+            if (resultado.HayError) return resultado;
+
+            Clientes cliente = _uow.Clientes.Buscar(recuperacion.CodCliente);
+            try
+            {
+                cliente.ClaveAcceso = HashearClave(solicitud.NuevaClave);
+
+                await _uow.RecuperacionesClave.ConsumirAsync(recuperacion.CodRecuperacion, ahora);
+                _uow.Clientes.Modificar(cliente);
+                await _uow.RecuperacionesClave.InvalidarPendientesAsync(cliente.CodCliente, recuperacion.CodRecuperacion, ahora);
+                RegistrarLogCliente($"CLIENTE_PASSWORD_RESET_COMPLETED propuesta={recuperacion.Propuesta} ip={ipSolicitud ?? "no-disponible"}", cliente.CodCliente);
+                _uow.Commit();
+
+                if (FunUtils.EsMailValido(cliente.Email ?? string.Empty))
+                {
+                    resultado.Valor = new DtoEmailAvisoClave { Email = cliente.Email! };
+                }
+            }
+            catch
+            {
+                _uow.Rollback();
+                throw;
+            }
+
+            return resultado;
+        }
+
+        private static Resultados ValidarClave(string? clave)
+        {
+            Resultados resultado = new();
+            string claveNormalizada = clave?.Trim() ?? string.Empty;
+            if (claveNormalizada == string.Empty) resultado.Agregar("La clave está vacia");
+            if (claveNormalizada.Length < 6) resultado.Agregar("La clave debe tener al menos 6 caracteres");
+            return resultado;
+        }
+
+        private static string HashearClave(string clave) => FunUtils.SHA1(clave.Trim());
+
+        private static string GenerarTokenRecuperacion()
+        {
+            byte[] bytes = RandomNumberGenerator.GetBytes(32);
+            return Convert.ToBase64String(bytes).TrimEnd('=').Replace('+', '-').Replace('/', '_');
+        }
+
+        private static string HashearToken(string token)
+        {
+            byte[] hash = SHA256.HashData(System.Text.Encoding.UTF8.GetBytes(token));
+            return Convert.ToHexString(hash);
         }
 
         public Resultados BorrarCliente(int codCliente)

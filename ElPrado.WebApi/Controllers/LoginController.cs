@@ -2,6 +2,7 @@
 using ElPrado.Data.Interfaces;
 using ElPrado.Dto.Dtos;
 using ElPrado.Services;
+using ElPrado.Services.Interfaces;
 using ElPrado.Services.Services;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.IdentityModel.Tokens;
@@ -18,12 +19,14 @@ namespace ElPrado.WebApi.Controllers
         private readonly IConfiguration configuration;
         private readonly IUnitOfWork _uow;
         private readonly IUserContextService _userContext;
+        private readonly IRecuperacionClaveEmailService _recuperacionClaveEmail;
 
-        public LoginController(IConfiguration configuration, IUnitOfWork unitOfWork, IUserContextService userContext) 
+        public LoginController(IConfiguration configuration, IUnitOfWork unitOfWork, IUserContextService userContext, IRecuperacionClaveEmailService recuperacionClaveEmail)
         {
             this.configuration = configuration;
             _uow = unitOfWork;
             _userContext = userContext;
+            _recuperacionClaveEmail = recuperacionClaveEmail;
         }
 
         [HttpPost("Usuario")]
@@ -95,6 +98,43 @@ namespace ElPrado.WebApi.Controllers
                 return BadRequest(apiResponse);
             }
             apiResponse.Message = "Usuario creado exitosamente";
+            return apiResponse;
+        }
+
+        [HttpPost("SolicitarRecuperacionCliente")]
+        public async Task<ActionResult<ApiResponse<string>>> SolicitarRecuperacionCliente([FromBody] DtoSolicitudRecuperacionCliente solicitud)
+        {
+            const string mensajeGenerico = "Si los datos corresponden a una cuenta recuperable, recibirás un correo con las instrucciones.";
+            ApiResponse<string> apiResponse = new()
+            {
+                Message = mensajeGenerico
+            };
+            if (solicitud.Propuesta <= 0 || solicitud.DniCuit <= 0) return BadRequest(apiResponse);
+
+            using LoginService loginService = new(_uow, _userContext);
+            string? ipSolicitud = HttpContext.Connection.RemoteIpAddress?.ToString();
+            Resultados<DtoEmailRecuperacionClave> resultado = await loginService.SolicitarRecuperacionClienteAsync(solicitud, ipSolicitud);
+            if (resultado.Valor != null)
+            {
+                await _recuperacionClaveEmail.EnviarEnlaceAsync(resultado.Valor.Email, resultado.Valor.Token);
+            }
+            return apiResponse;
+        }
+
+        [HttpPost("RestablecerClaveCliente")]
+        public async Task<ActionResult<ApiResponse<string>>> RestablecerClaveCliente([FromBody] DtoRestablecerClaveCliente solicitud)
+        {
+            using LoginService loginService = new(_uow, _userContext);
+            ApiResponse<string> apiResponse = new();
+            Resultados<DtoEmailAvisoClave> resultado = await loginService.RestablecerClaveClienteAsync(solicitud, HttpContext.Connection.RemoteIpAddress?.ToString());
+            if (resultado.HayError)
+            {
+                apiResponse.Agregar(resultado);
+                return BadRequest(apiResponse);
+            }
+
+            if (resultado.Valor != null) await _recuperacionClaveEmail.EnviarAvisoAsync(resultado.Valor.Email);
+            apiResponse.Message = "La clave fue restablecida correctamente.";
             return apiResponse;
         }
 

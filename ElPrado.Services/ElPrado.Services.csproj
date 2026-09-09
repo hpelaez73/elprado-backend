@@ -11,6 +11,7 @@
   </ItemGroup>
 
   <ItemGroup>
+    <PackageReference Include="MailKit" Version="4.17.0" />
     <PackageReference Include="mercadopago-sdk" Version="2.4.2" />
     <PackageReference Include="Microsoft.AspNetCore.Http.Abstractions" Version="2.3.9" />
     <PackageReference Include="Microsoft.AspNetCore.StaticFiles" Version="2.3.9" />
@@ -18,6 +19,7 @@
   </ItemGroup>
 
   <ItemGroup>
+    <ProjectReference Include="..\ElPrado.DataFactory\ElPrado.DataFactory.csproj" />
     <ProjectReference Include="..\ElPrado.Data\ElPrado.Data.csproj" />
     <ProjectReference Include="..\ElPrado.Dto\ElPrado.Dto.csproj" />
     <ProjectReference Include="..\ElPrado.Reports\ElPrado.Reports.csproj" />

@@ -27,6 +27,29 @@
         public string ClaveConfirmacion { get; set; } = string.Empty;
     }
 
+    public class DtoSolicitudRecuperacionCliente
+    {
+        public int Propuesta { get; set; }
+        public long DniCuit { get; set; }
+    }
+
+    public class DtoRestablecerClaveCliente
+    {
+        public string Token { get; set; } = string.Empty;
+        public string NuevaClave { get; set; } = string.Empty;
+    }
+
+    public class DtoEmailRecuperacionClave
+    {
+        public string Email { get; set; } = string.Empty;
+        public string Token { get; set; } = string.Empty;
+    }
+
+    public class DtoEmailAvisoClave
+    {
+        public string Email { get; set; } = string.Empty;
+    }
+
     public class DtoLogin
     {
         public int CodUsuario{ get; set; }

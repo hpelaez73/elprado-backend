@@ -30,6 +30,7 @@ namespace ElPrado.Data.Interfaces
         ProcesosSistemasRepository ProcesosSistemas { get; }
 
         RefreshTokensRepository RefreshTokens { get; }
+        RecuperacionesClaveRepository RecuperacionesClave { get; }
         ServiciosModelosRepository ServiciosModelos { get; }
         ServiciosObituariosRepository ServiciosObituarios { get; }
         SuscripcionesObituariosRepository SuscripcionesObituarios { get; }

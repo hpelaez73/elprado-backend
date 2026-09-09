@@ -1,0 +1,13 @@
+# Todos los archivos de texto se extraen como CRLF en Windows.
+* text=auto eol=crlf
+
+# Binarios: no transformar.
+*.png binary
+*.jpg binary
+*.jpeg binary
+*.gif binary
+*.ico binary
+*.pdf binary
+*.zip binary
+*.dll binary
+*.exe binary
