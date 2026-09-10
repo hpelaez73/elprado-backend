@@ -241,7 +241,7 @@ public class Wsfe : IDisposable
         if (_ws == null)
         {
             Console.WriteLine("Error: El cliente SOAP no esta inicializado");
-            return new ApiResponse
+            return new AfipConsultaResponse
             {
                 Success = false,
                 Message = "Cliente SOAP no inicializado"
@@ -251,7 +251,7 @@ public class Wsfe : IDisposable
         var comprobante = await _repo.GetComprobanteParaCAEAsync(codTalonario, nroComprobante);
         if (comprobante == null)
         {
-            return new ApiResponse
+            return new AfipConsultaResponse
             {
                 Success = false,
                 Message = "El comprobante no esta generado"
@@ -261,7 +261,7 @@ public class Wsfe : IDisposable
         string nroComprobanteNumerico = ObtenerNumeroComprobante(nroComprobante);
         if (!long.TryParse(nroComprobanteNumerico, out long cbteNro))
         {
-            return new ApiResponse
+            return new AfipConsultaResponse
             {
                 Success = false,
                 Message = "El numero de comprobante es invalido"
@@ -278,7 +278,7 @@ public class Wsfe : IDisposable
         FECompConsultaResponse response = _ws.FECompConsultar(_feAuthRequest, request);
         if (response.Errors != null && response.Errors.Length > 0)
         {
-            return new ApiResponse
+            return new AfipConsultaResponse
             {
                 Success = false,
                 Message = response.Errors[0].Msg
@@ -287,14 +287,14 @@ public class Wsfe : IDisposable
 
         if (response.ResultGet == null)
         {
-            return new ApiResponse
+            return new AfipConsultaResponse
             {
                 Success = false,
                 Message = "Afip no devolvio informacion para el comprobante consultado"
             };
         }
 
-        return new ApiResponse
+        return new AfipConsultaResponse
         {
             Success = true,
             Message = "Comprobante consultado correctamente",
