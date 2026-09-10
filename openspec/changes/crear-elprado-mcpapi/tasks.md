@@ -21,6 +21,6 @@
 
 ## 4. Validacion y entrega operativa
 
-- [ ] 4.1 Compilar la solucion con `dotnet build ElPradoWeb.sln` y corregir errores de referencias, framework o DI sin modificar contratos de `ElPrado.WebApi`, `Afip.WebApi` ni `ElPrado.Workers`.
+- [x] 4.1 Compilar la solucion con `dotnet build ElPradoWeb.sln` y corregir errores de referencias, framework o DI sin modificar contratos de `ElPrado.WebApi`, `Afip.WebApi` ni `ElPrado.Workers`.
 - [x] 4.2 Ejecutar `ElPrado.McpApi` con configuracion de prueba y verificar extremo a extremo `GET /health`, el formato de respuesta base y la ausencia de rutas MCP.
-- [ ] 4.3 Ejecutar `openspec validate crear-elprado-mcpapi --strict` y corregir todos los errores de validacion reportados.
+- [x] 4.3 Ejecutar `openspec validate crear-elprado-mcpapi --strict` y corregir todos los errores de validacion reportados.
