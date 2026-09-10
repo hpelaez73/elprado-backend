@@ -102,10 +102,10 @@ namespace ElPrado.WebApi.Controllers
         }
 
         [HttpPost("SolicitarRecuperacionCliente")]
-        public async Task<ActionResult<ApiResponse<string>>> SolicitarRecuperacionCliente([FromBody] DtoSolicitudRecuperacionCliente solicitud)
+        public async Task<ActionResult<ApiResponse<int>>> SolicitarRecuperacionCliente([FromBody] DtoSolicitudRecuperacionCliente solicitud)
         {
             const string mensajeGenerico = "Si los datos corresponden a una cuenta recuperable, recibirás un correo con las instrucciones.";
-            ApiResponse<string> apiResponse = new()
+            ApiResponse<int> apiResponse = new()
             {
                 Message = mensajeGenerico
             };
@@ -122,10 +122,10 @@ namespace ElPrado.WebApi.Controllers
         }
 
         [HttpPost("RestablecerClaveCliente")]
-        public async Task<ActionResult<ApiResponse<string>>> RestablecerClaveCliente([FromBody] DtoRestablecerClaveCliente solicitud)
+        public async Task<ActionResult<ApiResponse<int>>> RestablecerClaveCliente([FromBody] DtoRestablecerClaveCliente solicitud)
         {
             using LoginService loginService = new(_uow, _userContext);
-            ApiResponse<string> apiResponse = new();
+            ApiResponse<int> apiResponse = new();
             Resultados<DtoEmailAvisoClave> resultado = await loginService.RestablecerClaveClienteAsync(solicitud, HttpContext.Connection.RemoteIpAddress?.ToString());
             if (resultado.HayError)
             {
