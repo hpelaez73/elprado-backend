@@ -56,15 +56,38 @@ namespace ElPrado.Services.Services
 
         public DtoLogin? Login(string alias, string clave)
         {
+            DtoLogin? dtoLogin = AutenticarUsuario(alias, clave, commit: false);
+            if (dtoLogin == null) return null;
+
+            try
+            {
+                dtoLogin.RefreshToken = GenerarRefreshToken();
+                GuardarRefreshToken(null, null, dtoLogin.CodUsuario, dtoLogin.RefreshToken);
+                _uow.Commit();
+                return dtoLogin;
+            }
+            catch
+            {
+                _uow.Rollback();
+                throw;
+            }
+        }
+
+        public DtoLogin? AutenticarUsuario(string alias, string clave)
+        {
+            return AutenticarUsuario(alias, clave, commit: true);
+        }
+
+        private DtoLogin? AutenticarUsuario(string alias, string clave, bool commit)
+        {
             Usuarios? usuario = _uow.Usuarios.Buscar(alias, clave);
             if (usuario != null)
             {
                 try
                 {
                     RegistrarLogUsuario("Acceso desde la web", usuario.CodUsuario);
-                    DtoLogin dtoLogin = GenerarTokenUsuario(usuario);
-
-                    _uow.Commit();
+                    DtoLogin dtoLogin = LogginMapper.MapToDto(usuario);
+                    if (commit) _uow.Commit();
                     return dtoLogin;
                 }
                 catch
@@ -74,14 +97,6 @@ namespace ElPrado.Services.Services
                 }
             }
             return null;
-        }
-
-        private DtoLogin GenerarTokenUsuario(Usuarios usuario)
-        {
-            DtoLogin dtoLogin = LogginMapper.MapToDto(usuario);
-            dtoLogin.RefreshToken = GenerarRefreshToken();
-            GuardarRefreshToken(null, null, usuario.CodUsuario, dtoLogin.RefreshToken);
-            return dtoLogin;
         }
 
         public DtoLogin? RenovarToken(string token)
@@ -98,7 +113,10 @@ namespace ElPrado.Services.Services
             else if (refreshToken.CodUsuario != null)
             {
                 Usuarios usuario = _uow.Usuarios.Buscar(refreshToken.CodUsuario.Value);
-                return GenerarTokenUsuario(usuario);
+                DtoLogin dtoLogin = LogginMapper.MapToDto(usuario);
+                dtoLogin.RefreshToken = GenerarRefreshToken();
+                GuardarRefreshToken(null, null, usuario.CodUsuario, dtoLogin.RefreshToken);
+                return dtoLogin;
             }
             return null;
         }

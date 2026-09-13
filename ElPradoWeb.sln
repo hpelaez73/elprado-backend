@@ -7,6 +7,8 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "ElPrado.Data", "ElPrado.Dat
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "ElPrado.WebApi", "ElPrado.WebApi\ElPrado.WebApi.csproj", "{09B63EAC-716D-41BE-B62B-FFA73F295EEA}"
 EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "ElPrado.McpApi", "ElPrado.McpApi\ElPrado.McpApi.csproj", "{E2D0B3B7-1B97-43B0-B0D7-7C5C8E717C54}"
+EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "ElPrado.Services", "ElPrado.Services\ElPrado.Services.csproj", "{AAE3DEBA-608A-439D-A3D7-32BFD71DFDF3}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ElPrado.Core", "ElPrado.Core\ElPrado.Core.csproj", "{A295E3EC-3D3D-4715-84BA-583D1CCB3B66}"
@@ -46,6 +48,10 @@ Global
 		{09B63EAC-716D-41BE-B62B-FFA73F295EEA}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{09B63EAC-716D-41BE-B62B-FFA73F295EEA}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{09B63EAC-716D-41BE-B62B-FFA73F295EEA}.Release|Any CPU.Build.0 = Release|Any CPU
+		{E2D0B3B7-1B97-43B0-B0D7-7C5C8E717C54}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{E2D0B3B7-1B97-43B0-B0D7-7C5C8E717C54}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{E2D0B3B7-1B97-43B0-B0D7-7C5C8E717C54}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{E2D0B3B7-1B97-43B0-B0D7-7C5C8E717C54}.Release|Any CPU.Build.0 = Release|Any CPU
 		{AAE3DEBA-608A-439D-A3D7-32BFD71DFDF3}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{AAE3DEBA-608A-439D-A3D7-32BFD71DFDF3}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{AAE3DEBA-608A-439D-A3D7-32BFD71DFDF3}.Release|Any CPU.ActiveCfg = Release|Any CPU
