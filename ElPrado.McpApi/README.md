@@ -40,6 +40,19 @@ CORS está deshabilitado de forma predeterminada. Configure
 `Cors__AllowedOrigins__0` (y valores indexados adicionales) solo para orígenes
 web explícitos que requieran acceso desde un navegador.
 
+## Autenticacion JWT
+
+Las rutas de negocio bajo `/api` requieren `Authorization: Bearer <token>`.
+El consumidor `elprado-mcp` debe solicitar el token mediante
+`POST /api/login/usuario`, enviando un JSON con `alias` y `clave`, y reutilizar
+el token hasta su vencimiento. No se aceptan API keys ni tokens fijos.
+
+La configuracion del entorno debe proporcionar `Jwt__Key` y `Jwt__Issuer`.
+`Jwt__AccessTokenLifetimeHours` es opcional y tiene un valor predeterminado de
+24 horas. Asimismo, `elprado-mcp` debe recibir sus credenciales mediante su
+propio almacen de secretos. Ninguna de esas variables debe versionarse ni
+registrarse.
+
 ## Disponibilidad
 
 `GET /health` informa que el proceso está disponible y no consulta Firebird.

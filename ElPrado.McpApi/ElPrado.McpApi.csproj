@@ -7,6 +7,7 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <PackageReference Include="Microsoft.AspNetCore.Authentication.JwtBearer" Version="7.0.20" />
     <PackageReference Include="Serilog.AspNetCore" Version="8.0.2" />
     <PackageReference Include="Serilog.Settings.Configuration" Version="8.0.2" />
     <PackageReference Include="Serilog.Sinks.Console" Version="6.0.0" />
@@ -15,6 +16,8 @@
   <ItemGroup>
     <ProjectReference Include="..\ElPrado.Data\ElPrado.Data.csproj" />
     <ProjectReference Include="..\ElPrado.DataFactory\ElPrado.DataFactory.csproj" />
+    <ProjectReference Include="..\ElPrado.Dto\ElPrado.Dto.csproj" />
+    <ProjectReference Include="..\ElPrado.Services\ElPrado.Services.csproj" />
   </ItemGroup>
 
 </Project>
