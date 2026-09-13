@@ -6,6 +6,10 @@ namespace ElPrado.McpApi.Endpoints;
 /// </summary>
 public static class BusinessEndpointExtensions
 {
-    public static RouteGroupBuilder MapBusinessOperations(this IEndpointRouteBuilder endpoints) =>
-        endpoints.MapGroup("/api").RequireAuthorization();
+    public static RouteGroupBuilder MapBusinessOperations(this IEndpointRouteBuilder endpoints)
+    {
+        RouteGroupBuilder group = endpoints.MapGroup("/api").RequireAuthorization();
+        group.MapProposalOperations();
+        return group;
+    }
 }

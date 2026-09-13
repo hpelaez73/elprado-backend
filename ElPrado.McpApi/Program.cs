@@ -6,6 +6,7 @@ using ElPrado.McpApi.Auth;
 using ElPrado.McpApi.Contracts;
 using ElPrado.McpApi.Endpoints;
 using ElPrado.Services;
+using ElPrado.Services.Services;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.IdentityModel.Tokens;
 using Serilog;
@@ -49,6 +50,10 @@ builder.Services.AddSingleton<IDbConnectionFactory, FirebirdConnectionFactory>()
 builder.Services.AddScoped<IUnitOfWork, UnitOfWork>();
 builder.Services.AddHttpContextAccessor();
 builder.Services.AddScoped<IUserContextService, McpUserContextService>();
+builder.Services.AddScoped<PropuestasService>();
+builder.Services.AddScoped<CuentasCorrientesService>();
+builder.Services.AddScoped<ServiciosModelosService>();
+builder.Services.AddScoped<ComprobantesService>();
 
 var allowedOrigins = builder.Configuration.GetSection("Cors:AllowedOrigins").Get<string[]>()
     ?? Array.Empty<string>();
