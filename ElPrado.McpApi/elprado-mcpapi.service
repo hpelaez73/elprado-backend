@@ -1,0 +1,18 @@
+[Unit]
+Description=El Prado MCP API (fachada REST para elprado-mcp)
+After=network.target
+
+[Service]
+WorkingDirectory=/app/mcpapi
+ExecStart=/usr/bin/dotnet /app/mcpapi/ElPrado.McpApi.dll
+Restart=always
+# Reinicia el servicio a los 10 segundos si el proceso dotnet falla:
+RestartSec=10
+KillSignal=SIGINT
+SyslogIdentifier=dotnet-elprado-mcpapi
+User=www-data
+Environment=ASPNETCORE_ENVIRONMENT=Production
+Environment=DOTNET_PRINT_TELEMETRY_MESSAGE=false
+
+[Install]
+WantedBy=multi-user.target
