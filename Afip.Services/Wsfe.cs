@@ -301,7 +301,7 @@ public class Wsfe : IDisposable
             CodTalonario = codTalonario,
             NroComprobante = nroComprobante,
             NroCAE = response.ResultGet.CodAutorizacion,
-            Data = MapearDetalleConsulta(codTalonario, nroComprobante, request, response, comprobante)
+            Data = MapearDetalleConsulta(codTalonario, nroComprobante, response)
         };
     }
 
@@ -516,9 +516,7 @@ public class Wsfe : IDisposable
     private static DtoAfipWsfeConsultaDetalle MapearDetalleConsulta(
         int codTalonario,
         string nroComprobante,
-        FECompConsultaReq request,
-        FECompConsultaResponse response,
-        AfipComprobante comprobante)
+        FECompConsultaResponse response)
     {
         FECompConsultaResultGet result = response.ResultGet!;
 
@@ -526,36 +524,74 @@ public class Wsfe : IDisposable
         {
             CodTalonario = codTalonario,
             NroComprobante = nroComprobante,
-            Concepto = comprobante.AfipConcepto,
-            DocTipo = comprobante.AfipTipoDocumento ?? 0,
-            DocNro = long.TryParse(comprobante.NroDocumento, out long docNro) ? docNro : (comprobante.Cuit ?? 0),
-            CbteDesde = request.CbteNro,
-            CbteHasta = request.CbteNro,
-            CbteFch = comprobante.Fecha.ToString("yyyyMMdd"),
-            ImpTotal = Convert.ToDouble(comprobante.Total),
-            ImpTotConc = Convert.ToDouble(comprobante.NoGravado),
-            ImpNeto = Convert.ToDouble(comprobante.Neto),
-            ImpOpEx = 0,
-            ImpTrib = 0,
-            ImpIVA = Convert.ToDouble(comprobante.Iva),
-            FchServDesde = comprobante.AfipServicioDesde?.ToString("yyyyMMdd") ?? string.Empty,
-            FchServHasta = comprobante.AfipServicioHasta?.ToString("yyyyMMdd") ?? string.Empty,
-            FchVtoPago = comprobante.Fecha.ToString("yyyyMMdd"),
-            MonId = cMoneda,
-            MonCotiz = 1,
+            Concepto = result.Concepto,
+            DocTipo = result.DocTipo,
+            DocNro = result.DocNro,
+            CondicionIva = result.CondicionIVAReceptorId,
+            CbteDesde = result.CbteDesde,
+            CbteHasta = result.CbteHasta,
+            CbteFch = result.CbteFch,
+            ImpTotal = result.ImpTotal,
+            ImpTotConc = result.ImpTotConc,
+            ImpNeto = result.ImpNeto,
+            ImpOpEx = result.ImpOpEx,
+            ImpTrib = result.ImpTrib,
+            ImpIVA = result.ImpIVA,
+            FchServDesde = result.FchServDesde,
+            FchServHasta = result.FchServHasta,
+            FchVtoPago = result.FchVtoPago,
+            MonId = result.MonId,
+            MonCotiz = result.MonCotiz,
             Resultado = result.Resultado,
             CodAutorizacion = result.CodAutorizacion,
-            EmisionTipo = string.Empty,
+            EmisionTipo = result.EmisionTipo,
             FchVto = result.FchVto,
             FchProceso = result.FchProceso,
-            PtoVta = request.PtoVta,
-            CbteTipo = request.CbteTipo,
-            CbtesAsoc = new List<DtoAfipWsfeCbteAsoc>(),
-            Tributos = new List<DtoAfipWsfeTributo>(),
-            Iva = new List<DtoAfipWsfeIva>(),
-            Opcionales = new List<DtoAfipWsfeOpcional>(),
-            Compradores = new List<DtoAfipWsfeComprador>(),
-            PeriodoAsoc = new List<DtoAfipWsfePeriodoAsoc>(),
+            PtoVta = result.PtoVta,
+            CbteTipo = result.CbteTipo,
+            CbtesAsoc = result.CbtesAsoc?.Select(cbte => new DtoAfipWsfeCbteAsoc
+            {
+                Tipo = cbte.Tipo,
+                PtoVta = cbte.PtoVta,
+                Nro = cbte.Nro,
+                Cuit = cbte.Cuit,
+                CbteFch = cbte.CbteFch
+            }).ToList() ?? new List<DtoAfipWsfeCbteAsoc>(),
+            Tributos = result.Tributos?.Select(tributo => new DtoAfipWsfeTributo
+            {
+                Id = tributo.Id,
+                Desc = tributo.Desc,
+                BaseImp = tributo.BaseImp,
+                Alic = tributo.Alic,
+                Importe = tributo.Importe
+            }).ToList() ?? new List<DtoAfipWsfeTributo>(),
+            Iva = result.Iva?.Select(iva => new DtoAfipWsfeIva
+            {
+                Id = iva.Id,
+                BaseImp = iva.BaseImp,
+                Importe = iva.Importe
+            }).ToList() ?? new List<DtoAfipWsfeIva>(),
+            Opcionales = result.Opcionales?.Select(opcional => new DtoAfipWsfeOpcional
+            {
+                Id = opcional.Id,
+                Valor = opcional.Valor
+            }).ToList() ?? new List<DtoAfipWsfeOpcional>(),
+            Compradores = result.Compradores?.Select(comprador => new DtoAfipWsfeComprador
+            {
+                DocNro = comprador.DocNro,
+                DocTipo = comprador.DocTipo,
+                Porcentaje = comprador.Porcentaje
+            }).ToList() ?? new List<DtoAfipWsfeComprador>(),
+            PeriodoAsoc = result.PeriodoAsoc is null
+                ? new List<DtoAfipWsfePeriodoAsoc>()
+                : new List<DtoAfipWsfePeriodoAsoc>
+                {
+                    new()
+                    {
+                        FchDesde = result.PeriodoAsoc.FchDesde,
+                        FchHasta = result.PeriodoAsoc.FchHasta
+                    }
+                },
             Observaciones = result.Observaciones?.Select(obs => new DtoAfipWsfeObservacion
             {
                 Code = obs.Code,
@@ -566,7 +602,11 @@ public class Wsfe : IDisposable
                 Code = err.Code,
                 Msg = err.Msg
             }).ToList() ?? new List<DtoAfipWsfeError>(),
-            Events = new List<DtoAfipWsfeEvent>()
+            Events = response.Events?.Select(evt => new DtoAfipWsfeEvent
+            {
+                Code = evt.Code,
+                Msg = evt.Msg
+            }).ToList() ?? new List<DtoAfipWsfeEvent>()
         };
     }
 

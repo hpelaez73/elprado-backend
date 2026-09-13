@@ -30,6 +30,8 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Elementos de la solución",
 		.gitlab-ci.yml = .gitlab-ci.yml
 	EndProjectSection
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ElPrado.Tests", "ElPrado.Tests\ElPrado.Tests.csproj", "{45A3396C-3837-05AA-0C36-B3A1CB968C6D}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -80,6 +82,10 @@ Global
 		{A8FAE902-292A-BCE0-2BA0-2BC2B96E286F}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{A8FAE902-292A-BCE0-2BA0-2BC2B96E286F}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{A8FAE902-292A-BCE0-2BA0-2BC2B96E286F}.Release|Any CPU.Build.0 = Release|Any CPU
+		{45A3396C-3837-05AA-0C36-B3A1CB968C6D}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{45A3396C-3837-05AA-0C36-B3A1CB968C6D}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{45A3396C-3837-05AA-0C36-B3A1CB968C6D}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{45A3396C-3837-05AA-0C36-B3A1CB968C6D}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

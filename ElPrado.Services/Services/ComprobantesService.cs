@@ -1,5 +1,6 @@
 ﻿using ElPrado.Core;
 using ElPrado.Data.Interfaces;
+using ElPrado.Data.Models;
 using ElPrado.Dto.Documents;
 using ElPrado.Dto.Dtos;
 using ElPrado.Reports.Mappers;
@@ -40,6 +41,93 @@ namespace ElPrado.Services.Services
                 return listPeriodos;
             }
         }
+
+        public async Task EnriquecerComprobanteAfipAsync(int codTalonario, string nroComprobante, DtoAfipWsfeConsultaDetalle detalle)
+        {
+            AfipWsfeConsultaEnriquecimiento? enriquecimiento = await _uow.Comprobantes.ObtenerEnriquecimientoAfipAsync(codTalonario, nroComprobante);
+
+            if (enriquecimiento != null)
+            {
+                detalle.Concepto = enriquecimiento.Concepto ?? detalle.Concepto;
+                detalle.ConceptoDescripcion = ObtenerDescripcionConcepto(detalle.Concepto);
+                detalle.CbteTipo = enriquecimiento.TipoComprobante ?? detalle.CbteTipo;
+                detalle.CbteTipoDescripcion = enriquecimiento.TipoComprobanteDescripcion;
+                detalle.CondicionIva = enriquecimiento.CondicionIva;
+                detalle.CondicionIvaDescripcion = enriquecimiento.CondicionIvaDescripcion;
+
+                if (enriquecimiento.Cuit is > 0)
+                {
+                    detalle.DocTipo = 80;
+                    detalle.DocNro = enriquecimiento.Cuit.Value;
+                }
+                else if (enriquecimiento.NroDocumento is > 0)
+                {
+                    detalle.DocNro = enriquecimiento.NroDocumento.Value;
+                }
+                else
+                {
+                    detalle.DocTipo = 99;
+                    detalle.DocNro = 0;
+                }
+
+                detalle.DocTipoDescripcion = ObtenerDescripcion(enriquecimiento.TiposDocumentos, detalle.DocTipo);
+                detalle.MonIdDescripcion = ObtenerDescripcionMoneda(detalle.MonId);
+                detalle.ResultadoDescripcion = ObtenerDescripcionResultado(detalle.Resultado);
+                detalle.EmisionTipoDescripcion = ObtenerDescripcionEmision(detalle.EmisionTipo);
+
+                foreach (DtoAfipWsfeIva iva in detalle.Iva)
+                {
+                    iva.IdDescripcion = ObtenerDescripcion(enriquecimiento.TiposIva, iva.Id);
+                }
+
+                foreach (DtoAfipWsfeTributo tributo in detalle.Tributos)
+                {
+                    tributo.IdDescripcion = ObtenerDescripcion(enriquecimiento.TiposTributos, tributo.Id);
+                }
+
+                foreach (DtoAfipWsfeCbteAsoc comprobanteAsociado in detalle.CbtesAsoc)
+                {
+                    comprobanteAsociado.TipoDescripcion = ObtenerDescripcion(enriquecimiento.TiposComprobantes, comprobanteAsociado.Tipo);
+                }
+
+                foreach (DtoAfipWsfeComprador comprador in detalle.Compradores)
+                {
+                    comprador.DocTipoDescripcion = ObtenerDescripcion(enriquecimiento.TiposDocumentos, comprador.DocTipo);
+                }
+            }
+        }
+
+        private static string ObtenerDescripcion(IReadOnlyDictionary<int, string> descripciones, int codigo)
+        {
+            return descripciones.TryGetValue(codigo, out string? descripcion) ? descripcion : string.Empty;
+        }
+
+        private static string ObtenerDescripcionConcepto(int concepto) => concepto switch
+        {
+            1 => "Productos",
+            2 => "Servicios",
+            3 => "Productos y servicios",
+            _ => string.Empty
+        };
+
+        private static string ObtenerDescripcionMoneda(string moneda) => moneda.Equals("PES", StringComparison.OrdinalIgnoreCase)
+            ? "Pesos argentinos"
+            : string.Empty;
+
+        private static string ObtenerDescripcionResultado(string resultado) => resultado switch
+        {
+            "A" => "Aprobado",
+            "R" => "Rechazado",
+            "O" => "Observado",
+            _ => string.Empty
+        };
+
+        private static string ObtenerDescripcionEmision(string emisionTipo) => emisionTipo switch
+        {
+            "CAE" => "Código de Autorización Electrónico",
+            "CAEA" => "Código de Autorización Electrónico Anticipado",
+            _ => string.Empty
+        };
 
 
         #region Envio de facturas

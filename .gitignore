@@ -18,6 +18,8 @@
 /ElPrado.Reports/obj
 /ElPrado.Services/bin
 /ElPrado.Services/obj
+/ElPrado.Tests/bin
+/ElPrado.Tests/obj
 /ElPrado.WebApi/bin
 /ElPrado.WebApi/obj
 /ElPrado.Workers/bin
