@@ -140,16 +140,82 @@ public class FECompConsultaReq
 public class FECompConsultaResponse
 {
     public FECompConsultaResultGet? ResultGet { get; set; }
+    public Evt[]? Events { get; set; }
     public Err[]? Errors { get; set; }
 }
 
 public class FECompConsultaResultGet
 {
+    public int Concepto { get; set; }
+    public int DocTipo { get; set; }
+    public long DocNro { get; set; }
+    public int? CondicionIVAReceptorId { get; set; }
+    public long CbteDesde { get; set; }
+    public long CbteHasta { get; set; }
+    public string CbteFch { get; set; } = string.Empty;
+    public double ImpTotal { get; set; }
+    public double ImpTotConc { get; set; }
+    public double ImpNeto { get; set; }
+    public double ImpOpEx { get; set; }
+    public double ImpTrib { get; set; }
+    public double ImpIVA { get; set; }
+    public string FchServDesde { get; set; } = string.Empty;
+    public string FchServHasta { get; set; } = string.Empty;
+    public string FchVtoPago { get; set; } = string.Empty;
+    public string MonId { get; set; } = string.Empty;
+    public double MonCotiz { get; set; }
+    public string CanMisMonExt { get; set; } = string.Empty;
+    public CbteAsoc[]? CbtesAsoc { get; set; }
+    public Tributo[]? Tributos { get; set; }
+    public AlicIva[]? Iva { get; set; }
+    public Opcional[]? Opcionales { get; set; }
+    public Comprador[]? Compradores { get; set; }
+    public PeriodoAsoc? PeriodoAsoc { get; set; }
     public string FchProceso { get; set; } = string.Empty;
     public string Resultado { get; set; } = string.Empty;
     public string CodAutorizacion { get; set; } = string.Empty;
+    public string EmisionTipo { get; set; } = string.Empty;
     public string FchVto { get; set; } = string.Empty;
+    public int PtoVta { get; set; }
+    public int CbteTipo { get; set; }
     public Obs[]? Observaciones { get; set; }
+}
+
+public class CbteAsoc
+{
+    public int Tipo { get; set; }
+    public int PtoVta { get; set; }
+    public long Nro { get; set; }
+    public string Cuit { get; set; } = string.Empty;
+    public string CbteFch { get; set; } = string.Empty;
+}
+
+public class Tributo
+{
+    public int Id { get; set; }
+    public string Desc { get; set; } = string.Empty;
+    public double BaseImp { get; set; }
+    public double Alic { get; set; }
+    public double Importe { get; set; }
+}
+
+public class Opcional
+{
+    public int Id { get; set; }
+    public string Valor { get; set; } = string.Empty;
+}
+
+public class Comprador
+{
+    public long DocNro { get; set; }
+    public int DocTipo { get; set; }
+    public double Porcentaje { get; set; }
+}
+
+public class PeriodoAsoc
+{
+    public string FchDesde { get; set; } = string.Empty;
+    public string FchHasta { get; set; } = string.Empty;
 }
 
 public class FERecuperaLastCbteResponse
@@ -234,6 +300,12 @@ public class CondicionIvaReceptorResponse
 }
 
 public class Err
+{
+    public int Code { get; set; }
+    public string Msg { get; set; } = string.Empty;
+}
+
+public class Evt
 {
     public int Code { get; set; }
     public string Msg { get; set; } = string.Empty;

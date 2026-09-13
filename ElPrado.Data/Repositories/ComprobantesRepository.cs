@@ -1,7 +1,9 @@
 ﻿using Dapper;
+using ElPrado.Core;
 using ElPrado.Core.Domains;
 using ElPrado.Core.Enums;
 using ElPrado.Data.Comun;
+using ElPrado.Data.Interfaces;
 using ElPrado.Data.Models;
 using ElPrado.Dto.Dtos;
 
@@ -215,6 +217,57 @@ namespace ElPrado.Data.Repositories
         {
             string sql = "SELECT * FROM GET_COMPROBANTES_SIN_CAE";
             return (await _connection.QueryAsync<DtoComprobantesSinCae>(sql, transaction: _transaction)).ToList();
+        }
+
+        public async Task<AfipWsfeConsultaEnriquecimiento?> ObtenerEnriquecimientoAfipAsync(int codTalonario, string nroComprobante)
+        {
+            string sql = @"
+                SELECT
+                    C.AFIP_CONCEPTO AS CONCEPTO,
+                    ATC.ID AS TIPO_COMPROBANTE,
+                    ATC.DESCRIPCION AS TIPO_COMPROBANTE_DESCRIPCION,
+                    COALESCE(C.CUIT, CL.CUIT) AS CUIT,
+                    COALESCE(C.NRO_DOCUMENTO, CL.NRO_DOCUMENTO) AS NRO_DOCUMENTO,
+                    COALESCE(C.TIPO_DOCUMENTO, CL.TIPO_DOCUMENTO) AS TIPO_DOCUMENTO,
+                    ACFI.ID AS CONDICION_IVA,
+                    ACFI.DESCRIPCION AS CONDICION_IVA_DESCRIPCION
+                FROM COMPROBANTES C
+                INNER JOIN TALONARIOS T ON T.COD_TALONARIO = C.COD_TALONARIO
+                LEFT JOIN CLIENTES CL ON CL.COD_CLIENTE = C.COD_CLIENTE
+                LEFT JOIN AFIP_TIPOS_COMPROBANTES ATC ON ATC.COD_TIPO_COMPROBANTE = C.COD_TIPO_COMPROBANTE AND ATC.LETRA_TALONARIO = T.LETRA
+                LEFT JOIN CAT_IVA CI ON CI.COD_CAT_IVA = CL.COD_CAT_IVA
+                LEFT JOIN AFIP_CONDICION_FRENTE_AL_IVA ACFI ON ACFI.ID = CI.ID_CONDICION_FRENTE_AL_IVA
+                WHERE C.COD_TALONARIO = @codTalonario AND C.NRO_COMPROBANTE = @nroComprobante";
+
+            AfipWsfeConsultaEnriquecimiento? enriquecimiento = await _connection.QuerySingleOrDefaultAsync<AfipWsfeConsultaEnriquecimiento>(sql, new
+            {
+                codTalonario,
+                nroComprobante
+            }, _transaction);
+
+            if (enriquecimiento == null)
+            {
+                return null;
+            }
+
+            sql = "SELECT ID AS CODIGO, DESCRIPCION FROM AFIP_TIPOS_DOCUMENTOS";
+            List<AfipCodigoDescripcion> tiposDocumentos = (await _connection.QueryAsync<AfipCodigoDescripcion>(sql, transaction: _transaction)).ToList();
+
+            sql = "SELECT ID AS CODIGO, DESCRIPCION FROM AFIP_TIPOS_COMPROBANTES";
+            List<AfipCodigoDescripcion> tiposComprobantes = (await _connection.QueryAsync<AfipCodigoDescripcion>(sql, transaction: _transaction)).ToList();
+
+            sql = "SELECT ID AS CODIGO, DESCRIPCION FROM AFIP_TIPOS_IVAS";
+            List<AfipCodigoDescripcion> tiposIva = (await _connection.QueryAsync<AfipCodigoDescripcion>(sql, transaction: _transaction)).ToList();
+
+            sql = "SELECT ID AS CODIGO, DESCRIPCION FROM AFIP_TIPOS_TRIBUTOS";
+            List<AfipCodigoDescripcion> tiposTributos = (await _connection.QueryAsync<AfipCodigoDescripcion>(sql, transaction: _transaction)).ToList();
+
+            enriquecimiento.TiposDocumentos = tiposDocumentos.ToDictionary(x => x.Codigo, x => x.Descripcion);
+            enriquecimiento.TiposComprobantes = tiposComprobantes.ToDictionary(x => x.Codigo, x => x.Descripcion);
+            enriquecimiento.TiposIva = tiposIva.ToDictionary(x => x.Codigo, x => x.Descripcion);
+            enriquecimiento.TiposTributos = tiposTributos.ToDictionary(x => x.Codigo, x => x.Descripcion);
+
+            return enriquecimiento;
         }
     }
 }

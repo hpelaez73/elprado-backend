@@ -1,0 +1,15 @@
+[
+  {
+    "Name": "Web y Afip",
+    "Projects": [
+      {
+        "Path": "ElPrado.WebApi\\ElPrado.WebApi.csproj",
+        "Action": "Start"
+      },
+      {
+        "Path": "Afip.WebApi\\Afip.WebApi.csproj",
+        "Action": "Start"
+      }
+    ]
+  }
+]

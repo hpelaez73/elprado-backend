@@ -9,6 +9,8 @@ schema: spec-driven
 #     We use conventional commits
 #     Domain: e-commerce platform
 context: |
+  Idioma: Español
+  Todos los artefactos deben escribirse en español.
   Backend .NET 7 para ElPrado, organizado por capas y proyectos.
   Stack principal: ASP.NET Core Web API, Firebird, Dapper, Serilog, Swagger/OpenAPI.
   Hay dos fachadas API: ElPrado.WebApi para el frontend y Afip.WebApi para WSFE/AFIP.

@@ -213,7 +213,13 @@ namespace ElPrado.WebApi.Controllers
         [HttpPost("Afip/Comprobante")]
         public async Task<ApiResponse<DtoAfipWsfeConsultaDetalle>> AfipComprobanteAsync([FromBody] DtoAfipWsfeSolicitarReq dtoAfipWsfe)
         {
-            return await _afipWsfeGateway.ConsultarComprobanteAsync(dtoAfipWsfe.CodTalonario, dtoAfipWsfe.NroComprobante);
+            ApiResponse<DtoAfipWsfeConsultaDetalle> respuesta = await _afipWsfeGateway.ConsultarComprobanteAsync(dtoAfipWsfe.CodTalonario, dtoAfipWsfe.NroComprobante);
+            if (!respuesta.Success || respuesta.Data == null)
+            {
+                return respuesta;
+            }
+            await comprobantesService.EnriquecerComprobanteAfipAsync(dtoAfipWsfe.CodTalonario, dtoAfipWsfe.NroComprobante, respuesta.Data);
+            return respuesta;
         }
 
         #endregion
