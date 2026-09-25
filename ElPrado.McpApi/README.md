@@ -73,11 +73,11 @@ credenciales ni detalles de Firebird.
 | `consultar_contratos_propuesta` | `/api/propuestas/contratos` | `propuesta`, `incluirBaja` |
 | `consultar_historial_titulares` | `/api/propuestas/historial-titulares` | `propuesta`, `incluirBaja` |
 
-Los contratos de la fachada estan en `Contracts/ProposalContracts.cs`. Cada
+Los contratos de la fachada estan en `Contracts/PropuestasContracts.cs`. Cada
 adaptador convierte los DTOs de dominio campo a campo y no devuelve la
 envoltura HTTP de `ElPrado.WebApi`. Una solicitud mal formada devuelve `400`
 con `INVALID_REQUEST`; una propuesta no disponible devuelve `404` con
-`PROPOSAL_NOT_FOUND`.
+`PROPUESTAS_NOT_FOUND`.
 
 ## Migracion y rollback de base URL
 

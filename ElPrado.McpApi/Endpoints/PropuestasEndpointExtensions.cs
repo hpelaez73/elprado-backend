@@ -6,19 +6,19 @@ using ElPrado.Services.Services;
 
 namespace ElPrado.McpApi.Endpoints;
 
-public static class ProposalEndpointExtensions
+public static class PropuestasEndpointExtensions
 {
-    public static RouteGroupBuilder MapProposalOperations(this RouteGroupBuilder group)
+    public static RouteGroupBuilder MapPropuestasOperations(this RouteGroupBuilder group)
     {
-        RouteGroupBuilder proposals = group.MapGroup("/propuestas");
+        RouteGroupBuilder propuestas = group.MapGroup("/propuestas");
 
-        proposals.MapPost("/detalle", (McpProposalRequest request, IServiceProvider services) =>
-            ExecuteProposal(request, () => services.GetRequiredService<PropuestasService>().Detalle(ToDomain(request)), MapDetail));
+        propuestas.MapPost("/detalle", (McpPropuestasRequest request, IServiceProvider services) =>
+            ExecutePropuestas(request, () => services.GetRequiredService<PropuestasService>().Detalle(ToDomain(request)), MapDetail));
 
-        proposals.MapPost("/titulares", (McpProposalRequest request, IServiceProvider services) =>
-            ExecuteProposal(request, () => services.GetRequiredService<PropuestasService>().Titulares(ToDomain(request)), holders => holders.Select(MapHolder).ToList()));
+        propuestas.MapPost("/titulares", (McpPropuestasRequest request, IServiceProvider services) =>
+            ExecutePropuestas(request, () => services.GetRequiredService<PropuestasService>().Titulares(ToDomain(request)), holders => holders.Select(MapHolder).ToList()));
 
-        proposals.MapPost("/cuenta-corriente", (McpCurrentAccountRequest request, IServiceProvider services) =>
+        propuestas.MapPost("/cuenta-corriente", (McpCurrentAccountRequest request, IServiceProvider services) =>
         {
             if (request.CodPropuesta <= 0) return InvalidRequest<McpCurrentAccountResponse>();
             return Execute(() => services.GetRequiredService<CuentasCorrientesService>().ResumenCuentas(new DtoCuentasCorrientesResumenReq
@@ -31,20 +31,20 @@ public static class ProposalEndpointExtensions
             }), accounts => accounts.Select(MapAccount).ToList());
         });
 
-        proposals.MapPost("/servicios", (McpServicesRequest request, IServiceProvider services) =>
+        propuestas.MapPost("/servicios", (McpServicesRequest request, IServiceProvider services) =>
         {
-            if (request.CodPropuesta <= 0) return InvalidRequest<McpProposalServicesResponse>();
+            if (request.CodPropuesta <= 0) return InvalidRequest<McpPropuestasServicesResponse>();
             try
             {
-                return Results.Ok(ElPrado.McpApi.Contracts.ApiResponse<McpProposalServicesResponse>.Success(MapServices(services.GetRequiredService<ServiciosModelosService>().ServiciosPropuesta(request.CodPropuesta))));
+                return Results.Ok(ElPrado.McpApi.Contracts.ApiResponse<McpPropuestasServicesResponse>.Success(MapServices(services.GetRequiredService<ServiciosModelosService>().ServiciosPropuesta(request.CodPropuesta))));
             }
             catch
             {
-                return Failure<McpProposalServicesResponse>("BUSINESS_OPERATION_FAILED", "No se pudo completar la consulta solicitada.", StatusCodes.Status422UnprocessableEntity);
+                return Failure<McpPropuestasServicesResponse>("BUSINESS_OPERATION_FAILED", "No se pudo completar la consulta solicitada.", StatusCodes.Status422UnprocessableEntity);
             }
         });
 
-        proposals.MapPost("/comprobantes", async (McpComprobantesRequest request, IServiceProvider services) =>
+        propuestas.MapPost("/comprobantes", async (McpComprobantesRequest request, IServiceProvider services) =>
         {
             if (request.Propuesta <= 0 || request.Pagina <= 0 || request.FilasPagina is < 1 or > 100)
                 return InvalidRequest<McpComprobantesResponse>();
@@ -71,7 +71,7 @@ public static class ProposalEndpointExtensions
                 if (!result.Success)
                     return Failure<McpComprobantesResponse>("BUSINESS_OPERATION_FAILED", "No se pudieron consultar los comprobantes.", StatusCodes.Status422UnprocessableEntity);
 
-                IReadOnlyList<McpProposalComprobanteResponse> items = (result.Data ?? Enumerable.Empty<dynamic>())
+                IReadOnlyList<McpPropuestasComprobanteResponse> items = (result.Data ?? Enumerable.Empty<dynamic>())
                     .Cast<DtoComprobantesPropuestaList>()
                     .Select(MapComprobante)
                     .ToList();
@@ -83,16 +83,16 @@ public static class ProposalEndpointExtensions
             }
         });
 
-        proposals.MapPost("/contratos", (McpProposalRequest request, IServiceProvider services) =>
-            ExecuteProposal(request, () => services.GetRequiredService<PropuestasService>().DetalleContratos(ToDomain(request)), MapContracts));
+        propuestas.MapPost("/contratos", (McpPropuestasRequest request, IServiceProvider services) =>
+            ExecutePropuestas(request, () => services.GetRequiredService<PropuestasService>().DetalleContratos(ToDomain(request)), MapContracts));
 
-        proposals.MapPost("/historial-titulares", (McpProposalRequest request, IServiceProvider services) =>
-            ExecuteProposal(request, () => services.GetRequiredService<PropuestasService>().DetalleHistorialTitulares(ToDomain(request)), history => history.Select(MapHistory).ToList()));
+        propuestas.MapPost("/historial-titulares", (McpPropuestasRequest request, IServiceProvider services) =>
+            ExecutePropuestas(request, () => services.GetRequiredService<PropuestasService>().DetalleHistorialTitulares(ToDomain(request)), history => history.Select(MapHistory).ToList()));
 
         return group;
     }
 
-    private static IResult ExecuteProposal<TSource, TResult>(McpProposalRequest request, Func<Resultados<TSource>> action, Func<TSource, TResult> map)
+    private static IResult ExecutePropuestas<TSource, TResult>(McpPropuestasRequest request, Func<Resultados<TSource>> action, Func<TSource, TResult> map)
     {
         if (request.Propuesta <= 0) return InvalidRequest<TResult>();
         return Execute(action, map);
@@ -121,7 +121,7 @@ public static class ProposalEndpointExtensions
             bool unavailable = result.Errores.Any(error => error.Contains("no existe", StringComparison.OrdinalIgnoreCase)
                 || error.Contains("no est", StringComparison.OrdinalIgnoreCase));
             return Failure<TResult>(
-                unavailable ? "PROPOSAL_NOT_FOUND" : "INVALID_REQUEST",
+                unavailable ? "PROPUESTAS_NOT_FOUND" : "INVALID_REQUEST",
                 unavailable ? "La propuesta solicitada no está disponible." : "La solicitud no es válida.",
                 unavailable ? StatusCodes.Status404NotFound : StatusCodes.Status400BadRequest);
         }
@@ -135,22 +135,22 @@ public static class ProposalEndpointExtensions
     private static IResult Failure<T>(string code, string message, int statusCode) =>
         Results.Json(ElPrado.McpApi.Contracts.ApiResponse<T>.Failure(code, message), statusCode: statusCode);
 
-    private static DtoPropuestaDetalleReq ToDomain(McpProposalRequest request) => new()
+    private static DtoPropuestaDetalleReq ToDomain(McpPropuestasRequest request) => new()
     {
         Propuesta = request.Propuesta,
         IncluirBaja = request.IncluirBaja
     };
 
-    private static McpProposalDetailResponse MapDetail(DtoPropuestaDetalleResp source) => new(
+    private static McpPropuestasDetailResponse MapDetail(DtoPropuestaDetalleResp source) => new(
         source.CodPropuesta, source.Propuesta, source.TipoPropuesta, source.Fecha, source.FechaBaja,
         source.EstadoDeuda, source.MuestraMensajeAlerta, source.MensajeAlerta, source.CodParcela,
         source.Parcela, source.Manzana, source.EstadoParcela,
-        (source.ListPropuestasAsociadas ?? new()).Select(x => new McpAssociatedProposalResponse(x.CodPropuesta, x.Propuesta, x.Parcela, x.PrimerTitular)).ToList(),
+        (source.ListPropuestasAsociadas ?? new()).Select(x => new McpAssociatedPropuestasResponse(x.CodPropuesta, x.Propuesta, x.Parcela, x.PrimerTitular)).ToList(),
         source.ListZonasParcelas ?? new(),
-        (source.ListDetalleLugares ?? new()).Select(x => new McpProposalPlaceResponse(x.Nivel, x.Lugares, x.NombreInhumado1, x.Estado1, x.Color1, x.NombreInhumado2, x.Estado2, x.Color2, x.NombreInhumado3, x.Estado3, x.Color3, x.NombreInhumado4, x.Estado4, x.Color4, x.NombreInhumado5, x.Estado5, x.Color5, x.NombreInhumado6, x.Estado6, x.Color6)).ToList(),
-        (source.ListInhumados ?? new()).Select(x => new McpProposalDeceasedResponse(x.CodDetInhumado, x.NombreInhumado, x.TipoDocumento, x.NroDocumento, x.FechaNacimiento, x.FechaFallecimiento, x.FechaInhumacion, x.FechaExhumacion, x.NombreBIM, x.NroDeclaracionJurada)).ToList());
+        (source.ListDetalleLugares ?? new()).Select(x => new McpPropuestasPlaceResponse(x.Nivel, x.Lugares, x.NombreInhumado1, x.Estado1, x.Color1, x.NombreInhumado2, x.Estado2, x.Color2, x.NombreInhumado3, x.Estado3, x.Color3, x.NombreInhumado4, x.Estado4, x.Color4, x.NombreInhumado5, x.Estado5, x.Color5, x.NombreInhumado6, x.Estado6, x.Color6)).ToList(),
+        (source.ListInhumados ?? new()).Select(x => new McpPropuestasDeceasedResponse(x.CodDetInhumado, x.NombreInhumado, x.TipoDocumento, x.NroDocumento, x.FechaNacimiento, x.FechaFallecimiento, x.FechaInhumacion, x.FechaExhumacion, x.NombreBIM, x.NroDeclaracionJurada)).ToList());
 
-    private static McpProposalHolderResponse MapHolder(DtoClientesPropuestas source) => new(
+    private static McpPropuestasHolderResponse MapHolder(DtoClientesPropuestas source) => new(
         source.CodCliente, source.Orden, source.Nombre, source.TipoDocumento, source.NroDocumento,
         source.Telefono, source.TelefonoMovil, source.Email, source.Direccion, source.Localidad,
         source.Provincia, source.FechaNacimiento, source.FechaAlta, source.Web);
@@ -164,7 +164,7 @@ public static class ProposalEndpointExtensions
         source.DescuentoVencido, source.DescuentoAVencer, source.Deuda, source.Total, source.PorcCancelado,
         source.CodCatRecargo, source.EsIndependiente, source.EsPrecioDiferencial);
 
-    private static McpProposalServicesResponse MapServices(DtoServiciosPropuesta source) => new(
+    private static McpPropuestasServicesResponse MapServices(DtoServiciosPropuesta source) => new(
         (source.ListServiciosHabilitados ?? new()).Select(MapEnabledService).ToList(),
         (source.ListServiciosUtilizados ?? new()).Select(x => new McpUsedServiceResponse(x.Servicio, x.ServiciosRealizados, x.ServiciosPendientes)).ToList(),
         (source.ListServiciosBeneficiarios ?? new()).Select(x => new McpServiceBeneficiaryResponse(x.Fecha, x.NroComprobante, x.TipoServicio, x.CodTalonario, x.Nombre, x.NroDocumento, x.Producto, x.UsadoDe, x.UsadoEn)).ToList());
@@ -176,14 +176,14 @@ public static class ProposalEndpointExtensions
             new McpServiceMessageResponse(source.TituloServicio01, source.MensajeServicio01), new McpServiceMessageResponse(source.TituloServicio02, source.MensajeServicio02), new McpServiceMessageResponse(source.TituloServicio03, source.MensajeServicio03), new McpServiceMessageResponse(source.TituloServicio04, source.MensajeServicio04), new McpServiceMessageResponse(source.TituloServicio05, source.MensajeServicio05), new McpServiceMessageResponse(source.TituloServicio06, source.MensajeServicio06), new McpServiceMessageResponse(source.TituloServicio07, source.MensajeServicio07), new McpServiceMessageResponse(source.TituloServicio08, source.MensajeServicio08), new McpServiceMessageResponse(source.TituloServicio09, source.MensajeServicio09), new McpServiceMessageResponse(source.TituloServicio10, source.MensajeServicio10), new McpServiceMessageResponse(source.TituloServicio11, source.MensajeServicio11), new McpServiceMessageResponse(source.TituloServicio12, source.MensajeServicio12), new McpServiceMessageResponse(source.TituloServicio13, source.MensajeServicio13), new McpServiceMessageResponse(source.TituloServicio14, source.MensajeServicio14), new McpServiceMessageResponse(source.TituloServicio15, source.MensajeServicio15)
         }, source.CodCliente, source.CantServicios);
 
-    private static McpProposalComprobanteResponse MapComprobante(DtoComprobantesPropuestaList source) => new(
+    private static McpPropuestasComprobanteResponse MapComprobante(DtoComprobantesPropuestaList source) => new(
         source.Fecha, source.TipoComprobante, source.Talonario, source.NroComprobante, source.Cliente,
         source.Total, source.Estado, source.Concepto, source.Anulado, source.Pago, source.Usuario,
         source.NroComprobanteImputacion, source.ClienteBeneficiado, source.CodClienteBeneficiado,
         source.CodTalonario, source.CodTalonarioAsociado1, source.CodMovimientoFondo);
 
-    private static McpProposalContractsResponse MapContracts(DtoPropuestaDetalleContratosResp source) => new(
-        (source.ListContratos ?? new()).Select(x => new McpProposalContractResponse(x.CodContrato, x.CodPlanVenta, x.Fecha, x.FechaBaja, x.FechaCaducidad, x.TipoContrato, x.Modelo, x.Vendedor, x.Total)).ToList(),
+    private static McpPropuestasContractsResponse MapContracts(DtoPropuestaDetalleContratosResp source) => new(
+        (source.ListContratos ?? new()).Select(x => new McpPropuestasContractResponse(x.CodContrato, x.CodPlanVenta, x.Fecha, x.FechaBaja, x.FechaCaducidad, x.TipoContrato, x.Modelo, x.Vendedor, x.Total)).ToList(),
         (source.ListPlanesVentas ?? new()).Select(x => new McpSalesPlanResponse(x.PlanVenta, x.Concepto, x.Total, x.VigenciaDesde, x.VigenciaHasta)).ToList(),
         (source.ListTitulares ?? new()).Select(MapHolder).ToList(),
         (source.ListTitularesFacturasPagos ?? new()).Select(x => new McpInvoicePaymentHolderResponse(x.CodCliente, x.Factura, x.Pago, x.Nombre, x.TipoDocumento, x.NroDocumento, x.Telefono, x.TelefonoMovil)).ToList());

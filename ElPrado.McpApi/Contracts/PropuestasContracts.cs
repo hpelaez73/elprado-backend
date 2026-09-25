@@ -2,7 +2,7 @@ namespace ElPrado.McpApi.Contracts;
 
 // These contracts intentionally belong to the MCP facade. They keep the
 // transport boundary independent from the WebApi request/response envelopes.
-public sealed record McpProposalRequest(int Propuesta, bool IncluirBaja = false);
+public sealed record McpPropuestasRequest(int Propuesta, bool IncluirBaja = false);
 
 public sealed record McpCurrentAccountRequest(
     int CodPropuesta,
@@ -15,7 +15,7 @@ public sealed record McpServicesRequest(int CodPropuesta);
 
 public sealed record McpComprobantesRequest(int Propuesta, int Pagina = 1, int FilasPagina = 20);
 
-public sealed record McpProposalDetailResponse(
+public sealed record McpPropuestasDetailResponse(
     int CodPropuesta,
     int Propuesta,
     string TipoPropuesta,
@@ -28,14 +28,14 @@ public sealed record McpProposalDetailResponse(
     string Parcela,
     string Manzana,
     string EstadoParcela,
-    IReadOnlyList<McpAssociatedProposalResponse> PropuestasAsociadas,
+    IReadOnlyList<McpAssociatedPropuestasResponse> PropuestasAsociadas,
     IReadOnlyList<string> ZonasParcela,
-    IReadOnlyList<McpProposalPlaceResponse> Lugares,
-    IReadOnlyList<McpProposalDeceasedResponse> Inhumados);
+    IReadOnlyList<McpPropuestasPlaceResponse> Lugares,
+    IReadOnlyList<McpPropuestasDeceasedResponse> Inhumados);
 
-public sealed record McpAssociatedProposalResponse(int CodPropuesta, int Propuesta, string Parcela, string PrimerTitular);
+public sealed record McpAssociatedPropuestasResponse(int CodPropuesta, int Propuesta, string Parcela, string PrimerTitular);
 
-public sealed record McpProposalPlaceResponse(
+public sealed record McpPropuestasPlaceResponse(
     int Nivel,
     int Lugares,
     string NombreInhumado1,
@@ -57,7 +57,7 @@ public sealed record McpProposalPlaceResponse(
     string Estado6,
     string Color6);
 
-public sealed record McpProposalDeceasedResponse(
+public sealed record McpPropuestasDeceasedResponse(
     int CodDetInhumado,
     string NombreInhumado,
     string TipoDocumento,
@@ -69,7 +69,7 @@ public sealed record McpProposalDeceasedResponse(
     string NombreBim,
     int? NroDeclaracionJurada);
 
-public sealed record McpProposalHolderResponse(
+public sealed record McpPropuestasHolderResponse(
     int CodCliente,
     int Orden,
     string Nombre,
@@ -119,7 +119,7 @@ public sealed record McpCurrentAccountResponse(
     bool EsIndependiente,
     bool EsPrecioDiferencial);
 
-public sealed record McpProposalServicesResponse(
+public sealed record McpPropuestasServicesResponse(
     IReadOnlyList<McpEnabledServiceResponse> ServiciosHabilitados,
     IReadOnlyList<McpUsedServiceResponse> ServiciosUtilizados,
     IReadOnlyList<McpServiceBeneficiaryResponse> Beneficiarios);
@@ -147,11 +147,11 @@ public sealed record McpServiceBeneficiaryResponse(
     int UsadoEn);
 
 public sealed record McpComprobantesResponse(
-    IReadOnlyList<McpProposalComprobanteResponse> Comprobantes,
+    IReadOnlyList<McpPropuestasComprobanteResponse> Comprobantes,
     int CantidadPaginas,
     int CantidadRegistros);
 
-public sealed record McpProposalComprobanteResponse(
+public sealed record McpPropuestasComprobanteResponse(
     DateOnly Fecha,
     string TipoComprobante,
     string Talonario,
@@ -170,13 +170,13 @@ public sealed record McpProposalComprobanteResponse(
     int CodTalonarioAsociado1,
     int CodMovimientoFondo);
 
-public sealed record McpProposalContractsResponse(
-    IReadOnlyList<McpProposalContractResponse> Contratos,
+public sealed record McpPropuestasContractsResponse(
+    IReadOnlyList<McpPropuestasContractResponse> Contratos,
     IReadOnlyList<McpSalesPlanResponse> PlanesVenta,
-    IReadOnlyList<McpProposalHolderResponse> Titulares,
+    IReadOnlyList<McpPropuestasHolderResponse> Titulares,
     IReadOnlyList<McpInvoicePaymentHolderResponse> TitularesFacturasPagos);
 
-public sealed record McpProposalContractResponse(
+public sealed record McpPropuestasContractResponse(
     int CodContrato,
     int? CodPlanVenta,
     DateOnly Fecha,
