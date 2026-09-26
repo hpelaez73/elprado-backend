@@ -9,6 +9,7 @@ using ElPrado.Services;
 using ElPrado.Services.Services;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.IdentityModel.Tokens;
+using Microsoft.OpenApi.Models;
 using Serilog;
 using System.Text;
 
@@ -24,6 +25,32 @@ builder.Configuration
 
 builder.Host.UseSerilog((context, loggerConfiguration) =>
     loggerConfiguration.ReadFrom.Configuration(context.Configuration));
+
+builder.Services.AddEndpointsApiExplorer();
+builder.Services.AddSwaggerGen(options =>
+{
+    options.AddSecurityDefinition("bearerAuth", new OpenApiSecurityScheme
+    {
+        Type = SecuritySchemeType.Http,
+        Scheme = "bearer",
+        BearerFormat = "JWT",
+        Description = "JWT Authorization header using the Bearer scheme."
+    });
+    options.AddSecurityRequirement(new OpenApiSecurityRequirement
+    {
+        {
+            new OpenApiSecurityScheme
+            {
+                Reference = new OpenApiReference
+                {
+                    Type = ReferenceType.SecurityScheme,
+                    Id = "bearerAuth"
+                }
+            },
+            Array.Empty<string>()
+        }
+    });
+});
 
 JwtOptions jwtOptions = JwtOptions.FromConfiguration(builder.Configuration);
 builder.Services.AddSingleton(jwtOptions);
@@ -73,6 +100,12 @@ if (corsEnabled)
 var app = builder.Build();
 
 app.Logger.LogInformation("ElPrado.McpApi started in {Environment} environment", app.Environment.EnvironmentName);
+
+if (app.Environment.IsDevelopment() || app.Environment.IsStaging())
+{
+    app.UseSwagger();
+    app.UseSwaggerUI();
+}
 
 if (corsEnabled)
 {
