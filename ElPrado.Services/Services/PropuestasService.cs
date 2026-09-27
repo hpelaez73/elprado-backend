@@ -70,6 +70,21 @@ namespace ElPrado.Services.Services
             };
         }
 
+        public DtoBusquedaPropuestasV2Listado BuscarPropuestasV2(DtoBusquedaPropuestasV2Req criterios)
+        {
+            DtoBusquedaPropuestasV2Listado resultado = _uow.Propuestas.BuscarPropuestasV2(criterios);
+            ILookup<int, DtoBusquedaTitularPropuestaV2> titularesPorPropuesta = resultado.Titulares.ToLookup(x => x.CodPropuesta);
+            foreach (DtoBusquedaPropuestaV2 propuesta in resultado.Items)
+                propuesta.Titulares = titularesPorPropuesta[propuesta.CodPropuesta].ToList();
+
+            return new DtoBusquedaPropuestasV2Listado
+            {
+                Items = resultado.Items,
+                TotalItems = resultado.TotalItems,
+                TotalPages = resultado.TotalItems == 0 ? 0 : (int)Math.Ceiling(resultado.TotalItems / (double)criterios.PageSize)
+            };
+        }
+
         // Operaciones internas para fachadas que ya resolvieron el número público.
         public DtoPropuestaDetalleResp? DetalleV2(int codPropuesta)
         {

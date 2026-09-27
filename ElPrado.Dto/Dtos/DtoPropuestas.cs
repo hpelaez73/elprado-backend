@@ -80,6 +80,41 @@
         public int CodCliente { get; set; }
     }
 
+    public class DtoBusquedaPropuestasV2Req
+    {
+        public string? Nombre { get; init; }
+        public long? Documento { get; init; }
+        public string? Parcela { get; init; }
+        public int Page { get; init; }
+        public int PageSize { get; init; }
+    }
+
+    public class DtoBusquedaPropuestaV2
+    {
+        public int CodPropuesta { get; set; }
+        public int Propuesta { get; set; }
+        public string Tipo { get; set; } = string.Empty;
+        public string Estado { get; set; } = string.Empty;
+        public string? Parcela { get; set; }
+        public IReadOnlyList<DtoBusquedaTitularPropuestaV2> Titulares { get; set; } = Array.Empty<DtoBusquedaTitularPropuestaV2>();
+    }
+
+    public class DtoBusquedaTitularPropuestaV2
+    {
+        public int CodPropuesta { get; set; }
+        public string Nombre { get; set; } = string.Empty;
+        public string TipoDocumento { get; set; } = string.Empty;
+        public long? NroDocumento { get; set; }
+    }
+
+    public class DtoBusquedaPropuestasV2Listado
+    {
+        public IReadOnlyList<DtoBusquedaPropuestaV2> Items { get; init; } = Array.Empty<DtoBusquedaPropuestaV2>();
+        public IReadOnlyList<DtoBusquedaTitularPropuestaV2> Titulares { get; init; } = Array.Empty<DtoBusquedaTitularPropuestaV2>();
+        public int TotalItems { get; init; }
+        public int TotalPages { get; init; }
+    }
+
     public class DtoPropuestasInhumadosList : DtoBase
     {
         public int CodPropuesta { get; set; }

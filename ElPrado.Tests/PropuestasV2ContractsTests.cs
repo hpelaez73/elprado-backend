@@ -46,6 +46,7 @@ public class PropuestasV2ContractsTests
             new PropuestaV2ServiciosResponse(1, Array.Empty<HabilitacionServicioV2>(), Array.Empty<CupoServicioV2>(), Array.Empty<UtilizacionServicioV2>()),
             new PropuestaV2ContratosResponse(1, Array.Empty<ContratoV2>(), new FacturacionV2(Array.Empty<TitularFacturacionV2>())),
             new PropuestaV2ComprobantesResponse(1, Array.Empty<ComprobanteV2>(), new PaginacionV2(1, 20, 0, 0, false, false)),
+            new PropuestaV2BusquedaResponse(Array.Empty<PropuestaBusquedaV2>(), new PaginacionV2(1, 20, 0, 0, false, false)),
             new PropuestaV2HistorialTitularesResponse(1, Array.Empty<HistorialTitularV2>())
         };
 
@@ -57,6 +58,22 @@ public class PropuestasV2ContractsTests
         Assert.Contains("\"facturacion\":{", json);
         Assert.Contains("\"pagination\":{", json);
         Assert.Contains("\"historial\":[]", json);
+    }
+
+    [Fact]
+    public void Busqueda_SerializaElContratoCompactoSinCodigosInternos()
+    {
+        var response = new PropuestaV2BusquedaResponse(
+            new[] { new PropuestaBusquedaV2(41251, "PARCELA", "ACTIVA", new ParcelaBusquedaV2("20750"),
+                new[] { new TitularBusquedaV2("ASTURZZI ALFONSO", new DocumentoV2("DNI", "20123456")) }) },
+            new PaginacionV2(1, 20, 1, 1, false, false));
+
+        JsonObject root = AssertSnapshot(response, "items", "pagination");
+        JsonObject item = root["items"]![0]!.AsObject();
+        Assert.Equal(41251, item["propuesta"]!.GetValue<int>());
+        Assert.False(item.ContainsKey("codPropuesta"));
+        Assert.False(item.ContainsKey("codigo"));
+        Assert.Equal("20750", item["parcela"]?["numero"]?.GetValue<string>());
     }
 
     [Fact]

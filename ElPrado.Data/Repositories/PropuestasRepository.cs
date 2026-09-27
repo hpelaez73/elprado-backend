@@ -131,6 +131,74 @@ namespace ElPrado.Data.Repositories
             return _connection.QuerySingleOrDefault<Propuestas>(sql, new { parcela, incluirBaja }, _transaction);
         }
 
+        public DtoBusquedaPropuestasV2Listado BuscarPropuestasV2(DtoBusquedaPropuestasV2Req criterios)
+        {
+            const string filtros = @"
+                P.FECHA_BAJA IS NULL
+                AND (@nombre IS NULL OR EXISTS (
+                    SELECT 1
+                    FROM PROPUESTAS_TITULARES PT
+                    INNER JOIN CLIENTES C ON C.COD_CLIENTE = PT.COD_CLIENTE
+                    WHERE PT.COD_PROPUESTA = P.COD_PROPUESTA
+                      AND PT.FECHA_BAJA IS NULL
+                      AND UPPER(C.NOMBRE) LIKE '%' || UPPER(@nombre) || '%'))
+                AND (@documento IS NULL OR EXISTS (
+                    SELECT 1
+                    FROM PROPUESTAS_TITULARES PT
+                    INNER JOIN CLIENTES C ON C.COD_CLIENTE = PT.COD_CLIENTE
+                    WHERE PT.COD_PROPUESTA = P.COD_PROPUESTA
+                      AND PT.FECHA_BAJA IS NULL
+                      AND C.NRO_DOCUMENTO = @documento))
+                AND (@parcela IS NULL OR PA.LEGAJO = @parcela)";
+
+            object parametros = new
+            {
+                criterios.Nombre,
+                criterios.Documento,
+                criterios.Parcela,
+                firstRow = ((criterios.Page - 1) * criterios.PageSize) + 1,
+                lastRow = criterios.Page * criterios.PageSize
+            };
+
+            string from = @"
+                FROM PROPUESTA P
+                INNER JOIN TIPOS_PROPUESTAS TP ON TP.COD_TIPO_PROPUESTA = P.COD_TIPO_PROPUESTA
+                INNER JOIN ESTADOS_DEUDAS ED ON ED.COD_ESTADO_DEUDA = P.COD_ESTADO_DEUDA
+                LEFT JOIN PARCELA PA ON PA.COD_PARCELA = P.COD_PARCELA";
+
+            int totalItems = _connection.QuerySingle<int>($"SELECT COUNT(*) {from} WHERE {filtros}", parametros, _transaction);
+            List<DtoBusquedaPropuestaV2> items = _connection.Query<DtoBusquedaPropuestaV2>($@"
+                SELECT P.COD_PROPUESTA, P.LEGAJO AS PROPUESTA, TP.NOMBRE AS TIPO,
+                       ED.ESTADO, PA.LEGAJO AS PARCELA
+                {from}
+                WHERE {filtros}
+                ORDER BY P.LEGAJO
+                ROWS @firstRow TO @lastRow", parametros, _transaction).ToList();
+
+            List<DtoBusquedaTitularPropuestaV2> titulares = BuscarTitularesPropuestasV2(items.Select(x => x.CodPropuesta).ToList());
+            return new DtoBusquedaPropuestasV2Listado
+            {
+                Items = items,
+                Titulares = titulares,
+                TotalItems = totalItems
+            };
+        }
+
+        private List<DtoBusquedaTitularPropuestaV2> BuscarTitularesPropuestasV2(IReadOnlyList<int> codPropuestas)
+        {
+            if (codPropuestas.Count == 0)
+                return new();
+
+            const string sql = @"
+                SELECT PT.COD_PROPUESTA, C.NOMBRE, C.TIPO_DOCUMENTO, C.NRO_DOCUMENTO
+                FROM PROPUESTAS_TITULARES PT
+                INNER JOIN CLIENTES C ON C.COD_CLIENTE = PT.COD_CLIENTE
+                WHERE PT.COD_PROPUESTA IN @codPropuestas
+                  AND PT.FECHA_BAJA IS NULL
+                ORDER BY PT.COD_PROPUESTA, PT.ORDEN, C.NOMBRE";
+            return _connection.Query<DtoBusquedaTitularPropuestaV2>(sql, new { codPropuestas }, _transaction).ToList();
+        }
+
         public DtoPropuestaDetalleResp? BuscarPropuestaDetalle(int codPropuesta)
         {
             string sql = @" SELECT * FROM GET_CONSULTA_PROPUESTA(@codPropuesta) P";

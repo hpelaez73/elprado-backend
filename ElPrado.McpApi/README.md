@@ -89,6 +89,7 @@ decimales, los valores ausentes son `null` y las colecciones vacías son `[]`.
 
 | Ruta | Descripción |
 | --- | --- |
+| `/api/v2/propuestas/buscar` | Búsqueda compacta de propuestas activas. |
 | `/api/v2/propuestas/{propuesta}` | Detalle de propuesta y parcela. |
 | `/api/v2/propuestas/{propuesta}/titulares` | Titulares actuales. |
 | `/api/v2/propuestas/{propuesta}/deuda` | Estado, totales y cuentas. |
@@ -104,6 +105,15 @@ y `pageSize=20`, con máximo `pageSize=100`. Un rango de fechas inválido o una
 paginación fuera de límites devuelve `400`/`INVALID_REQUEST`. Una propuesta no
 disponible devuelve `404`/`PROPOSAL_NOT_FOUND`; un fallo controlado de negocio
 devuelve `422`/`BUSINESS_OPERATION_FAILED`, sin detalles internos.
+
+La búsqueda usa `GET /api/v2/propuestas/buscar` con al menos uno de `nombre`,
+`documento` o `parcela`. Cuando se combinan, todos los criterios deben
+coincidir. `nombre` busca parcialmente entre titulares actuales; `documento` y
+`parcela` aceptan sus números normalizados. La respuesta contiene una página de
+`items` con `propuesta`, `tipo`, `estado`, parcela opcional y titulares actuales
+para desambiguar, sin detalle, importes ni códigos internos. Usa los mismos
+defaults de paginación (`page=1`, `pageSize=20`, máximo 100); una búsqueda sin
+coincidencias devuelve `200` con `items: []`.
 
 ## Migracion y rollback de base URL
 

@@ -45,10 +45,22 @@ public sealed class PropuestasV2IntegrationTests : IClassFixture<WebApplicationF
         Assert.Equal(HttpStatusCode.Unauthorized, response.StatusCode);
     }
 
+    [Fact]
+    public async Task BusquedaV2_SinAutenticacion_RechazaLaSolicitud()
+    {
+        using HttpClient client = _factory.CreateClient();
+        HttpResponseMessage response = await client.GetAsync("/api/v2/propuestas/buscar?nombre=asturzzi");
+
+        Assert.Equal(HttpStatusCode.Unauthorized, response.StatusCode);
+    }
+
     [Theory]
     [InlineData("/api/v2/propuestas/0", HttpStatusCode.BadRequest, "INVALID_REQUEST")]
     [InlineData("/api/v2/propuestas/999999999", HttpStatusCode.NotFound, "PROPOSAL_NOT_FOUND")]
     [InlineData("/api/v2/propuestas/41000/comprobantes?page=0", HttpStatusCode.BadRequest, "INVALID_REQUEST")]
+    [InlineData("/api/v2/propuestas/buscar", HttpStatusCode.BadRequest, "INVALID_REQUEST")]
+    [InlineData("/api/v2/propuestas/buscar?nombre=asturzzi&pageSize=101", HttpStatusCode.BadRequest, "INVALID_REQUEST")]
+    [InlineData("/api/v2/propuestas/buscar?documento=no-es-documento", HttpStatusCode.BadRequest, "INVALID_REQUEST")]
     public async Task RutaV2_ConSolicitudInvalidaONoEncontrada_DevuelveErrorEstable(string route, HttpStatusCode expectedStatus, string expectedCode)
     {
         using HttpClient client = CreateAuthenticatedClient();
@@ -77,6 +89,51 @@ public sealed class PropuestasV2IntegrationTests : IClassFixture<WebApplicationF
         Assert.True(pagination.TryGetProperty("hasNext", out _));
         Assert.True(pagination.TryGetProperty("hasPrevious", out _));
     }
+
+    [Fact]
+    public async Task BusquedaV2_EncuentraLaPropuestaPorNombreYDocumento()
+    {
+        using HttpClient client = CreateAuthenticatedClient();
+        HttpResponseMessage titularesResponse = await client.GetAsync($"/api/v2/propuestas/{PropuestaDePrueba}/titulares");
+        Assert.Equal(HttpStatusCode.OK, titularesResponse.StatusCode);
+
+        using JsonDocument titularesBody = JsonDocument.Parse(await titularesResponse.Content.ReadAsStringAsync());
+        JsonElement titular = titularesBody.RootElement.GetProperty("data").GetProperty("titulares")[0];
+        string nombre = titular.GetProperty("nombre").GetString()!;
+        string documento = titular.GetProperty("documento").GetProperty("numero").GetString()!;
+
+        HttpResponseMessage response = await client.GetAsync($"/api/v2/propuestas/buscar?nombre={Uri.EscapeDataString(nombre)}&documento={Uri.EscapeDataString(documento)}");
+
+        Assert.Equal(HttpStatusCode.OK, response.StatusCode);
+        using JsonDocument body = JsonDocument.Parse(await response.Content.ReadAsStringAsync());
+        JsonElement data = body.RootElement.GetProperty("data");
+        JsonElement propuesta = data.GetProperty("items").EnumerateArray().Single(x => x.GetProperty("propuesta").GetInt32() == PropuestaDePrueba);
+        Assert.True(data.GetProperty("pagination").TryGetProperty("totalItems", out _));
+
+        if (propuesta.TryGetProperty("parcela", out JsonElement parcela) && parcela.ValueKind == JsonValueKind.Object)
+        {
+            string numeroParcela = parcela.GetProperty("numero").GetString()!;
+            HttpResponseMessage parcelaResponse = await client.GetAsync($"/api/v2/propuestas/buscar?parcela={Uri.EscapeDataString(numeroParcela)}");
+            Assert.Equal(HttpStatusCode.OK, parcelaResponse.StatusCode);
+            using JsonDocument parcelaBody = JsonDocument.Parse(await parcelaResponse.Content.ReadAsStringAsync());
+            Assert.Contains(parcelaBody.RootElement.GetProperty("data").GetProperty("items").EnumerateArray(), x => x.GetProperty("propuesta").GetInt32() == PropuestaDePrueba);
+        }
+    }
+
+    [Fact]
+    public async Task BusquedaV2_SinCoincidencias_DevuelvePaginaVacia()
+    {
+        using HttpClient client = CreateAuthenticatedClient();
+        HttpResponseMessage response = await client.GetAsync("/api/v2/propuestas/buscar?nombre=zzqvwxk");
+
+        Assert.Equal(HttpStatusCode.OK, response.StatusCode);
+        using JsonDocument body = JsonDocument.Parse(await response.Content.ReadAsStringAsync());
+        JsonElement data = body.RootElement.GetProperty("data");
+        Assert.Equal(JsonValueKind.Array, data.GetProperty("items").ValueKind);
+        Assert.Equal(0, data.GetProperty("items").GetArrayLength());
+        Assert.Equal(0, data.GetProperty("pagination").GetProperty("totalItems").GetInt32());
+    }
+
 
     private HttpClient CreateAuthenticatedClient()
     {

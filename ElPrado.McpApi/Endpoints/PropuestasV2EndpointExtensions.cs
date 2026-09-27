@@ -15,6 +15,33 @@ public static class PropuestasV2EndpointExtensions
     {
         RouteGroupBuilder propuestas = group.MapGroup("/v2/propuestas").WithTags("Propuestas v2");
 
+        propuestas.MapGet("/buscar", (string? nombre, string? documento, string? parcela, string? page, string? pageSize, IServiceProvider services) =>
+        {
+            nombre = NullIfEmpty(nombre);
+            if (!TryParseDocumento(documento, out long? numeroDocumento) || !TryNormalizeNumero(parcela, out string? numeroParcela)
+                || (nombre is null && numeroDocumento is null && numeroParcela is null)
+                || !TryParseInt(page, 1, out int currentPage) || !TryParseInt(pageSize, DefaultPageSize, out int currentPageSize)
+                || currentPage < 1 || currentPageSize is < 1 or > MaxPageSize)
+                return InvalidRequest<PropuestaV2BusquedaResponse>();
+
+            try
+            {
+                DtoBusquedaPropuestasV2Listado resultado = services.GetRequiredService<PropuestasService>().BuscarPropuestasV2(new DtoBusquedaPropuestasV2Req
+                {
+                    Nombre = nombre,
+                    Documento = numeroDocumento,
+                    Parcela = numeroParcela,
+                    Page = currentPage,
+                    PageSize = currentPageSize
+                });
+                return Ok(new PropuestaV2BusquedaResponse(resultado.Items.Select(MapBusqueda).ToList(),
+                    new PaginacionV2(currentPage, currentPageSize, resultado.TotalItems, resultado.TotalPages,
+                        currentPage < resultado.TotalPages, currentPage > 1)));
+            }
+            catch (ArgumentOutOfRangeException) { return InvalidRequest<PropuestaV2BusquedaResponse>(); }
+            catch { return BusinessFailure<PropuestaV2BusquedaResponse>(); }
+        });
+
         propuestas.MapGet("/{propuesta}", (string propuesta, IServiceProvider services) =>
             Execute<PropuestaV2DetalleResponse>(propuesta, services, (numero, codigo) =>
             {
@@ -141,6 +168,9 @@ public static class PropuestasV2EndpointExtensions
         string.IsNullOrWhiteSpace(x.NroComprobante) ? null : new ComprobanteReferenciaV2(x.NroComprobante), x.PropuestaOrigen, x.PropuestaAplicacion);
     private static ContratoV2 MapContrato(DtoContratosPropuestas x, DtoPlanesVentasPropuestas? plan) => new(x.CodContrato, x.Fecha, x.TipoContrato, x.Modelo, x.Estado, (decimal)x.Total, new VendedorV2(NullIfEmpty(x.Vendedor)),
         plan is null ? null : new PlanVentaV2(plan.CodPlanVenta, plan.PlanVenta, plan.Concepto));
+    private static PropuestaBusquedaV2 MapBusqueda(DtoBusquedaPropuestaV2 x) => new(x.Propuesta, NullIfEmpty(x.Tipo), NullIfEmpty(x.Estado),
+        string.IsNullOrWhiteSpace(x.Parcela) ? null : new ParcelaBusquedaV2(x.Parcela), x.Titulares.Select(t => new TitularBusquedaV2(NullIfEmpty(t.Nombre),
+            t.NroDocumento is null ? null : new DocumentoV2(NullIfEmpty(t.TipoDocumento), t.NroDocumento.Value.ToString()))).ToList());
     private static string? NullIfEmpty(string? value) => string.IsNullOrWhiteSpace(value) ? null : value;
     private static bool TryParseDate(string? value, out DateOnly? date)
     {
@@ -154,4 +184,26 @@ public static class PropuestasV2EndpointExtensions
     }
     private static bool TryParseInt(string? value, int defaultValue, out int number) =>
         string.IsNullOrWhiteSpace(value) ? (number = defaultValue) > 0 : int.TryParse(value, out number);
+    private static bool TryParseDocumento(string? value, out long? documento)
+    {
+        documento = null;
+        if (string.IsNullOrWhiteSpace(value))
+            return true;
+        string normalizado = new(value.Where(char.IsDigit).ToArray());
+        if (normalizado.Length == 0 || !long.TryParse(normalizado, out long numero) || numero <= 0)
+            return false;
+        documento = numero;
+        return true;
+    }
+    private static bool TryNormalizeNumero(string? value, out string? numero)
+    {
+        numero = null;
+        if (string.IsNullOrWhiteSpace(value))
+            return true;
+        string normalizado = new(value.Where(char.IsDigit).ToArray());
+        if (normalizado.Length == 0)
+            return false;
+        numero = normalizado;
+        return true;
+    }
 }

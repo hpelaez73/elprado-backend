@@ -200,6 +200,21 @@ public sealed record PaginacionV2(
     bool HasNext,
     bool HasPrevious);
 
+public sealed record PropuestaV2BusquedaResponse(
+    IReadOnlyList<PropuestaBusquedaV2> Items,
+    PaginacionV2 Pagination);
+
+public sealed record PropuestaBusquedaV2(
+    int Propuesta,
+    string? Tipo,
+    string? Estado,
+    ParcelaBusquedaV2? Parcela,
+    IReadOnlyList<TitularBusquedaV2> Titulares);
+
+public sealed record ParcelaBusquedaV2(string? Numero);
+
+public sealed record TitularBusquedaV2(string? Nombre, DocumentoV2? Documento);
+
 public sealed record PropuestaV2HistorialTitularesResponse(
     int Propuesta,
     IReadOnlyList<HistorialTitularV2> Historial);
