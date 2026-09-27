@@ -1,4 +1,4 @@
-﻿namespace ElPrado.Dto.Dtos
+namespace ElPrado.Dto.Dtos
 {
     public class  DtoComprobanteReq
     {
@@ -135,7 +135,7 @@
         public int CodMovimientoFondo { get; set; }
     }
 
-    public class DtoComprobantesPropuestaV2
+    public class DtoComprobantesPropuesta
     {
         public DateOnly Fecha { get; set; }
         public string TipoComprobante { get; set; } = string.Empty;
@@ -148,9 +148,9 @@
         public bool Anulado { get; set; }
     }
 
-    public class DtoComprobantesPropuestaV2Listado
+    public class DtoComprobantesPropuestaListado
     {
-        public IReadOnlyList<DtoComprobantesPropuestaV2> Items { get; init; } = Array.Empty<DtoComprobantesPropuestaV2>();
+        public IReadOnlyList<DtoComprobantesPropuesta> Items { get; init; } = Array.Empty<DtoComprobantesPropuesta>();
         public int TotalItems { get; init; }
         public int TotalPages { get; init; }
     }

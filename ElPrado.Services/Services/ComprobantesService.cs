@@ -1,4 +1,4 @@
-﻿using ElPrado.Core;
+using ElPrado.Core;
 using ElPrado.Data.Interfaces;
 using ElPrado.Data.Models;
 using ElPrado.Dto.Documents;
@@ -171,15 +171,15 @@ namespace ElPrado.Services.Services
             return await _uow.Comprobantes.ListadoComprobantesPropuestaAsync(opcionesListado);
         }
 
-        public DtoComprobantesPropuestaV2Listado ComprobantesPropuestaV2(
+        public DtoComprobantesPropuestaListado ComprobantesPropuesta(
             int codPropuesta, DateOnly? desde, DateOnly? hasta, string? tipo, string? estado, int page, int pageSize)
         {
-            List<DtoComprobantesPropuestaV2> comprobantes = _uow.Comprobantes
-                .ComprobantesPropuestaV2(codPropuesta, desde, hasta, tipo, estado);
+            List<DtoComprobantesPropuesta> comprobantes = _uow.Comprobantes
+                .ComprobantesPropuesta(codPropuesta, desde, hasta, tipo, estado);
             int totalItems = comprobantes.Count;
             int totalPages = totalItems == 0 ? 0 : (int)Math.Ceiling(totalItems / (double)pageSize);
 
-            return new DtoComprobantesPropuestaV2Listado
+            return new DtoComprobantesPropuestaListado
             {
                 Items = comprobantes.Skip((page - 1) * pageSize).Take(pageSize).ToList(),
                 TotalItems = totalItems,

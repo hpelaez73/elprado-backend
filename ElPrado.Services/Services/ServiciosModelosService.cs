@@ -1,4 +1,4 @@
-﻿using ElPrado.Data.Interfaces;
+using ElPrado.Data.Interfaces;
 using ElPrado.Dto.Dtos;
 
 namespace ElPrado.Services.Services
@@ -20,17 +20,17 @@ namespace ElPrado.Services.Services
             return serviciosPropuesta;
         }
 
-        public DtoServiciosPropuestaV2 ServiciosPropuestaV2(int codPropuesta)
+        public DtoServiciosPropuestaMcp ServiciosPropuestaMcp(int codPropuesta)
         {
-            List<DtoServicioPropuestaV2Fuente> fuente = _uow.ServiciosModelos.ServiciosPropuestaV2(codPropuesta);
-            return new DtoServiciosPropuestaV2
+            List<DtoServicioPropuestaMcpFuente> fuente = _uow.ServiciosModelos.ServiciosPropuestaMcp(codPropuesta);
+            return new DtoServiciosPropuestaMcp
             {
                 Habilitaciones = fuente.Select(MapHabilitacion).ToList(),
                 Cupos = fuente
                     .Where(x => x.LimiteServicios > 0)
                     .GroupBy(x => new { x.CodServicioModelo, x.Orden, x.CodPlanVenta, x.Modelo, x.Servicio })
                     .Select(x => x.First())
-                    .Select(x => new DtoCupoServicioV2
+                    .Select(x => new DtoCupoServicioMcp
                     {
                         Producto = x.Modelo,
                         Servicio = x.Servicio,
@@ -39,14 +39,14 @@ namespace ElPrado.Services.Services
                         Disponibles = x.ServiciosPendientes
                     })
                     .ToList(),
-                Utilizaciones = _uow.ServiciosModelos.UtilizacionesPropuestaV2(codPropuesta)
+                Utilizaciones = _uow.ServiciosModelos.UtilizacionesPropuestaMcp(codPropuesta)
             };
         }
 
-        private static DtoHabilitacionServicioV2 MapHabilitacion(DtoServicioPropuestaV2Fuente source)
+        private static DtoHabilitacionServicioMcp MapHabilitacion(DtoServicioPropuestaMcpFuente source)
         {
             (string? codigo, string? descripcion, DateOnly? hasta) = ObtenerMotivo(source);
-            return new DtoHabilitacionServicioV2
+            return new DtoHabilitacionServicioMcp
             {
                 CodCliente = source.CodCliente,
                 Cliente = source.Cliente,
@@ -59,7 +59,7 @@ namespace ElPrado.Services.Services
             };
         }
 
-        private static (string? Codigo, string? Descripcion, DateOnly? Hasta) ObtenerMotivo(DtoServicioPropuestaV2Fuente source)
+        private static (string? Codigo, string? Descripcion, DateOnly? Hasta) ObtenerMotivo(DtoServicioPropuestaMcpFuente source)
         {
             if (source.Habilitado) return (null, null, null);
             if (source.UtilizadoTitular > 0 || (source.LimiteServicios > 0 && source.ServiciosPendientes == 0))

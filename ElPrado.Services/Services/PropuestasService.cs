@@ -1,4 +1,4 @@
-﻿using ElPrado.Core;
+using ElPrado.Core;
 using ElPrado.Data.Interfaces;
 using ElPrado.Data.Models;
 using ElPrado.Dto.Dtos;
@@ -70,14 +70,14 @@ namespace ElPrado.Services.Services
             };
         }
 
-        public DtoBusquedaPropuestasV2Listado BuscarPropuestasV2(DtoBusquedaPropuestasV2Req criterios)
+        public DtoBusquedaPropuestasListado BuscarPropuestas(DtoBusquedaPropuestasReq criterios)
         {
-            DtoBusquedaPropuestasV2Listado resultado = _uow.Propuestas.BuscarPropuestasV2(criterios);
-            ILookup<int, DtoBusquedaTitularPropuestaV2> titularesPorPropuesta = resultado.Titulares.ToLookup(x => x.CodPropuesta);
-            foreach (DtoBusquedaPropuestaV2 propuesta in resultado.Items)
+            DtoBusquedaPropuestasListado resultado = _uow.Propuestas.BuscarPropuestas(criterios);
+            ILookup<int, DtoBusquedaTitularPropuesta> titularesPorPropuesta = resultado.Titulares.ToLookup(x => x.CodPropuesta);
+            foreach (DtoBusquedaPropuesta propuesta in resultado.Items)
                 propuesta.Titulares = titularesPorPropuesta[propuesta.CodPropuesta].ToList();
 
-            return new DtoBusquedaPropuestasV2Listado
+            return new DtoBusquedaPropuestasListado
             {
                 Items = resultado.Items,
                 TotalItems = resultado.TotalItems,
@@ -86,7 +86,7 @@ namespace ElPrado.Services.Services
         }
 
         // Operaciones internas para fachadas que ya resolvieron el número público.
-        public DtoPropuestaDetalleResp? DetalleV2(int codPropuesta)
+        public DtoPropuestaDetalleResp? Detalle(int codPropuesta)
         {
             DtoPropuestaDetalleResp? propuestaDetalle = _uow.Propuestas.BuscarPropuestaDetalle(codPropuesta);
             if (propuestaDetalle == null) return null;
@@ -103,9 +103,9 @@ namespace ElPrado.Services.Services
             return propuestaDetalle;
         }
 
-        public List<DtoClientesPropuestas> TitularesV2(int codPropuesta) => _uow.Clientes.BuscarTitulares(codPropuesta);
+        public List<DtoClientesPropuestas> Titulares(int codPropuesta) => _uow.Clientes.BuscarTitulares(codPropuesta);
 
-        public DtoPropuestaDetalleContratosResp ContratosV2(int codPropuesta)
+        public DtoPropuestaDetalleContratosResp Contratos(int codPropuesta)
         {
             DtoPropuestaDetalleContratosResp detalle = new()
             {
@@ -119,7 +119,7 @@ namespace ElPrado.Services.Services
             return detalle;
         }
 
-        public List<DtoClientesPropuestasHistorial> HistorialTitularesV2(int codPropuesta) =>
+        public List<DtoClientesPropuestasHistorial> HistorialTitulares(int codPropuesta) =>
             _uow.Propuestas.DetalleHistorialTitulares(codPropuesta);
 
         public Resultados<DtoPropuestaDetalleResp> Detalle(DtoPropuestaDetalleReq dtoPropuesta)

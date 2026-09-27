@@ -7,7 +7,7 @@ Proporcionar a agentes y al servidor MCP consultas v2 de propuestas con hechos d
 ## Requirements
 
 ### Requirement: Superficie v2 autenticada y compatible
-ElPrado.McpApi SHALL exponer, con JWT de empleado vÃ¡lido, los recursos `GET /api/v2/propuestas/{propuesta}`, `/titulares`, `/deuda`, `/servicios`, `/contratos`, `/comprobantes` e `/historial-titulares`. La ruta SHALL usar el nÃºmero pÃºblico `propuesta`; la API SHALL resolver internamente cualquier `CodPropuesta` necesario. Las rutas existentes bajo `/api/propuestas` SHALL permanecer disponibles sin cambios de contrato.
+ElPrado.McpApi SHALL exponer, con JWT de empleado vÃ¡lido, los recursos `GET /api/v2/propuestas/{propuesta}`, `/titulares`, `/deuda`, `/servicios`, `/contratos`, `/comprobantes` e `/historial-titulares`. La ruta SHALL usar el nÃºmero pÃºblico `propuesta`; la API SHALL resolver internamente cualquier `CodPropuesta` necesario. Las rutas heredadas bajo `/api/propuestas` SHALL NOT estar disponibles.
 
 #### Scenario: Consulta v2 autenticada por nÃºmero pÃºblico
 - **WHEN** un consumidor autenticado solicita un recurso v2 con una propuesta existente
@@ -16,6 +16,10 @@ ElPrado.McpApi SHALL exponer, con JWT de empleado vÃ¡lido, los recursos `GET /
 #### Scenario: Consulta v2 sin autenticaciÃ³n
 - **WHEN** un consumidor solicita un recurso v2 sin un JWT vÃ¡lido
 - **THEN** la API responde HTTP 401 sin ejecutar la consulta de negocio
+
+#### Scenario: Ruta heredada retirada
+- **WHEN** un consumidor invoca una ruta de propuestas bajo /api/propuestas`r
+- **THEN** la API no publica esa operación heredada
 
 ### Requirement: Búsqueda compacta de propuestas por criterios de dominio
 ElPrado.McpApi SHALL exponer, con JWT de empleado válido, `GET /api/v2/propuestas/buscar` para localizar candidatas activas cuando no se conoce el número público. La operación SHALL aceptar los parámetros opcionales `nombre`, `documento` y `parcela`, y los parámetros de paginación `page` y `pageSize`; deberá recibirse al menos un criterio no vacío. Si se suministran varios criterios, la propuesta SHALL coincidir con todos ellos. `nombre` SHALL buscar titulares actuales por coincidencia parcial sin distinguir mayúsculas/minúsculas; `documento` y `parcela` SHALL cotejarse contra sus números normalizados, sin requerir que el consumidor conozca identificadores internos.

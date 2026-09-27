@@ -1,214 +1,227 @@
 namespace ElPrado.McpApi.Contracts;
 
-// These contracts intentionally belong to the MCP facade. They keep the
-// transport boundary independent from the WebApi request/response envelopes.
-public sealed record McpPropuestasRequest(int Propuesta, bool IncluirBaja = false);
-
-public sealed record McpCurrentAccountRequest(
-    int CodPropuesta,
-    bool MostrarBaja = false,
-    bool MostrarInactiva = false,
-    DateOnly? FechaInteres = null,
-    DateOnly? FechaHasta = null);
-
-public sealed record McpServicesRequest(int CodPropuesta);
-
-public sealed record McpComprobantesRequest(int Propuesta, int Pagina = 1, int FilasPagina = 20);
-
-public sealed record McpPropuestasDetailResponse(
-    int CodPropuesta,
+// Contratos de lectura exclusivos de la superficie v2. No reutilizan DTOs de
+// WebApi ni los contratos v1, porque representan hechos de dominio para agentes.
+public sealed record PropuestaDetalleResponse(
     int Propuesta,
-    string TipoPropuesta,
-    DateOnly Fecha,
+    int Codigo,
+    string? Tipo,
+    DateOnly? FechaAlta,
     DateOnly? FechaBaja,
-    string EstadoDeuda,
-    bool MuestraMensajeAlerta,
-    string MensajeAlerta,
-    int? CodParcela,
-    string Parcela,
-    string Manzana,
-    string EstadoParcela,
-    IReadOnlyList<McpAssociatedPropuestasResponse> PropuestasAsociadas,
-    IReadOnlyList<string> ZonasParcela,
-    IReadOnlyList<McpPropuestasPlaceResponse> Lugares,
-    IReadOnlyList<McpPropuestasDeceasedResponse> Inhumados);
+    string? Estado,
+    EstadoDeuda? Deuda,
+    Parcela? Parcela,
+    IReadOnlyList<Inhumado> Inhumados,
+    IReadOnlyList<PropuestaAsociada> PropuestasAsociadas,
+    IReadOnlyList<string> Alertas);
 
-public sealed record McpAssociatedPropuestasResponse(int CodPropuesta, int Propuesta, string Parcela, string PrimerTitular);
+public sealed record EstadoDeuda(
+    string? Nombre,
+    bool Activa,
+    bool AlDia,
+    bool PermiteImputar);
 
-public sealed record McpPropuestasPlaceResponse(
+public sealed record Parcela(
+    int Codigo,
+    string? Numero,
+    string? Manzana,
+    EstadoParcela? Estado,
+    IReadOnlyList<string> Zonas,
+    IReadOnlyList<LugarParcela> Lugares);
+
+public sealed record EstadoParcela(
+    string? Nombre,
+    bool Permanente,
+    bool DisponibleVenta,
+    bool DisponibleInhumar,
+    bool Inhabilitada,
+    bool ConInhumado);
+
+public sealed record LugarParcela(
     int Nivel,
-    int Lugares,
-    string NombreInhumado1,
-    string Estado1,
-    string Color1,
-    string NombreInhumado2,
-    string Estado2,
-    string Color2,
-    string NombreInhumado3,
-    string Estado3,
-    string Color3,
-    string NombreInhumado4,
-    string Estado4,
-    string Color4,
-    string NombreInhumado5,
-    string Estado5,
-    string Color5,
-    string NombreInhumado6,
-    string Estado6,
-    string Color6);
+    int Posicion,
+    EstadoLugar? Estado,
+    InhumadoReferencia? Inhumado);
 
-public sealed record McpPropuestasDeceasedResponse(
-    int CodDetInhumado,
-    string NombreInhumado,
-    string TipoDocumento,
-    int? NroDocumento,
+public sealed record EstadoLugar(
+    string? Nombre,
+    bool DisponibleVenta,
+    bool DisponibleInhumar);
+
+public sealed record InhumadoReferencia(int Codigo, string? Nombre);
+
+public sealed record Inhumado(
+    int Codigo,
+    string? Nombre,
+    Documento? Documento,
     DateOnly? FechaNacimiento,
     DateOnly? FechaFallecimiento,
-    DateOnly FechaInhumacion,
-    DateOnly? FechaExhumacion,
-    string NombreBim,
-    int? NroDeclaracionJurada);
+    DateOnly? FechaInhumacion,
+    DateOnly? FechaExhumacion);
 
-public sealed record McpPropuestasHolderResponse(
-    int CodCliente,
-    int Orden,
-    string Nombre,
-    string TipoDocumento,
-    long NroDocumento,
-    string Telefono,
-    string TelefonoMovil,
-    string Email,
-    string Direccion,
-    string Localidad,
-    string Provincia,
-    DateOnly? FechaNacimiento,
-    DateOnly? FechaAlta,
-    string Web);
+public sealed record PropuestaAsociada(int Propuesta, string? Tipo);
 
-public sealed record McpCurrentAccountResponse(
-    string Tipo,
-    bool EsRefinanciacion,
-    bool EsDocumentado,
-    string Categoria,
-    string Estado,
-    double Importe,
-    double PrecioDolar,
-    DateOnly FechaInicio,
-    DateOnly? PrimerCuota,
-    DateOnly? FechaBaja,
-    string Cobrador,
-    string Cliente,
-    int CodCliente,
-    string ZonaCobranza,
-    string CobradorZona,
+public sealed record PropuestaTitularesResponse(
+    int Propuesta,
+    int Cantidad,
+    IReadOnlyList<Titular> Titulares);
+
+public sealed record Titular(
     int Codigo,
-    int? CodMedioCobro,
-    string Comercializadora,
-    int Cuotas,
+    int Orden,
+    bool EsPrincipal,
+    string? Nombre,
+    Documento? Documento,
+    Contacto? Contacto,
+    Domicilio? Domicilio,
+    DateOnly? FechaNacimiento,
+    DateOnly? FechaAlta);
+
+public sealed record Documento(string? Tipo, string? Numero);
+
+public sealed record Contacto(string? Telefono, string? Movil, string? Email);
+
+public sealed record Domicilio(string? Direccion, string? Localidad, string? Provincia);
+
+public sealed record PropuestaDeudaResponse(
+    int Propuesta,
+    EstadoDeuda? Estado,
+    TotalesDeuda Totales,
+    IReadOnlyList<CuentaCorriente> Cuentas);
+
+public sealed record TotalesDeuda(
+    decimal Vencido,
+    decimal Intereses,
+    decimal AVencer,
+    decimal DescuentoVencido,
+    decimal DescuentoAVencer,
+    decimal Deuda,
+    decimal Total);
+
+public sealed record CuentaCorriente(
+    int Codigo,
+    string? Tipo,
+    string? Categoria,
+    EstadoDeuda? Estado,
+    ClienteReferencia? Cliente,
+    decimal Importe,
+    PeriodoCuenta? Periodo,
+    TotalesDeuda Importes,
+    Cobranza? Cobranza);
+
+public sealed record ClienteReferencia(int Codigo, string? Nombre);
+
+public sealed record PeriodoCuenta(
+    DateOnly? Inicio,
+    DateOnly? PrimeraCuota,
     DateOnly? CuotaDesde,
-    DateOnly? CuotaHasta,
-    double ImporteVencido,
-    double Interes,
-    double ImporteAVencer,
-    double DescuentoVencido,
-    double DescuentoAVencer,
-    double Deuda,
-    double Total,
-    double PorcCancelado,
-    int? CodCatRecargo,
-    bool EsIndependiente,
-    bool EsPrecioDiferencial);
+    DateOnly? CuotaHasta);
 
-public sealed record McpPropuestasServicesResponse(
-    IReadOnlyList<McpEnabledServiceResponse> ServiciosHabilitados,
-    IReadOnlyList<McpUsedServiceResponse> ServiciosUtilizados,
-    IReadOnlyList<McpServiceBeneficiaryResponse> Beneficiarios);
+public sealed record Cobranza(string? Cobrador, string? Zona, string? Comercializadora);
 
-public sealed record McpEnabledServiceResponse(
-    string PlanBeneficio,
-    string Cliente,
-    IReadOnlyList<McpServiceMessageResponse> Mensajes,
-    int CodCliente,
-    int CantServicios);
+public sealed record PropuestaServiciosResponse(
+    int Propuesta,
+    IReadOnlyList<HabilitacionServicio> Habilitaciones,
+    IReadOnlyList<CupoServicio> Cupos,
+    IReadOnlyList<UtilizacionServicio> Utilizaciones);
 
-public sealed record McpServiceMessageResponse(string Titulo, string Mensaje);
+public sealed record HabilitacionServicio(
+    ClienteReferencia? Cliente,
+    string? Producto,
+    string? Servicio,
+    bool Habilitado,
+    MotivoHabilitacion? Motivo);
 
-public sealed record McpUsedServiceResponse(string Servicio, int ServiciosRealizados, int ServiciosPendientes);
+public sealed record MotivoHabilitacion(string? Codigo, string? Descripcion, DateOnly? Hasta);
 
-public sealed record McpServiceBeneficiaryResponse(
-    DateOnly Fecha,
-    string NroComprobante,
-    string TipoServicio,
-    int CodTalonario,
-    string Nombre,
-    int NroDocumento,
-    string Producto,
-    int UsadoDe,
-    int UsadoEn);
+public sealed record CupoServicio(
+    string? Producto,
+    string? Servicio,
+    int Total,
+    int Utilizados,
+    int Disponibles);
 
-public sealed record McpComprobantesResponse(
-    IReadOnlyList<McpPropuestasComprobanteResponse> Comprobantes,
-    int CantidadPaginas,
-    int CantidadRegistros);
+public sealed record UtilizacionServicio(
+    DateOnly? Fecha,
+    string? Producto,
+    string? Servicio,
+    BeneficiarioServicio? Beneficiario,
+    ComprobanteReferencia? Comprobante,
+    int? PropuestaOrigen,
+    int? PropuestaAplicacion);
 
-public sealed record McpPropuestasComprobanteResponse(
-    DateOnly Fecha,
-    string TipoComprobante,
-    string Talonario,
-    string NroComprobante,
-    string Cliente,
-    double Total,
-    string Estado,
-    string Concepto,
-    string Anulado,
-    double Pago,
-    string Usuario,
-    string NroComprobanteImputacion,
-    string ClienteBeneficiado,
-    int CodClienteBeneficiado,
-    int CodTalonario,
-    int CodTalonarioAsociado1,
-    int CodMovimientoFondo);
+public sealed record BeneficiarioServicio(string? Nombre, Documento? Documento);
 
-public sealed record McpPropuestasContractsResponse(
-    IReadOnlyList<McpPropuestasContractResponse> Contratos,
-    IReadOnlyList<McpSalesPlanResponse> PlanesVenta,
-    IReadOnlyList<McpPropuestasHolderResponse> Titulares,
-    IReadOnlyList<McpInvoicePaymentHolderResponse> TitularesFacturasPagos);
+public sealed record ComprobanteReferencia(string? Numero);
 
-public sealed record McpPropuestasContractResponse(
-    int CodContrato,
-    int? CodPlanVenta,
-    DateOnly Fecha,
+public sealed record PropuestaContratosResponse(
+    int Propuesta,
+    IReadOnlyList<Contrato> Contratos,
+    Facturacion Facturacion);
+
+public sealed record Contrato(
+    int Codigo,
+    DateOnly? Fecha,
+    string? Tipo,
+    string? Modelo,
+    string? Estado,
+    decimal Total,
+    Vendedor? Vendedor,
+    PlanVenta? PlanVenta);
+
+public sealed record Vendedor(string? Nombre);
+
+public sealed record PlanVenta(int Codigo, string? Nombre, string? Concepto);
+
+public sealed record Facturacion(IReadOnlyList<TitularFacturacion> TitularesHabilitados);
+
+public sealed record TitularFacturacion(int Codigo, string? Nombre, bool Factura, bool Pago);
+
+public sealed record PropuestaComprobantesResponse(
+    int Propuesta,
+    IReadOnlyList<Comprobante> Items,
+    Paginacion Pagination);
+
+public sealed record Comprobante(
+    DateOnly? Fecha,
+    string? Tipo,
+    string? Numero,
+    ClienteReferencia? Cliente,
+    decimal Total,
+    decimal Pago,
+    string? Estado,
+    bool Anulado);
+
+public sealed record Paginacion(
+    int Page,
+    int PageSize,
+    int TotalItems,
+    int TotalPages,
+    bool HasNext,
+    bool HasPrevious);
+
+public sealed record PropuestaBusquedaResponse(
+    IReadOnlyList<PropuestaBusqueda> Items,
+    Paginacion Pagination);
+
+public sealed record PropuestaBusqueda(
+    int Propuesta,
+    string? Tipo,
+    string? Estado,
+    ParcelaBusqueda? Parcela,
+    IReadOnlyList<TitularBusqueda> Titulares);
+
+public sealed record ParcelaBusqueda(string? Numero);
+
+public sealed record TitularBusqueda(string? Nombre, Documento? Documento);
+
+public sealed record PropuestaHistorialTitularesResponse(
+    int Propuesta,
+    IReadOnlyList<HistorialTitular> Historial);
+
+public sealed record HistorialTitular(
+    ClienteReferencia? Cliente,
+    DateOnly? FechaAlta,
     DateOnly? FechaBaja,
-    DateOnly? FechaCaducidad,
-    string TipoContrato,
-    string Modelo,
-    string Vendedor,
-    double Total);
-
-public sealed record McpSalesPlanResponse(
-    string PlanVenta,
-    string Concepto,
-    double Total,
-    DateOnly VigenciaDesde,
-    DateOnly? VigenciaHasta);
-
-public sealed record McpInvoicePaymentHolderResponse(
-    int CodCliente,
-    bool Factura,
-    bool Pago,
-    string Nombre,
-    string TipoDocumento,
-    long NroDocumento,
-    string Telefono,
-    string TelefonoMovil);
-
-public sealed record McpHolderHistoryResponse(
-    string Nombre,
-    DateTime FechaAlta,
-    string AutorizaAlta,
-    string UsuarioAlta,
-    DateOnly? FechaBaja,
-    string AutorizaBaja,
-    string UsuarioBaja);
+    string? UsuarioAlta,
+    string? UsuarioBaja);

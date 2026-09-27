@@ -1,4 +1,4 @@
-﻿using Dapper;
+using Dapper;
 using ElPrado.Dto.Dtos;
 
 namespace ElPrado.Data.Repositories 
@@ -15,13 +15,13 @@ namespace ElPrado.Data.Repositories
             return _connection.Query<DtoServiciosHabilitados>(sql, new { codPropuesta }, _transaction).ToList();
         }
 
-        public List<DtoServicioPropuestaV2Fuente> ServiciosPropuestaV2(int codPropuesta)
+        public List<DtoServicioPropuestaMcpFuente> ServiciosPropuestaMcp(int codPropuesta)
         {
             const string sql = "SELECT * FROM GET_SERVICIOS_PROPUESTA_V2(@codPropuesta)";
-            return _connection.Query<DtoServicioPropuestaV2Fuente>(sql, new { codPropuesta }, _transaction).ToList();
+            return _connection.Query<DtoServicioPropuestaMcpFuente>(sql, new { codPropuesta }, _transaction).ToList();
         }
 
-        public List<DtoUtilizacionServicioV2> UtilizacionesPropuestaV2(int codPropuesta)
+        public List<DtoUtilizacionServicioMcp> UtilizacionesPropuestaMcp(int codPropuesta)
         {
             const string sql = @"SELECT DISTINCT COALESCE(H.FECHA_UTILIZACION, C.FECHA) AS FECHA,
                                         COALESCE(PM.NOMBRE, SM.DESCRIPCION) AS PRODUCTO,
@@ -45,7 +45,7 @@ namespace ElPrado.Data.Repositories
                                  WHERE H.COD_PROPUESTA = @codPropuesta
                                     OR H.COD_PROPUESTA_ORIGINAL = @codPropuesta
                                  ORDER BY 1, 8";
-            return _connection.Query<DtoUtilizacionServicioV2>(sql, new { codPropuesta }, _transaction).ToList();
+            return _connection.Query<DtoUtilizacionServicioMcp>(sql, new { codPropuesta }, _transaction).ToList();
         }
 
         public List<DtoServiciosUtilizados> ServiciosUtilizadosPropuesta(int codPropuesta)

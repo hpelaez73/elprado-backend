@@ -1,4 +1,4 @@
-﻿using Dapper;
+using Dapper;
 using ElPrado.Core;
 using ElPrado.Core.Domains;
 using ElPrado.Core.Enums;
@@ -201,12 +201,12 @@ namespace ElPrado.Data.Repositories
             return await funcionesListados.ApiResponseAsync(sql, _connection, _transaction);
         }
 
-        public List<DtoComprobantesPropuestaV2> ComprobantesPropuestaV2(
+        public List<DtoComprobantesPropuesta> ComprobantesPropuesta(
             int codPropuesta, DateOnly? desde, DateOnly? hasta, string? tipo, string? estado)
         {
             const string sql = @"SELECT * FROM GET_COMPROBANTES_PROPUESTA_V2(
                                     @codPropuesta, @desde, @hasta, @tipo, @estado)";
-            return _connection.Query<DtoComprobantesPropuestaV2>(sql,
+            return _connection.Query<DtoComprobantesPropuesta>(sql,
                 new { codPropuesta, desde, hasta, tipo, estado }, _transaction).ToList();
         }
 

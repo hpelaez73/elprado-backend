@@ -1,4 +1,4 @@
-﻿namespace ElPrado.Dto.Dtos
+namespace ElPrado.Dto.Dtos
 {
     public class DtoServiciosPropuesta
     {
@@ -8,7 +8,7 @@
     }
 
     /// <summary>Hechos planos de servicios calculados por el ERP para la fachada v2.</summary>
-    public class DtoServicioPropuestaV2Fuente
+    public class DtoServicioPropuestaMcpFuente
     {
         public int CodServicioModelo { get; set; }
         public int Orden { get; set; }
@@ -32,14 +32,14 @@
         public DateOnly? FechaCaducidad { get; set; }
     }
 
-    public class DtoServiciosPropuestaV2
+    public class DtoServiciosPropuestaMcp
     {
-        public List<DtoHabilitacionServicioV2> Habilitaciones { get; init; } = new();
-        public List<DtoCupoServicioV2> Cupos { get; init; } = new();
-        public List<DtoUtilizacionServicioV2> Utilizaciones { get; init; } = new();
+        public List<DtoHabilitacionServicioMcp> Habilitaciones { get; init; } = new();
+        public List<DtoCupoServicioMcp> Cupos { get; init; } = new();
+        public List<DtoUtilizacionServicioMcp> Utilizaciones { get; init; } = new();
     }
 
-    public class DtoHabilitacionServicioV2
+    public class DtoHabilitacionServicioMcp
     {
         public int? CodCliente { get; init; }
         public string? Cliente { get; init; }
@@ -51,7 +51,7 @@
         public DateOnly? MotivoHasta { get; init; }
     }
 
-    public class DtoCupoServicioV2
+    public class DtoCupoServicioMcp
     {
         public string Producto { get; init; } = string.Empty;
         public string Servicio { get; init; } = string.Empty;
@@ -60,7 +60,7 @@
         public int Disponibles { get; init; }
     }
 
-    public class DtoUtilizacionServicioV2
+    public class DtoUtilizacionServicioMcp
     {
         public DateOnly? Fecha { get; set; }
         public string? Producto { get; set; }

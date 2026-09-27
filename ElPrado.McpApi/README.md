@@ -56,47 +56,24 @@ Asimismo, `elprado-mcp` debe recibir sus credenciales mediante su
 propio almacen de secretos. Ninguna de esas variables debe versionarse ni
 registrarse.
 
-## Consultas de propuestas
+## Propuestas
 
-Las siete consultas que usa `elprado-mcp` se exponen mediante `POST` bajo el
-grupo autenticado `/api/propuestas`. Todas responden el sobre estable
-`{ succeeded, data, error }`; los errores funcionales no incluyen trazas,
-credenciales ni detalles de Firebird.
-
-| Tool MCP | Ruta | Solicitud MCP |
-| --- | --- | --- |
-| `consultar_propuesta` | `/api/propuestas/detalle` | `propuesta`, `incluirBaja` |
-| `consultar_titulares_propuesta` | `/api/propuestas/titulares` | `propuesta`, `incluirBaja` |
-| `consultar_cuenta_corriente` | `/api/propuestas/cuenta-corriente` | `codPropuesta`, opciones de fecha/estado |
-| `consultar_servicios_propuesta` | `/api/propuestas/servicios` | `codPropuesta` |
-| `consultar_comprobantes_propuesta` | `/api/propuestas/comprobantes` | `propuesta`, `pagina`, `filasPagina` |
-| `consultar_contratos_propuesta` | `/api/propuestas/contratos` | `propuesta`, `incluirBaja` |
-| `consultar_historial_titulares` | `/api/propuestas/historial-titulares` | `propuesta`, `incluirBaja` |
-
-Los contratos de la fachada estan en `Contracts/PropuestasContracts.cs`. Cada
-adaptador convierte los DTOs de dominio campo a campo y no devuelve la
-envoltura HTTP de `ElPrado.WebApi`. Una solicitud mal formada devuelve `400`
-con `INVALID_REQUEST`; una propuesta no disponible devuelve `404` con
-`PROPUESTAS_NOT_FOUND`.
-
-## Propuestas v2
-
-La superficie v2 es de solo lectura, usa `GET` y conserva las rutas v1
-anteriores sin cambios. Todas sus rutas requieren el mismo JWT de empleado y
-responden `{ succeeded, data, error }`. Los contratos se encuentran en
-`Contracts/PropuestasV2Contracts.cs`; las fechas son ISO 8601, los importes son
+La única superficie de propuestas es de solo lectura y usa `GET` bajo
+`/api/propuestas`. Todas sus rutas requieren el JWT de empleado y responden
+`{ succeeded, data, error }`. Los contratos se encuentran en
+`Contracts/PropuestasContracts.cs`; las fechas son ISO 8601, los importes son
 decimales, los valores ausentes son `null` y las colecciones vacías son `[]`.
 
 | Ruta | Descripción |
 | --- | --- |
-| `/api/v2/propuestas/buscar` | Búsqueda compacta de propuestas activas. |
-| `/api/v2/propuestas/{propuesta}` | Detalle de propuesta y parcela. |
-| `/api/v2/propuestas/{propuesta}/titulares` | Titulares actuales. |
-| `/api/v2/propuestas/{propuesta}/deuda` | Estado, totales y cuentas. |
-| `/api/v2/propuestas/{propuesta}/servicios` | Habilitaciones, cupos y utilizaciones. |
-| `/api/v2/propuestas/{propuesta}/contratos` | Contratos y titulares habilitados para facturación/pago. |
-| `/api/v2/propuestas/{propuesta}/comprobantes` | Comprobantes filtrables y paginados. |
-| `/api/v2/propuestas/{propuesta}/historial-titulares` | Hechos históricos de titularidad. |
+| `/api/propuestas/buscar` | Búsqueda compacta de propuestas activas. |
+| `/api/propuestas/{propuesta}` | Detalle de propuesta y parcela. |
+| `/api/propuestas/{propuesta}/titulares` | Titulares actuales. |
+| `/api/propuestas/{propuesta}/deuda` | Estado, totales y cuentas. |
+| `/api/propuestas/{propuesta}/servicios` | Habilitaciones, cupos y utilizaciones. |
+| `/api/propuestas/{propuesta}/contratos` | Contratos y titulares habilitados para facturación/pago. |
+| `/api/propuestas/{propuesta}/comprobantes` | Comprobantes filtrables y paginados. |
+| `/api/propuestas/{propuesta}/historial-titulares` | Hechos históricos de titularidad. |
 
 `propuesta` es siempre el número público; el código interno se resuelve dentro
 de la API. En comprobantes son opcionales `desde`, `hasta` (formato
@@ -106,7 +83,7 @@ paginación fuera de límites devuelve `400`/`INVALID_REQUEST`. Una propuesta no
 disponible devuelve `404`/`PROPOSAL_NOT_FOUND`; un fallo controlado de negocio
 devuelve `422`/`BUSINESS_OPERATION_FAILED`, sin detalles internos.
 
-La búsqueda usa `GET /api/v2/propuestas/buscar` con al menos uno de `nombre`,
+La búsqueda usa `GET /api/propuestas/buscar` con al menos uno de `nombre`,
 `documento` o `parcela`. Cuando se combinan, todos los criterios deben
 coincidir. `nombre` busca parcialmente entre titulares actuales; `documento` y
 `parcela` aceptan sus números normalizados. La respuesta contiene una página de

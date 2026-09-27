@@ -9,12 +9,12 @@ using Xunit;
 
 namespace ElPrado.Tests;
 
-public sealed class PropuestasV2IntegrationTests : IClassFixture<WebApplicationFactory<Program>>
+public sealed class PropuestasIntegrationTests : IClassFixture<WebApplicationFactory<Program>>
 {
     private const int PropuestaDePrueba = 41000;
     private readonly WebApplicationFactory<Program> _factory;
 
-    public PropuestasV2IntegrationTests(WebApplicationFactory<Program> factory) => _factory = factory;
+    public PropuestasIntegrationTests(WebApplicationFactory<Program> factory) => _factory = factory;
 
     [Theory]
     [InlineData("")]
@@ -24,7 +24,7 @@ public sealed class PropuestasV2IntegrationTests : IClassFixture<WebApplicationF
     [InlineData("/contratos")]
     [InlineData("/comprobantes?page=1&pageSize=2")]
     [InlineData("/historial-titulares")]
-    public async Task RutasV2_Autenticadas_DevuelvenEnvelopeCanonico(string suffix)
+    public async Task Rutas_Autenticadas_DevuelvenEnvelopeCanonico(string suffix)
     {
         using HttpClient client = CreateAuthenticatedClient();
         HttpResponseMessage response = await client.GetAsync($"/api/v2/propuestas/{PropuestaDePrueba}{suffix}");
@@ -37,7 +37,7 @@ public sealed class PropuestasV2IntegrationTests : IClassFixture<WebApplicationF
     }
 
     [Fact]
-    public async Task RutaV2_SinAutenticacion_RechazaLaSolicitud()
+    public async Task Ruta_SinAutenticacion_RechazaLaSolicitud()
     {
         using HttpClient client = _factory.CreateClient();
         HttpResponseMessage response = await client.GetAsync($"/api/v2/propuestas/{PropuestaDePrueba}");
@@ -46,12 +46,22 @@ public sealed class PropuestasV2IntegrationTests : IClassFixture<WebApplicationF
     }
 
     [Fact]
-    public async Task BusquedaV2_SinAutenticacion_RechazaLaSolicitud()
+    public async Task Busqueda_SinAutenticacion_RechazaLaSolicitud()
     {
         using HttpClient client = _factory.CreateClient();
         HttpResponseMessage response = await client.GetAsync("/api/v2/propuestas/buscar?nombre=asturzzi");
 
         Assert.Equal(HttpStatusCode.Unauthorized, response.StatusCode);
+    }
+
+    [Fact]
+    public async Task RutasHeredadas_NoEstanPublicadas()
+    {
+        using HttpClient client = CreateAuthenticatedClient();
+
+        HttpResponseMessage response = await client.PostAsync("/api/propuestas/detalle", content: null);
+
+        Assert.Equal(HttpStatusCode.NotFound, response.StatusCode);
     }
 
     [Theory]
@@ -61,7 +71,7 @@ public sealed class PropuestasV2IntegrationTests : IClassFixture<WebApplicationF
     [InlineData("/api/v2/propuestas/buscar", HttpStatusCode.BadRequest, "INVALID_REQUEST")]
     [InlineData("/api/v2/propuestas/buscar?nombre=asturzzi&pageSize=101", HttpStatusCode.BadRequest, "INVALID_REQUEST")]
     [InlineData("/api/v2/propuestas/buscar?documento=no-es-documento", HttpStatusCode.BadRequest, "INVALID_REQUEST")]
-    public async Task RutaV2_ConSolicitudInvalidaONoEncontrada_DevuelveErrorEstable(string route, HttpStatusCode expectedStatus, string expectedCode)
+    public async Task Ruta_ConSolicitudInvalidaONoEncontrada_DevuelveErrorEstable(string route, HttpStatusCode expectedStatus, string expectedCode)
     {
         using HttpClient client = CreateAuthenticatedClient();
         HttpResponseMessage response = await client.GetAsync(route);
@@ -74,7 +84,7 @@ public sealed class PropuestasV2IntegrationTests : IClassFixture<WebApplicationF
     }
 
     [Fact]
-    public async Task ComprobantesV2_RespetaLaPaginacionSolicitada()
+    public async Task Comprobantes_RespetaLaPaginacionSolicitada()
     {
         using HttpClient client = CreateAuthenticatedClient();
         HttpResponseMessage response = await client.GetAsync($"/api/v2/propuestas/{PropuestaDePrueba}/comprobantes?page=1&pageSize=2");
@@ -91,7 +101,7 @@ public sealed class PropuestasV2IntegrationTests : IClassFixture<WebApplicationF
     }
 
     [Fact]
-    public async Task BusquedaV2_EncuentraLaPropuestaPorNombreYDocumento()
+    public async Task Busqueda_EncuentraLaPropuestaPorNombreYDocumento()
     {
         using HttpClient client = CreateAuthenticatedClient();
         HttpResponseMessage titularesResponse = await client.GetAsync($"/api/v2/propuestas/{PropuestaDePrueba}/titulares");
@@ -121,7 +131,7 @@ public sealed class PropuestasV2IntegrationTests : IClassFixture<WebApplicationF
     }
 
     [Fact]
-    public async Task BusquedaV2_SinCoincidencias_DevuelvePaginaVacia()
+    public async Task Busqueda_SinCoincidencias_DevuelvePaginaVacia()
     {
         using HttpClient client = CreateAuthenticatedClient();
         HttpResponseMessage response = await client.GetAsync("/api/v2/propuestas/buscar?nombre=zzqvwxk");

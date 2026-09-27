@@ -1,4 +1,4 @@
-﻿using Dapper;
+using Dapper;
 using ElPrado.Core.Enums;
 using ElPrado.Data.Comun;
 using ElPrado.Data.Models;
@@ -131,7 +131,7 @@ namespace ElPrado.Data.Repositories
             return _connection.QuerySingleOrDefault<Propuestas>(sql, new { parcela, incluirBaja }, _transaction);
         }
 
-        public DtoBusquedaPropuestasV2Listado BuscarPropuestasV2(DtoBusquedaPropuestasV2Req criterios)
+        public DtoBusquedaPropuestasListado BuscarPropuestas(DtoBusquedaPropuestasReq criterios)
         {
             const string filtros = @"
                 P.FECHA_BAJA IS NULL
@@ -167,7 +167,7 @@ namespace ElPrado.Data.Repositories
                 LEFT JOIN PARCELA PA ON PA.COD_PARCELA = P.COD_PARCELA";
 
             int totalItems = _connection.QuerySingle<int>($"SELECT COUNT(*) {from} WHERE {filtros}", parametros, _transaction);
-            List<DtoBusquedaPropuestaV2> items = _connection.Query<DtoBusquedaPropuestaV2>($@"
+            List<DtoBusquedaPropuesta> items = _connection.Query<DtoBusquedaPropuesta>($@"
                 SELECT P.COD_PROPUESTA, P.LEGAJO AS PROPUESTA, TP.NOMBRE AS TIPO,
                        ED.ESTADO, PA.LEGAJO AS PARCELA
                 {from}
@@ -175,8 +175,8 @@ namespace ElPrado.Data.Repositories
                 ORDER BY P.LEGAJO
                 ROWS @firstRow TO @lastRow", parametros, _transaction).ToList();
 
-            List<DtoBusquedaTitularPropuestaV2> titulares = BuscarTitularesPropuestasV2(items.Select(x => x.CodPropuesta).ToList());
-            return new DtoBusquedaPropuestasV2Listado
+            List<DtoBusquedaTitularPropuesta> titulares = BuscarTitularesPropuestas(items.Select(x => x.CodPropuesta).ToList());
+            return new DtoBusquedaPropuestasListado
             {
                 Items = items,
                 Titulares = titulares,
@@ -184,7 +184,7 @@ namespace ElPrado.Data.Repositories
             };
         }
 
-        private List<DtoBusquedaTitularPropuestaV2> BuscarTitularesPropuestasV2(IReadOnlyList<int> codPropuestas)
+        private List<DtoBusquedaTitularPropuesta> BuscarTitularesPropuestas(IReadOnlyList<int> codPropuestas)
         {
             if (codPropuestas.Count == 0)
                 return new();
@@ -196,7 +196,7 @@ namespace ElPrado.Data.Repositories
                 WHERE PT.COD_PROPUESTA IN @codPropuestas
                   AND PT.FECHA_BAJA IS NULL
                 ORDER BY PT.COD_PROPUESTA, PT.ORDEN, C.NOMBRE";
-            return _connection.Query<DtoBusquedaTitularPropuestaV2>(sql, new { codPropuestas }, _transaction).ToList();
+            return _connection.Query<DtoBusquedaTitularPropuesta>(sql, new { codPropuestas }, _transaction).ToList();
         }
 
         public DtoPropuestaDetalleResp? BuscarPropuestaDetalle(int codPropuesta)
