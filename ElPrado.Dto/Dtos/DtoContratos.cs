@@ -9,6 +9,7 @@
         public DateOnly? FechaCaducidad { get; set; }
         public string TipoContrato { get; set; } = string.Empty;
         public string Modelo { get; set; } = string.Empty;
+        public string Estado { get; set; } = string.Empty;
         public string Vendedor { get; set; } = string.Empty;
         public double Total { get; set; }
     }

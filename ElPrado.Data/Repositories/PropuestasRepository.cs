@@ -137,6 +137,25 @@ namespace ElPrado.Data.Repositories
             return _connection.QuerySingleOrDefault<DtoPropuestaDetalleResp>(sql, new { codPropuesta }, _transaction);
         }
 
+        public DtoEstadoDeuda? BuscarEstadoDeuda(int codPropuesta)
+        {
+            string sql = @"SELECT E.ESTADO AS NOMBRE, E.ACTIVA, E.AL_DIA, E.PERMITIR_IMPUTAR
+                           FROM PROPUESTA P
+                           INNER JOIN ESTADOS_DEUDAS E ON E.COD_ESTADO_DEUDA = P.COD_ESTADO_DEUDA
+                           WHERE P.COD_PROPUESTA = @codPropuesta";
+            return _connection.QuerySingleOrDefault<DtoEstadoDeuda>(sql, new { codPropuesta }, _transaction);
+        }
+
+        public DtoEstadoParcela? BuscarEstadoParcela(int codParcela)
+        {
+            const string sql = @"SELECT E.ESTADO AS NOMBRE, E.PERMANENTE, E.DISPONIBLE_VENTA,
+                                        E.DISPONIBLE_INHUMAR, E.INHABILITADA, E.CON_INHUMADO
+                                 FROM PARCELA P
+                                 INNER JOIN ESTADOS_PARCELA E ON E.COD_ESTADO_PARCELA = P.COD_ESTADO
+                                 WHERE P.COD_PARCELA = @codParcela";
+            return _connection.QuerySingleOrDefault<DtoEstadoParcela>(sql, new { codParcela }, _transaction);
+        }
+
         public List<DtoPropuestasAsociadas> BuscarPropuestasAsociadas(int codPropuesta, bool incluirBajas)
         {
             string sql = "SELECT * FROM GET_DATOS_PROPUESTAS_ASOCIADAS(@codPropuesta, @incluirBajas)";
@@ -145,7 +164,15 @@ namespace ElPrado.Data.Repositories
 
         public List<DtoClientesPropuestasHistorial> DetalleHistorialTitulares(int codPropuesta)
         {
-            string sql = "SELECT * FROM GET_DATOS_HISTORIAL_TITULARES(@codPropuesta)";
+            const string sql = @"SELECT T.COD_CLIENTE, CL.NOMBRE, T.FECHA_ALTA,
+                                        UA.NOMBRE AS USUARIO_ALTA, T.FECHA_BAJA,
+                                        UB.NOMBRE AS USUARIO_BAJA
+                                 FROM PROPUESTAS_TITULARES T
+                                 INNER JOIN CLIENTES CL ON CL.COD_CLIENTE = T.COD_CLIENTE
+                                 LEFT JOIN USUARIOS UA ON UA.COD_USUARIO = T.COD_USUARIO
+                                 LEFT JOIN USUARIOS UB ON UB.COD_USUARIO = T.COD_USUARIO_BAJA
+                                 WHERE T.COD_PROPUESTA = @codPropuesta
+                                 ORDER BY T.FECHA_ALTA, CL.NOMBRE";
             return _connection.Query<DtoClientesPropuestasHistorial>(sql, new { codPropuesta }, _transaction).ToList();
         }
 

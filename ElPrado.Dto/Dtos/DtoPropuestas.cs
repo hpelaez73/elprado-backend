@@ -25,8 +25,10 @@
         public string Parcela { get; set; } = string.Empty;
         public string Manzana { get; set; } = string.Empty;
         public string EstadoParcela { get; set; } = string.Empty;
+        public DtoEstadoParcela? EstadoParcelaDetalle { get; set; }
         public List<string>? ListZonasParcelas { get; set; }
         public List<DtoParcelasDetallesLugares>? ListDetalleLugares { get; set; }
+        public List<DtoParcelaLugar>? ListLugares { get; set; }
 
         // Datos de los inhumados
         public List<DtoInhumadosPropuestas>? ListInhumados { get; set; }
@@ -53,6 +55,17 @@
         public int Propuesta { get; set; }
         public string Parcela { get; set; } = string.Empty;
         public string PrimerTitular { get; set; } = string.Empty;
+    }
+
+    /// <summary>Hechos funcionales del estado configurable de una parcela.</summary>
+    public class DtoEstadoParcela
+    {
+        public string Nombre { get; set; } = string.Empty;
+        public bool Permanente { get; set; }
+        public bool DisponibleVenta { get; set; }
+        public bool DisponibleInhumar { get; set; }
+        public bool Inhabilitada { get; set; }
+        public bool ConInhumado { get; set; }
     }
 
     public class DtoPropuestasTitularesList : DtoBase

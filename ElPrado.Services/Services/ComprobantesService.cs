@@ -171,6 +171,22 @@ namespace ElPrado.Services.Services
             return await _uow.Comprobantes.ListadoComprobantesPropuestaAsync(opcionesListado);
         }
 
+        public DtoComprobantesPropuestaV2Listado ComprobantesPropuestaV2(
+            int codPropuesta, DateOnly? desde, DateOnly? hasta, string? tipo, string? estado, int page, int pageSize)
+        {
+            List<DtoComprobantesPropuestaV2> comprobantes = _uow.Comprobantes
+                .ComprobantesPropuestaV2(codPropuesta, desde, hasta, tipo, estado);
+            int totalItems = comprobantes.Count;
+            int totalPages = totalItems == 0 ? 0 : (int)Math.Ceiling(totalItems / (double)pageSize);
+
+            return new DtoComprobantesPropuestaV2Listado
+            {
+                Items = comprobantes.Skip((page - 1) * pageSize).Take(pageSize).ToList(),
+                TotalItems = totalItems,
+                TotalPages = totalPages
+            };
+        }
+
         public async Task<DtoComprobantesFacturasPublicas?> BuscarLinkPublicoPdfAsync(string id)
         {
             return await _uow.Comprobantes.BuscarLinkPublicoPdfAsync(id);

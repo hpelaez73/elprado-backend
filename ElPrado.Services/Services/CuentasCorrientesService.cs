@@ -131,6 +131,46 @@ namespace ElPrado.Services.Services
             return resultado;
         }
 
+        /// <summary>
+        /// Conserva los importes calculados por el ERP y concentra en Services
+        /// el total de propuesta; las fachadas no deben volver a calcularlos.
+        /// </summary>
+        public Resultados<DtoResumenDeudaPropuesta> ResumenDeuda(DtoCuentasCorrientesResumenReq dtoCuentas)
+        {
+            Resultados<List<DtoCuentasCorrientesResumen>> cuentasResultado = ResumenCuentas(dtoCuentas);
+            Resultados<DtoResumenDeudaPropuesta> resultado = new();
+            if (cuentasResultado.HayError || cuentasResultado.Valor is null)
+            {
+                resultado.Agregar(cuentasResultado);
+                return resultado;
+            }
+
+            List<DtoCuentasCorrientesResumen> cuentas = cuentasResultado.Valor;
+            resultado.Valor = new DtoResumenDeudaPropuesta
+            {
+                Cuentas = cuentas,
+                Totales = new DtoTotalesDeuda
+                {
+                    Vencido = cuentas.Sum(x => (decimal)x.ImporteVencido),
+                    Intereses = cuentas.Sum(x => (decimal)x.Interes),
+                    AVencer = cuentas.Sum(x => (decimal)x.ImporteAVencer),
+                    DescuentoVencido = cuentas.Sum(x => (decimal)x.DescuentoVencido),
+                    DescuentoAVencer = cuentas.Sum(x => (decimal)x.DescuentoAVencer),
+                    Deuda = cuentas.Sum(x => (decimal)x.Deuda),
+                    Total = cuentas.Sum(x => (decimal)x.Total)
+                }
+            };
+            return resultado;
+        }
+
+        public Resultados<List<DtoEstadoDeudaCuenta>> EstadosDeuda(int codPropuesta)
+        {
+            return new Resultados<List<DtoEstadoDeudaCuenta>>
+            {
+                Valor = _uow.CuentasCorrientes.EstadosDeuda(codPropuesta)
+            };
+        }
+
         public ApiResponseListado<IEnumerable<dynamic>> ListadoResumenCuotas(DtoOpcionesListados opcionesListado)
         {
             return _uow.CuentasCorrientes.ListadoResumenCuotas(opcionesListado);

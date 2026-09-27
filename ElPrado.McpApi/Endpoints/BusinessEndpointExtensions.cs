@@ -10,6 +10,7 @@ public static class BusinessEndpointExtensions
     {
         RouteGroupBuilder group = endpoints.MapGroup("/api").RequireAuthorization();
         group.MapPropuestasOperations();
+        group.MapPropuestasV2Operations();
         return group;
     }
 }

@@ -35,6 +35,24 @@
         public DateOnly? FechaHasta { get; set; }
     }
 
+    /// <summary>Totales de deuda calculados a partir de cuentas ya valorizadas por el ERP.</summary>
+    public class DtoTotalesDeuda
+    {
+        public decimal Vencido { get; init; }
+        public decimal Intereses { get; init; }
+        public decimal AVencer { get; init; }
+        public decimal DescuentoVencido { get; init; }
+        public decimal DescuentoAVencer { get; init; }
+        public decimal Deuda { get; init; }
+        public decimal Total { get; init; }
+    }
+
+    public class DtoResumenDeudaPropuesta
+    {
+        public List<DtoCuentasCorrientesResumen> Cuentas { get; init; } = new();
+        public DtoTotalesDeuda Totales { get; init; } = new();
+    }
+
     public class DtoCuentasCorrientesResumen
     {
         public string Tipo { get; set; } = string.Empty;
@@ -42,6 +60,7 @@
         public bool EsDocumentado { get; set; }
         public string Categoria { get; set; } = string.Empty;
         public string Estado { get; set; } = string.Empty;
+        public bool? AlDia { get; set; }
         public double Importe { get; set; }
         public double PrecioDolar { get; set; }
         public DateOnly FechaInicio { get; set; }

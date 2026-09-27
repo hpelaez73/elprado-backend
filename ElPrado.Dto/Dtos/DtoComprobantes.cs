@@ -135,6 +135,26 @@
         public int CodMovimientoFondo { get; set; }
     }
 
+    public class DtoComprobantesPropuestaV2
+    {
+        public DateOnly Fecha { get; set; }
+        public string TipoComprobante { get; set; } = string.Empty;
+        public string NroComprobante { get; set; } = string.Empty;
+        public int CodCliente { get; set; }
+        public string Cliente { get; set; } = string.Empty;
+        public decimal Total { get; set; }
+        public decimal Pago { get; set; }
+        public string EstadoComprobante { get; set; } = string.Empty;
+        public bool Anulado { get; set; }
+    }
+
+    public class DtoComprobantesPropuestaV2Listado
+    {
+        public IReadOnlyList<DtoComprobantesPropuestaV2> Items { get; init; } = Array.Empty<DtoComprobantesPropuestaV2>();
+        public int TotalItems { get; init; }
+        public int TotalPages { get; init; }
+    }
+
     public class DtoComprobantesSinCae
     {
         public string TipoComprobante { get; set; } = string.Empty;

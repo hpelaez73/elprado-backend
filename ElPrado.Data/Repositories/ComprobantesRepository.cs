@@ -201,6 +201,15 @@ namespace ElPrado.Data.Repositories
             return await funcionesListados.ApiResponseAsync(sql, _connection, _transaction);
         }
 
+        public List<DtoComprobantesPropuestaV2> ComprobantesPropuestaV2(
+            int codPropuesta, DateOnly? desde, DateOnly? hasta, string? tipo, string? estado)
+        {
+            const string sql = @"SELECT * FROM GET_COMPROBANTES_PROPUESTA_V2(
+                                    @codPropuesta, @desde, @hasta, @tipo, @estado)";
+            return _connection.Query<DtoComprobantesPropuestaV2>(sql,
+                new { codPropuesta, desde, hasta, tipo, estado }, _transaction).ToList();
+        }
+
         public async Task<DtoComprobantesFacturasPublicas?> BuscarLinkPublicoPdfAsync(string id)
         {
             string sql = "SELECT * FROM GET_LINK_PUBLICOS_PDFS(@id)";

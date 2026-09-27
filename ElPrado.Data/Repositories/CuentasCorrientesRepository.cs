@@ -67,6 +67,22 @@ namespace ElPrado.Data.Repositories
             return _connection.Query<DtoCuentasCorrientesResumen>(sql, new { codPropuesta, mostrarBaja, mostrarInactiva, fechaInteres, fechaHasta }, _transaction).AsList();
         }
 
+        public List<DtoEstadoDeudaCuenta> EstadosDeuda(int codPropuesta)
+        {
+            string sql = @"SELECT 'CR' AS TIPO, C.COD_CREDITO AS CODIGO, E.ESTADO AS NOMBRE,
+                                  E.ACTIVA, E.AL_DIA, E.PERMITIR_IMPUTAR
+                           FROM CREDITOS C
+                           INNER JOIN ESTADOS_DEUDAS E ON E.COD_ESTADO_DEUDA = C.COD_ESTADO_DEUDA
+                           WHERE C.COD_PROPUESTA = @codPropuesta
+                           UNION ALL
+                           SELECT 'CP' AS TIPO, C.COD_CONFIGURACION AS CODIGO, E.ESTADO AS NOMBRE,
+                                  E.ACTIVA, E.AL_DIA, E.PERMITIR_IMPUTAR
+                           FROM CONFIG_CUOTAS_PERIODICAS C
+                           INNER JOIN ESTADOS_DEUDAS E ON E.COD_ESTADO_DEUDA = C.COD_ESTADO_DEUDA
+                           WHERE C.COD_PROPUESTA = @codPropuesta";
+            return _connection.Query<DtoEstadoDeudaCuenta>(sql, new { codPropuesta }, _transaction).AsList();
+        }
+
         public ApiResponseListado<IEnumerable<dynamic>> ListadoResumenCuotas(DtoOpcionesListados opcionesListado)
         {
             FuncionesListados<DtoCuotasResumenList> funcionesListados = new(cfgListResumenCuotas, opcionesListado);

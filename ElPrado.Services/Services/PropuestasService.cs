@@ -28,6 +28,85 @@ namespace ElPrado.Services.Services
             return resultado;
         }
 
+        /// <summary>
+        /// Resuelve el número público de propuesta al identificador interno usado
+        /// por las consultas de dominio. Las fachadas no deben recibir el código
+        /// interno como parámetro público.
+        /// </summary>
+        public Resultados<DtoPropuestaResuelta> ResolverPropuesta(int propuesta, bool incluirBaja = false)
+        {
+            Resultados<DtoPropuestaResuelta> resultado = new();
+            if (propuesta <= 0)
+            {
+                resultado.Agregar("El número de propuesta debe ser mayor que cero");
+                return resultado;
+            }
+
+            Propuestas? propuestaEncontrada = _uow.Propuestas.BuscarPropuesta(propuesta);
+            if (propuestaEncontrada == null)
+            {
+                resultado.Agregar("La propuesta no existe");
+                return resultado;
+            }
+            if (propuestaEncontrada.FechaBaja != null && !incluirBaja)
+            {
+                resultado.Agregar("La propuesta está dada de baja");
+                return resultado;
+            }
+
+            resultado.Valor = new DtoPropuestaResuelta
+            {
+                Propuesta = propuestaEncontrada.Legajo,
+                CodPropuesta = propuestaEncontrada.CodPropuesta
+            };
+            return resultado;
+        }
+
+        public Resultados<DtoEstadoDeuda> EstadoDeuda(int codPropuesta)
+        {
+            return new Resultados<DtoEstadoDeuda>
+            {
+                Valor = _uow.Propuestas.BuscarEstadoDeuda(codPropuesta)
+            };
+        }
+
+        // Operaciones internas para fachadas que ya resolvieron el número público.
+        public DtoPropuestaDetalleResp? DetalleV2(int codPropuesta)
+        {
+            DtoPropuestaDetalleResp? propuestaDetalle = _uow.Propuestas.BuscarPropuestaDetalle(codPropuesta);
+            if (propuestaDetalle == null) return null;
+
+            propuestaDetalle.ListPropuestasAsociadas = _uow.Propuestas.BuscarPropuestasAsociadas(codPropuesta, false);
+            if (propuestaDetalle.CodParcela != null)
+            {
+                propuestaDetalle.EstadoParcelaDetalle = _uow.Propuestas.BuscarEstadoParcela(propuestaDetalle.CodParcela.Value);
+                propuestaDetalle.ListZonasParcelas = _uow.Parcelas.BuscarZonasParcelas(propuestaDetalle.CodParcela.Value);
+                propuestaDetalle.ListDetalleLugares = _uow.Parcelas.BuscarDetalleLugares(propuestaDetalle.CodParcela.Value, codPropuesta);
+                propuestaDetalle.ListLugares = _uow.Parcelas.BuscarLugares(propuestaDetalle.CodParcela.Value, codPropuesta);
+                propuestaDetalle.ListInhumados = _uow.Inhumados.BuscarInhumados(codPropuesta, propuestaDetalle.CodParcela.Value);
+            }
+            return propuestaDetalle;
+        }
+
+        public List<DtoClientesPropuestas> TitularesV2(int codPropuesta) => _uow.Clientes.BuscarTitulares(codPropuesta);
+
+        public DtoPropuestaDetalleContratosResp ContratosV2(int codPropuesta)
+        {
+            DtoPropuestaDetalleContratosResp detalle = new()
+            {
+                ListContratos = _uow.Contratos.BuscarContratos(codPropuesta, false),
+                ListPlanesVentas = _uow.PlanesVentas.BuscarPlanesVentas(codPropuesta, false),
+                ListTitulares = _uow.Clientes.BuscarTitulares(codPropuesta),
+                ListTitularesFacturasPagos = _uow.Clientes.BuscarTitularesFacturasPagos(codPropuesta)
+            };
+            foreach (DtoContratosPropuestas contrato in detalle.ListContratos ?? new())
+                contrato.Estado = contrato.FechaBaja is null ? "ACTIVO" : "BAJA";
+            return detalle;
+        }
+
+        public List<DtoClientesPropuestasHistorial> HistorialTitularesV2(int codPropuesta) =>
+            _uow.Propuestas.DetalleHistorialTitulares(codPropuesta);
+
         public Resultados<DtoPropuestaDetalleResp> Detalle(DtoPropuestaDetalleReq dtoPropuesta)
         {
             Resultados<DtoPropuestaDetalleResp> resultado = new();
@@ -47,8 +126,10 @@ namespace ElPrado.Services.Services
 
                 if (propuestaDetalle.CodParcela != null)
                 {
+                    propuestaDetalle.EstadoParcelaDetalle = _uow.Propuestas.BuscarEstadoParcela(propuestaDetalle.CodParcela.Value);
                     propuestaDetalle.ListZonasParcelas = _uow.Parcelas.BuscarZonasParcelas(propuestaDetalle.CodParcela.Value);
                     propuestaDetalle.ListDetalleLugares = _uow.Parcelas.BuscarDetalleLugares(propuestaDetalle.CodParcela.Value, propuestaDetalle.CodPropuesta);
+                    propuestaDetalle.ListLugares = _uow.Parcelas.BuscarLugares(propuestaDetalle.CodParcela.Value, propuestaDetalle.CodPropuesta);
                     propuestaDetalle.ListInhumados = _uow.Inhumados.BuscarInhumados(propuestaDetalle.CodPropuesta, propuestaDetalle.CodParcela.Value);
                 }
             }
@@ -77,6 +158,11 @@ namespace ElPrado.Services.Services
                 ListTitulares = _uow.Clientes.BuscarTitulares(propuesta.CodPropuesta),
                 ListTitularesFacturasPagos = _uow.Clientes.BuscarTitularesFacturasPagos(propuesta.CodPropuesta)
             };
+
+            foreach (DtoContratosPropuestas contrato in propuestaDetalle.ListContratos ?? new())
+            {
+                contrato.Estado = contrato.FechaBaja is null ? "ACTIVO" : "BAJA";
+            }
 
             resultado.Valor = propuestaDetalle;
             return resultado;

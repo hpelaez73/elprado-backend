@@ -33,4 +33,19 @@
         public string Estado6 { get; set; } = string.Empty;
         public string Color6 { get; set; } = "#000000";
     }
+
+    /// <summary>
+    /// Lugar normalizado con estado funcional y vínculo opcional, pero
+    /// verificable, al detalle de inhumación.
+    /// </summary>
+    public class DtoParcelaLugar
+    {
+        public int CodNivel { get; set; }
+        public int CodLugar { get; set; }
+        public string Estado { get; set; } = string.Empty;
+        public bool DisponibleVenta { get; set; }
+        public bool DisponibleInhumar { get; set; }
+        public int? CodInhumado { get; set; }
+        public int? CodDetInhumado { get; set; }
+    }
 }

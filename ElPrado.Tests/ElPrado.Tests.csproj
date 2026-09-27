@@ -7,6 +7,7 @@
   </PropertyGroup>
   <ItemGroup>
     <PackageReference Include="Microsoft.NET.Test.Sdk" Version="17.11.1" />
+    <PackageReference Include="Microsoft.AspNetCore.Mvc.Testing" Version="7.0.20" />
     <PackageReference Include="NSubstitute" Version="5.1.0" />
     <PackageReference Include="xunit" Version="2.9.2" />
     <PackageReference Include="xunit.runner.visualstudio" Version="2.8.2">
@@ -16,6 +17,11 @@
   <ItemGroup>
     <ProjectReference Include="..\ElPrado.Data\ElPrado.Data.csproj" />
     <ProjectReference Include="..\ElPrado.Dto\ElPrado.Dto.csproj" />
+    <ProjectReference Include="..\ElPrado.McpApi\ElPrado.McpApi.csproj" />
     <ProjectReference Include="..\ElPrado.Services\ElPrado.Services.csproj" />
+  </ItemGroup>
+  <!-- Rehabilitar cuando esté disponible el servidor/dependencias de AFIP. -->
+  <ItemGroup>
+    <Compile Remove="ComprobantesServiceTests.cs" />
   </ItemGroup>
 </Project>

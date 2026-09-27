@@ -79,6 +79,32 @@ envoltura HTTP de `ElPrado.WebApi`. Una solicitud mal formada devuelve `400`
 con `INVALID_REQUEST`; una propuesta no disponible devuelve `404` con
 `PROPUESTAS_NOT_FOUND`.
 
+## Propuestas v2
+
+La superficie v2 es de solo lectura, usa `GET` y conserva las rutas v1
+anteriores sin cambios. Todas sus rutas requieren el mismo JWT de empleado y
+responden `{ succeeded, data, error }`. Los contratos se encuentran en
+`Contracts/PropuestasV2Contracts.cs`; las fechas son ISO 8601, los importes son
+decimales, los valores ausentes son `null` y las colecciones vacías son `[]`.
+
+| Ruta | Descripción |
+| --- | --- |
+| `/api/v2/propuestas/{propuesta}` | Detalle de propuesta y parcela. |
+| `/api/v2/propuestas/{propuesta}/titulares` | Titulares actuales. |
+| `/api/v2/propuestas/{propuesta}/deuda` | Estado, totales y cuentas. |
+| `/api/v2/propuestas/{propuesta}/servicios` | Habilitaciones, cupos y utilizaciones. |
+| `/api/v2/propuestas/{propuesta}/contratos` | Contratos y titulares habilitados para facturación/pago. |
+| `/api/v2/propuestas/{propuesta}/comprobantes` | Comprobantes filtrables y paginados. |
+| `/api/v2/propuestas/{propuesta}/historial-titulares` | Hechos históricos de titularidad. |
+
+`propuesta` es siempre el número público; el código interno se resuelve dentro
+de la API. En comprobantes son opcionales `desde`, `hasta` (formato
+`yyyy-MM-dd`), `tipo`, `estado`, `page` y `pageSize`; los defaults son `page=1`
+y `pageSize=20`, con máximo `pageSize=100`. Un rango de fechas inválido o una
+paginación fuera de límites devuelve `400`/`INVALID_REQUEST`. Una propuesta no
+disponible devuelve `404`/`PROPOSAL_NOT_FOUND`; un fallo controlado de negocio
+devuelve `422`/`BUSINESS_OPERATION_FAILED`, sin detalles internos.
+
 ## Migracion y rollback de base URL
 
 Configure `elprado-mcp` con `ELPRADO_MCP_API_BASE_URL` apuntando a esta

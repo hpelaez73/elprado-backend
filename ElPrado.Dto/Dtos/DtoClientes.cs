@@ -84,6 +84,7 @@
 
     public class DtoClientesPropuestasHistorial
     {
+        public int CodCliente { get; set; }
         public string Nombre { get; set; } = string.Empty;
         public DateTime FechaAlta { get; set; }
         public string AutorizaAlta { get; set; } = string.Empty;

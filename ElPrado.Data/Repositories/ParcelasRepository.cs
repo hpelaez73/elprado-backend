@@ -22,6 +22,15 @@ namespace ElPrado.Data.Repositories
             return _connection.Query<DtoParcelasDetallesLugares>(sql, new { codParcela, codPropuesta }, _transaction).ToList();
         }
 
+        public List<DtoParcelaLugar> BuscarLugares(int codParcela, int codPropuesta)
+        {
+            const string sql = @"SELECT COD_NIVEL, COD_LUGAR, ESTADO,
+                                        DISPONIBLE_VENTA, DISPONIBLE_INHUMAR,
+                                        COD_INHUMADO, COD_DET_INHUMADO
+                                 FROM GET_DATOS_PARCELAS_LUGARES(@codParcela, @codPropuesta)";
+            return _connection.Query<DtoParcelaLugar>(sql, new { codParcela, codPropuesta }, _transaction).ToList();
+        }
+
         public List<string>? BuscarZonasParcelas(int codParcela)
         {
             string sql = "SELECT * FROM GET_DATOS_PARCELAS_ZONAS(@codParcela) P";
