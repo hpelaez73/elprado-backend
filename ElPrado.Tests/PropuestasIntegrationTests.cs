@@ -27,7 +27,7 @@ public sealed class PropuestasIntegrationTests : IClassFixture<WebApplicationFac
     public async Task Rutas_Autenticadas_DevuelvenEnvelopeCanonico(string suffix)
     {
         using HttpClient client = CreateAuthenticatedClient();
-        HttpResponseMessage response = await client.GetAsync($"/api/v2/propuestas/{PropuestaDePrueba}{suffix}");
+        HttpResponseMessage response = await client.GetAsync($"/api/propuestas/{PropuestaDePrueba}{suffix}");
 
         Assert.Equal(HttpStatusCode.OK, response.StatusCode);
         using JsonDocument body = JsonDocument.Parse(await response.Content.ReadAsStringAsync());
@@ -40,7 +40,7 @@ public sealed class PropuestasIntegrationTests : IClassFixture<WebApplicationFac
     public async Task Ruta_SinAutenticacion_RechazaLaSolicitud()
     {
         using HttpClient client = _factory.CreateClient();
-        HttpResponseMessage response = await client.GetAsync($"/api/v2/propuestas/{PropuestaDePrueba}");
+        HttpResponseMessage response = await client.GetAsync($"/api/propuestas/{PropuestaDePrueba}");
 
         Assert.Equal(HttpStatusCode.Unauthorized, response.StatusCode);
     }
@@ -49,28 +49,18 @@ public sealed class PropuestasIntegrationTests : IClassFixture<WebApplicationFac
     public async Task Busqueda_SinAutenticacion_RechazaLaSolicitud()
     {
         using HttpClient client = _factory.CreateClient();
-        HttpResponseMessage response = await client.GetAsync("/api/v2/propuestas/buscar?nombre=asturzzi");
+        HttpResponseMessage response = await client.GetAsync("/api/propuestas/buscar?nombre=asturzzi");
 
         Assert.Equal(HttpStatusCode.Unauthorized, response.StatusCode);
     }
 
-    [Fact]
-    public async Task RutasHeredadas_NoEstanPublicadas()
-    {
-        using HttpClient client = CreateAuthenticatedClient();
-
-        HttpResponseMessage response = await client.PostAsync("/api/propuestas/detalle", content: null);
-
-        Assert.Equal(HttpStatusCode.NotFound, response.StatusCode);
-    }
-
     [Theory]
-    [InlineData("/api/v2/propuestas/0", HttpStatusCode.BadRequest, "INVALID_REQUEST")]
-    [InlineData("/api/v2/propuestas/999999999", HttpStatusCode.NotFound, "PROPOSAL_NOT_FOUND")]
-    [InlineData("/api/v2/propuestas/41000/comprobantes?page=0", HttpStatusCode.BadRequest, "INVALID_REQUEST")]
-    [InlineData("/api/v2/propuestas/buscar", HttpStatusCode.BadRequest, "INVALID_REQUEST")]
-    [InlineData("/api/v2/propuestas/buscar?nombre=asturzzi&pageSize=101", HttpStatusCode.BadRequest, "INVALID_REQUEST")]
-    [InlineData("/api/v2/propuestas/buscar?documento=no-es-documento", HttpStatusCode.BadRequest, "INVALID_REQUEST")]
+    [InlineData("/api/propuestas/0", HttpStatusCode.BadRequest, "INVALID_REQUEST")]
+    [InlineData("/api/propuestas/999999999", HttpStatusCode.NotFound, "PROPOSAL_NOT_FOUND")]
+    [InlineData("/api/propuestas/41000/comprobantes?page=0", HttpStatusCode.BadRequest, "INVALID_REQUEST")]
+    [InlineData("/api/propuestas/buscar", HttpStatusCode.BadRequest, "INVALID_REQUEST")]
+    [InlineData("/api/propuestas/buscar?nombre=asturzzi&pageSize=101", HttpStatusCode.BadRequest, "INVALID_REQUEST")]
+    [InlineData("/api/propuestas/buscar?documento=no-es-documento", HttpStatusCode.BadRequest, "INVALID_REQUEST")]
     public async Task Ruta_ConSolicitudInvalidaONoEncontrada_DevuelveErrorEstable(string route, HttpStatusCode expectedStatus, string expectedCode)
     {
         using HttpClient client = CreateAuthenticatedClient();
@@ -87,7 +77,7 @@ public sealed class PropuestasIntegrationTests : IClassFixture<WebApplicationFac
     public async Task Comprobantes_RespetaLaPaginacionSolicitada()
     {
         using HttpClient client = CreateAuthenticatedClient();
-        HttpResponseMessage response = await client.GetAsync($"/api/v2/propuestas/{PropuestaDePrueba}/comprobantes?page=1&pageSize=2");
+        HttpResponseMessage response = await client.GetAsync($"/api/propuestas/{PropuestaDePrueba}/comprobantes?page=1&pageSize=2");
 
         Assert.Equal(HttpStatusCode.OK, response.StatusCode);
         using JsonDocument body = JsonDocument.Parse(await response.Content.ReadAsStringAsync());
@@ -104,7 +94,7 @@ public sealed class PropuestasIntegrationTests : IClassFixture<WebApplicationFac
     public async Task Busqueda_EncuentraLaPropuestaPorNombreYDocumento()
     {
         using HttpClient client = CreateAuthenticatedClient();
-        HttpResponseMessage titularesResponse = await client.GetAsync($"/api/v2/propuestas/{PropuestaDePrueba}/titulares");
+        HttpResponseMessage titularesResponse = await client.GetAsync($"/api/propuestas/{PropuestaDePrueba}/titulares");
         Assert.Equal(HttpStatusCode.OK, titularesResponse.StatusCode);
 
         using JsonDocument titularesBody = JsonDocument.Parse(await titularesResponse.Content.ReadAsStringAsync());
@@ -112,7 +102,7 @@ public sealed class PropuestasIntegrationTests : IClassFixture<WebApplicationFac
         string nombre = titular.GetProperty("nombre").GetString()!;
         string documento = titular.GetProperty("documento").GetProperty("numero").GetString()!;
 
-        HttpResponseMessage response = await client.GetAsync($"/api/v2/propuestas/buscar?nombre={Uri.EscapeDataString(nombre)}&documento={Uri.EscapeDataString(documento)}");
+        HttpResponseMessage response = await client.GetAsync($"/api/propuestas/buscar?nombre={Uri.EscapeDataString(nombre)}&documento={Uri.EscapeDataString(documento)}");
 
         Assert.Equal(HttpStatusCode.OK, response.StatusCode);
         using JsonDocument body = JsonDocument.Parse(await response.Content.ReadAsStringAsync());
@@ -123,7 +113,7 @@ public sealed class PropuestasIntegrationTests : IClassFixture<WebApplicationFac
         if (propuesta.TryGetProperty("parcela", out JsonElement parcela) && parcela.ValueKind == JsonValueKind.Object)
         {
             string numeroParcela = parcela.GetProperty("numero").GetString()!;
-            HttpResponseMessage parcelaResponse = await client.GetAsync($"/api/v2/propuestas/buscar?parcela={Uri.EscapeDataString(numeroParcela)}");
+            HttpResponseMessage parcelaResponse = await client.GetAsync($"/api/propuestas/buscar?parcela={Uri.EscapeDataString(numeroParcela)}");
             Assert.Equal(HttpStatusCode.OK, parcelaResponse.StatusCode);
             using JsonDocument parcelaBody = JsonDocument.Parse(await parcelaResponse.Content.ReadAsStringAsync());
             Assert.Contains(parcelaBody.RootElement.GetProperty("data").GetProperty("items").EnumerateArray(), x => x.GetProperty("propuesta").GetInt32() == PropuestaDePrueba);
@@ -134,7 +124,7 @@ public sealed class PropuestasIntegrationTests : IClassFixture<WebApplicationFac
     public async Task Busqueda_SinCoincidencias_DevuelvePaginaVacia()
     {
         using HttpClient client = CreateAuthenticatedClient();
-        HttpResponseMessage response = await client.GetAsync("/api/v2/propuestas/buscar?nombre=zzqvwxk");
+        HttpResponseMessage response = await client.GetAsync("/api/propuestas/buscar?nombre=zzqvwxk");
 
         Assert.Equal(HttpStatusCode.OK, response.StatusCode);
         using JsonDocument body = JsonDocument.Parse(await response.Content.ReadAsStringAsync());

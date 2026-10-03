@@ -1,7 +1,9 @@
 using ElPrado.Core;
 using ElPrado.Dto.Dtos;
 using ElPrado.McpApi.Contracts;
+using ElPrado.McpApi.Observability;
 using ElPrado.Services.Services;
+using Microsoft.Extensions.Logging;
 
 namespace ElPrado.McpApi.Endpoints;
 
@@ -15,7 +17,7 @@ public static class PropuestasEndpointExtensions
     {
         RouteGroupBuilder propuestas = group.MapGroup("/propuestas").WithTags("Propuestas");
 
-        propuestas.MapGet("/buscar", (string? nombre, string? documento, string? parcela, string? page, string? pageSize, IServiceProvider services) =>
+        propuestas.MapGet("/buscar", (string? nombre, string? documento, string? parcela, string? page, string? pageSize, IServiceProvider services, HttpContext context, ILoggerFactory loggerFactory) =>
         {
             nombre = NullIfEmpty(nombre);
             if (!TryParseDocumento(documento, out long? numeroDocumento) || !TryNormalizeNumero(parcela, out string? numeroParcela)
@@ -38,12 +40,20 @@ public static class PropuestasEndpointExtensions
                     new Paginacion(currentPage, currentPageSize, resultado.TotalItems, resultado.TotalPages,
                         currentPage < resultado.TotalPages, currentPage > 1)));
             }
-            catch (ArgumentOutOfRangeException) { return InvalidRequest<PropuestaBusquedaResponse>(); }
-            catch { return BusinessFailure<PropuestaBusquedaResponse>(); }
+            catch (ArgumentOutOfRangeException exception)
+            {
+                McpExceptionLog.Error(loggerFactory.CreateLogger(nameof(PropuestasEndpointExtensions)), context, exception, StatusCodes.Status400BadRequest);
+                return InvalidRequest<PropuestaBusquedaResponse>();
+            }
+            catch (Exception exception)
+            {
+                McpExceptionLog.Error(loggerFactory.CreateLogger(nameof(PropuestasEndpointExtensions)), context, exception, StatusCodes.Status422UnprocessableEntity);
+                return BusinessFailure<PropuestaBusquedaResponse>();
+            }
         });
 
-        propuestas.MapGet("/{propuesta}", (string propuesta, IServiceProvider services) =>
-            Execute<PropuestaDetalleResponse>(propuesta, services, (numero, codigo) =>
+        propuestas.MapGet("/{propuesta}", (string propuesta, IServiceProvider services, HttpContext context, ILoggerFactory loggerFactory) =>
+            Execute<PropuestaDetalleResponse>(propuesta, services, context, loggerFactory.CreateLogger(nameof(PropuestasEndpointExtensions)), (numero, codigo) =>
             {
                 PropuestasService propuestaService = services.GetRequiredService<PropuestasService>();
                 DtoPropuestaDetalleResp? detalle = propuestaService.Detalle(codigo);
@@ -52,15 +62,15 @@ public static class PropuestasEndpointExtensions
                 return Ok(MapDetalle(numero, detalle, propuestaService.EstadoDeuda(codigo).Valor));
             }));
 
-        propuestas.MapGet("/{propuesta}/titulares", (string propuesta, IServiceProvider services) =>
-            Execute<PropuestaTitularesResponse>(propuesta, services, (numero, codigo) =>
+        propuestas.MapGet("/{propuesta}/titulares", (string propuesta, IServiceProvider services, HttpContext context, ILoggerFactory loggerFactory) =>
+            Execute<PropuestaTitularesResponse>(propuesta, services, context, loggerFactory.CreateLogger(nameof(PropuestasEndpointExtensions)), (numero, codigo) =>
             {
                 List<DtoClientesPropuestas> titulares = services.GetRequiredService<PropuestasService>().Titulares(codigo);
                 return Ok(new PropuestaTitularesResponse(numero, titulares.Count, titulares.Select(MapTitular).ToList()));
             }));
 
-        propuestas.MapGet("/{propuesta}/deuda", (string propuesta, IServiceProvider services) =>
-            Execute<PropuestaDeudaResponse>(propuesta, services, (numero, codigo) =>
+        propuestas.MapGet("/{propuesta}/deuda", (string propuesta, IServiceProvider services, HttpContext context, ILoggerFactory loggerFactory) =>
+            Execute<PropuestaDeudaResponse>(propuesta, services, context, loggerFactory.CreateLogger(nameof(PropuestasEndpointExtensions)), (numero, codigo) =>
             {
                 CuentasCorrientesService cuentasService = services.GetRequiredService<CuentasCorrientesService>();
                 Resultados<DtoResumenDeudaPropuesta> resumen = cuentasService.ResumenDeuda(new DtoCuentasCorrientesResumenReq { CodPropuesta = codigo });
@@ -73,8 +83,8 @@ public static class PropuestasEndpointExtensions
                     resumen.Valor.Cuentas.Select(x => MapCuenta(x, estados.GetValueOrDefault((x.Tipo, x.Codigo)))).ToList()));
             }));
 
-        propuestas.MapGet("/{propuesta}/servicios", (string propuesta, IServiceProvider services) =>
-            Execute<PropuestaServiciosResponse>(propuesta, services, (numero, codigo) =>
+        propuestas.MapGet("/{propuesta}/servicios", (string propuesta, IServiceProvider services, HttpContext context, ILoggerFactory loggerFactory) =>
+            Execute<PropuestaServiciosResponse>(propuesta, services, context, loggerFactory.CreateLogger(nameof(PropuestasEndpointExtensions)), (numero, codigo) =>
             {
                 DtoServiciosPropuestaMcp servicios = services.GetRequiredService<ServiciosModelosService>().ServiciosPropuestaMcp(codigo);
                 return Ok(new PropuestaServiciosResponse(numero,
@@ -83,8 +93,8 @@ public static class PropuestasEndpointExtensions
                     servicios.Utilizaciones.Select(MapUtilizacion).ToList()));
             }));
 
-        propuestas.MapGet("/{propuesta}/contratos", (string propuesta, IServiceProvider services) =>
-            Execute<PropuestaContratosResponse>(propuesta, services, (numero, codigo) =>
+        propuestas.MapGet("/{propuesta}/contratos", (string propuesta, IServiceProvider services, HttpContext context, ILoggerFactory loggerFactory) =>
+            Execute<PropuestaContratosResponse>(propuesta, services, context, loggerFactory.CreateLogger(nameof(PropuestasEndpointExtensions)), (numero, codigo) =>
             {
                 DtoPropuestaDetalleContratosResp datos = services.GetRequiredService<PropuestasService>().Contratos(codigo);
                 Dictionary<int, DtoPlanesVentasPropuestas> planes = (datos.ListPlanesVentas ?? new()).ToDictionary(x => x.CodContrato);
@@ -93,19 +103,19 @@ public static class PropuestasEndpointExtensions
                     new Facturacion((datos.ListTitularesFacturasPagos ?? new()).Select(x => new TitularFacturacion(x.CodCliente, x.Nombre, x.Factura, x.Pago)).ToList())));
             }));
 
-        propuestas.MapGet("/{propuesta}/historial-titulares", (string propuesta, IServiceProvider services) =>
-            Execute<PropuestaHistorialTitularesResponse>(propuesta, services, (numero, codigo) => Ok(new PropuestaHistorialTitularesResponse(numero,
+        propuestas.MapGet("/{propuesta}/historial-titulares", (string propuesta, IServiceProvider services, HttpContext context, ILoggerFactory loggerFactory) =>
+            Execute<PropuestaHistorialTitularesResponse>(propuesta, services, context, loggerFactory.CreateLogger(nameof(PropuestasEndpointExtensions)), (numero, codigo) => Ok(new PropuestaHistorialTitularesResponse(numero,
                 services.GetRequiredService<PropuestasService>().HistorialTitulares(codigo).Select(x =>
                     new HistorialTitular(new ClienteReferencia(x.CodCliente, x.Nombre), DateOnly.FromDateTime(x.FechaAlta), x.FechaBaja,
                         NullIfEmpty(x.UsuarioAlta), NullIfEmpty(x.UsuarioBaja))).ToList()))));
 
-        propuestas.MapGet("/{propuesta}/comprobantes", (string propuesta, string? desde, string? hasta, string? tipo, string? estado, string? page, string? pageSize, IServiceProvider services) =>
+        propuestas.MapGet("/{propuesta}/comprobantes", (string propuesta, string? desde, string? hasta, string? tipo, string? estado, string? page, string? pageSize, IServiceProvider services, HttpContext context, ILoggerFactory loggerFactory) =>
         {
             if (!TryParseInt(page, 1, out int currentPage) || !TryParseInt(pageSize, DefaultPageSize, out int currentPageSize)
                 || !TryParseDate(desde, out DateOnly? fechaDesde) || !TryParseDate(hasta, out DateOnly? fechaHasta)
                 || currentPage < 1 || currentPageSize is < 1 or > MaxPageSize || (fechaDesde is not null && fechaHasta is not null && fechaDesde > fechaHasta))
                 return InvalidRequest<PropuestaComprobantesResponse>();
-            return Execute<PropuestaComprobantesResponse>(propuesta, services, (numero, codigo) =>
+            return Execute<PropuestaComprobantesResponse>(propuesta, services, context, loggerFactory.CreateLogger(nameof(PropuestasEndpointExtensions)), (numero, codigo) =>
             {
                 DtoComprobantesPropuestaListado resultado = services.GetRequiredService<ComprobantesService>()
                     .ComprobantesPropuesta(codigo, fechaDesde, fechaHasta, tipo, estado, currentPage, currentPageSize);
@@ -119,7 +129,7 @@ public static class PropuestasEndpointExtensions
         return group;
     }
 
-    private static IResult Execute<T>(string propuesta, IServiceProvider services, Func<int, int, IResult> action)
+    private static IResult Execute<T>(string propuesta, IServiceProvider services, HttpContext context, ILogger logger, Func<int, int, IResult> action)
     {
         if (!int.TryParse(propuesta, out int numeroPropuesta) || numeroPropuesta <= 0)
             return InvalidRequest<T>();
@@ -128,8 +138,16 @@ public static class PropuestasEndpointExtensions
             Resultados<DtoPropuestaResuelta> resolucion = services.GetRequiredService<PropuestasService>().ResolverPropuesta(numeroPropuesta);
             return resolucion.HayError || resolucion.Valor is null ? NotFound<T>() : action(resolucion.Valor.Propuesta, resolucion.Valor.CodPropuesta);
         }
-        catch (ArgumentOutOfRangeException) { return InvalidRequest<T>(); }
-        catch { return BusinessFailure<T>(); }
+        catch (ArgumentOutOfRangeException exception)
+        {
+            McpExceptionLog.Error(logger, context, exception, StatusCodes.Status400BadRequest);
+            return InvalidRequest<T>();
+        }
+        catch (Exception exception)
+        {
+            McpExceptionLog.Error(logger, context, exception, StatusCodes.Status422UnprocessableEntity);
+            return BusinessFailure<T>();
+        }
     }
 
     private static IResult Ok<T>(T data) => Results.Ok(ElPrado.McpApi.Contracts.ApiResponse<T>.Success(data));

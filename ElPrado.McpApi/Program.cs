@@ -5,6 +5,7 @@ using ElPrado.DataFactory.Interfaces;
 using ElPrado.McpApi.Auth;
 using ElPrado.McpApi.Contracts;
 using ElPrado.McpApi.Endpoints;
+using ElPrado.McpApi.Middlewares;
 using ElPrado.Services;
 using ElPrado.Services.Services;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
@@ -112,6 +113,7 @@ if (corsEnabled)
     app.UseCors("ConfiguredOrigins");
 }
 
+app.UseMiddleware<McpExceptionHandlingMiddleware>();
 app.UseAuthentication();
 app.UseAuthorization();
 
