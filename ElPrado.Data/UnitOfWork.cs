@@ -20,6 +20,7 @@ namespace ElPrado.Data
         private CuentasCorrientesRepository? _cuentasCorrientesRepository;
 
         private DomiciliosRepository? _domiciliosRepository;
+        private EstadisticasRepository? _estadisticasRepository;
         private InhumadosRepository? _inhumadosRepository;
 
         private LogsRepository? _logsRepository;
@@ -59,6 +60,7 @@ namespace ElPrado.Data
         public CuentasCorrientesRepository CuentasCorrientes => _cuentasCorrientesRepository ??= new CuentasCorrientesRepository(_dbContext);
 
         public DomiciliosRepository Domicilios => _domiciliosRepository ??= new DomiciliosRepository(_dbContext);
+        public EstadisticasRepository Estadisticas => _estadisticasRepository ??= new EstadisticasRepository(_dbContext);
         public InhumadosRepository Inhumados => _inhumadosRepository ??= new InhumadosRepository(_dbContext);
         public ObituariosRepository Obituarios => _obituariosRepository ??= new ObituariosRepository(_dbContext);
 

@@ -30,3 +30,4 @@
 /ElPrado.Workers/workersettings.Development.json
 appdata
 logs
+.env.local

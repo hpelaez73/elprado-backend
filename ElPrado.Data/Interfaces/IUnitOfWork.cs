@@ -16,6 +16,7 @@ namespace ElPrado.Data.Interfaces
         CuentasCorrientesRepository CuentasCorrientes { get; }
 
         DomiciliosRepository Domicilios { get; }
+        EstadisticasRepository Estadisticas { get; }
         InhumadosRepository Inhumados { get; }
 
         LogsRepository LogsRepository { get; }
