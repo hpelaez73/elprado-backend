@@ -19,6 +19,11 @@ try
 
     var app = builder.Build();
 
+    app.Lifetime.ApplicationStarted.Register(() =>
+        Log.Information("Migration API started in {Environment}", app.Environment.EnvironmentName));
+    app.Lifetime.ApplicationStopping.Register(() =>
+        Log.Information("Migration API is stopping"));
+
     app.UseExceptionHandler(exceptionApplication =>
     {
         exceptionApplication.Run(async context =>
@@ -41,6 +46,7 @@ try
         app.UseSwaggerUI();
     }
 
+    app.UseSerilogRequestLogging();
     app.MapHealthEndpoints();
 
     await app.RunAsync();
@@ -52,4 +58,8 @@ catch (Exception exception)
 finally
 {
     await Log.CloseAndFlushAsync();
+}
+
+public partial class Program
+{
 }

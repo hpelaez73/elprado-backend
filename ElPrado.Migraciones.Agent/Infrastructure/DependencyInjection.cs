@@ -8,6 +8,8 @@ public static class DependencyInjection
     public static IServiceCollection AddMigrationAgentServices(this IServiceCollection services)
     {
         services.AddHostedService<AgentWorker>();
+        services.AddWindowsService();
+        services.AddSystemd();
 
         return services;
     }

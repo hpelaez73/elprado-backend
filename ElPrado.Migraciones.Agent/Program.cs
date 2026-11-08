@@ -16,9 +16,6 @@ try
             .Enrich.FromLogContext()
             .WriteToOptionalSeq(builder.Configuration));
 
-    builder.Services.AddWindowsService();
-    builder.Services.AddSystemd();
-
     var host = builder.Build();
     await host.RunAsync();
 }

@@ -8,6 +8,7 @@ public static class DependencyInjection
     {
         services.AddEndpointsApiExplorer();
         services.AddSwaggerGen();
+        services.AddHealthChecks();
 
         return services;
     }
