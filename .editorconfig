@@ -3,3 +3,25 @@ root = true
 [*]
 end_of_line = crlf
 insert_final_newline = true
+
+[*.cs]
+indent_style = space
+indent_size = 4
+
+# Llaves
+csharp_new_line_before_open_brace = all
+
+# Mantener bloques separados
+csharp_new_line_before_else = true
+csharp_new_line_before_catch = true
+csharp_new_line_before_finally = true
+
+# Indentación
+csharp_indent_block_contents = true
+csharp_indent_braces = false
+csharp_indent_case_contents = true
+csharp_indent_switch_labels = true
+
+# Espacios
+csharp_space_after_comma = true
+csharp_space_around_binary_operators = before_and_after

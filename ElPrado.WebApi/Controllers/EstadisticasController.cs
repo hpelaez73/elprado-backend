@@ -22,7 +22,11 @@ namespace ElPrado.WebApi.Controllers
         {
             Resultados<DtoEstadisticasResumen> resultado = Estadisticas.Resumen(periodo, producto);
             ApiResponse<DtoEstadisticasResumen> respuesta = new();
-            if (resultado.HayError) { respuesta.Agregar(resultado); return BadRequest(respuesta); }
+            if (resultado.HayError)
+            {
+                respuesta.Agregar(resultado);
+                return BadRequest(respuesta);
+            }
             respuesta.Data = resultado.Valor;
             return Ok(respuesta);
         }
@@ -35,7 +39,11 @@ namespace ElPrado.WebApi.Controllers
         {
             Resultados<DtoEstadisticasEvolucion> resultado = Estadisticas.Evolucion(desde, hasta, producto);
             ApiResponse<DtoEstadisticasEvolucion> respuesta = new();
-            if (resultado.HayError) { respuesta.Agregar(resultado); return BadRequest(respuesta); }
+            if (resultado.HayError)
+            {
+                respuesta.Agregar(resultado);
+                return BadRequest(respuesta);
+            }
             respuesta.Data = resultado.Valor;
             return Ok(respuesta);
         }

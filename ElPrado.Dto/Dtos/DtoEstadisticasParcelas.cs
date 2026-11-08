@@ -6,6 +6,7 @@ namespace ElPrado.Dto.Dtos
         public int AlDia { get; set; }
         public int Morosas { get; set; }
         public int Recuperadas { get; set; }
+        public int DeudoresRecientes { get; set; }
         public decimal? PorcentajeAlDia => Parcelas == 0 ? null : decimal.Round((decimal)AlDia * 100 / Parcelas, 2);
         public decimal? PorcentajeMorosas => Parcelas == 0 ? null : decimal.Round((decimal)Morosas * 100 / Parcelas, 2);
     }
@@ -47,6 +48,7 @@ namespace ElPrado.Dto.Dtos
         public int AlDia { get; set; }
         public int Morosas { get; set; }
         public int Recuperadas { get; set; }
+        public int DeudoresRecientes { get; set; }
     }
 
     public sealed class DtoEstadisticasCobertura

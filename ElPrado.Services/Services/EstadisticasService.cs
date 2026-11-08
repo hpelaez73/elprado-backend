@@ -80,7 +80,8 @@ namespace ElPrado.Services.Services
 
         private static DtoKpiParcelas CrearKpi(DtoEstadisticasFila fila) => new()
         {
-            Parcelas = fila.CantidadParcelas, AlDia = fila.AlDia, Morosas = fila.Morosas, Recuperadas = fila.Recuperadas
+            Parcelas = fila.CantidadParcelas, AlDia = fila.AlDia, Morosas = fila.Morosas, Recuperadas = fila.Recuperadas,
+            DeudoresRecientes = fila.DeudoresRecientes
         };
     }
 }

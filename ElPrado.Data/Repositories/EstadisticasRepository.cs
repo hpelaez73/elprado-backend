@@ -1,9 +1,10 @@
 using Dapper;
+using ElPrado.Data.Interfaces;
 using ElPrado.Dto.Dtos;
 
 namespace ElPrado.Data.Repositories
 {
-    public sealed class EstadisticasRepository : RepositoryBase
+    public sealed class EstadisticasRepository : RepositoryBase, IEstadisticasRepository
     {
         public EstadisticasRepository(DbContext dbContext) : base(dbContext) { }
 

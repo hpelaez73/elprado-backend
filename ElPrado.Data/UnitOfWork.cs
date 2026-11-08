@@ -60,7 +60,7 @@ namespace ElPrado.Data
         public CuentasCorrientesRepository CuentasCorrientes => _cuentasCorrientesRepository ??= new CuentasCorrientesRepository(_dbContext);
 
         public DomiciliosRepository Domicilios => _domiciliosRepository ??= new DomiciliosRepository(_dbContext);
-        public EstadisticasRepository Estadisticas => _estadisticasRepository ??= new EstadisticasRepository(_dbContext);
+        public IEstadisticasRepository Estadisticas => _estadisticasRepository ??= new EstadisticasRepository(_dbContext);
         public InhumadosRepository Inhumados => _inhumadosRepository ??= new InhumadosRepository(_dbContext);
         public ObituariosRepository Obituarios => _obituariosRepository ??= new ObituariosRepository(_dbContext);
 
