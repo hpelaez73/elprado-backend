@@ -1,50 +1,48 @@
 # Tareas
 
-## 1. Base de configuración y criptografía de la API
+## 1. Configuración, criptografía y aprovisionamiento
 
-- [ ] 1.1 Agregar a `ElPrado.Migraciones.Api` las referencias JWT Bearer necesarias y la configuración de rate limiting de .NET 7; verificar `dotnet restore ElPrado.Migraciones.Api/ElPrado.Migraciones.Api.csproj`.
-- [ ] 1.2 Crear las opciones `MigrationAuthentication` para JWT, administrador, agentes y límites de intentos, con validación de clave Base64 de 256 bits, issuer, audience, duración, hashes e IDs únicos; verificar que `ValidateOnStart` rechace configuración incompleta en una prueba de API.
-- [ ] 1.3 Implementar el codificador/verificador PBKDF2-HMAC-SHA512 versionado, con sal aleatoria y comparación de tiempo constante; verificar hashes válidos, secreto incorrecto y formatos malformados con pruebas unitarias.
-- [ ] 1.4 Registrar las opciones desde fuentes externas sin agregar secretos a `ElPrado.Migraciones.Api/appsettings*.json`; documentar el esquema y comprobar que la fábrica de pruebas pueda inyectar una configuración efímera válida.
+- [x] 1.1 Agregar JWT Bearer y Rate Limiting compatibles con .NET 7 a la API; verificar `dotnet restore ElPrado.Migraciones.Api/ElPrado.Migraciones.Api.csproj`.
+- [x] 1.2 Crear opciones para JWT, admin, agentes, PBKDF2, rate limiting y proxies confiables; validar HMAC Base64 ≥256 bits, vidas iniciales admin 30 min/agent 15 min y rangos; verificar `ValidateOnStart` contra configuración inválida.
+- [x] 1.3 Implementar PBKDF2-HMAC-SHA512 versionado con sal 16 bytes, hash 32 bytes, 210.000 iteraciones iniciales y rango 210.000–1.000.000; verificar hash válido, secreto incorrecto, comparación constante y formato malformado.
+- [x] 1.4 Crear la utilidad local que lea credencial por entrada estándar sin eco y produzca sólo el hash; verificar que ejemplos no pasen secretos por argumentos, logs ni archivos versionados.
+- [x] 1.5 Registrar fuentes externas sin secretos en `appsettings*.json`; documentar reload/reinicio por proveedor y verificar configuración efímera en pruebas.
 
-## 2. Emisión y validación de tokens administrativos
+## 2. Emisión, validación y transporte seguro de la API
 
-- [ ] 2.1 Implementar el servicio privado de emisión JWT con los claims, firma, issuer, audience y expiración de `MigrationAuthentication`; verificar mediante pruebas que un token válido contiene `migration_identity=admin` o `agent` y nunca secretos.
-- [ ] 2.2 Configurar autenticación Bearer y la policy `AdminOnly` en `ElPrado.Migraciones.Api/Infrastructure/DependencyInjection.cs`; verificar rechazo HTTP 401 para token vencido, manipulado, issuer inválido y audience inválida.
-- [ ] 2.3 Crear `POST /auth/admin/login` y `GET /auth/me` bajo `ElPrado.Migraciones.Api/Features/Authentication`; verificar login válido, credenciales inválidas, respuesta sin secretos y acceso 200/401/403 según corresponda.
-- [ ] 2.4 Configurar el límite de solicitudes de los endpoints de login por origen y respuestas 429 seguras; verificar con una prueba que exceder la cuota no emite tokens.
-- [ ] 2.5 Documentar en `docs/migraciones/autenticacion.md` el aprovisionamiento inicial de administrador, la generación de hash y la rotación sin valores reales; verificar que los comandos y ejemplos usan marcadores o secretos del host.
+- [x] 2.1 Implementar emisor JWT con firma, issuer, audience, expiración y `migration_identity=admin|agent`; verificar vidas iniciales y ausencia de secretos.
+- [x] 2.2 Configurar Bearer, `AdminOnly` y `AgentOnly`; verificar 401 para token vencido/manipulado/issuer-audience inválidos y 403 entre identidades.
+- [x] 2.3 Crear login admin y consulta `me`; verificar login válido/inválido y respuestas sin secretos.
+- [x] 2.4 Configurar rate limiting de endpoints token; verificar HTTP 429 sin validación ni emisión.
+- [x] 2.5 Rechazar HTTP antes de enlazar o validar credenciales y aceptar forwarded headers sólo de `KnownProxies`/`KnownNetworks`; verificar que un cliente no autorizado no habilita HTTPS.
+- [x] 2.6 Excluir cuerpos, Authorization, contraseñas, secretos, hashes y tokens de logs/errores; verificar con sink de prueba.
 
-## 3. Autenticación y revocación de agentes en la API
+## 3. Agentes, revocación y rotación en la API
 
-- [ ] 3.1 Añadir a `ElPrado.Migraciones.Contracts` únicamente los DTOs de solicitud y respuesta de token de agente; verificar que API y Agent compilan con la referencia y que Contracts no contiene opciones, hashes ni claves.
-- [ ] 3.2 Implementar el registro configurado de agentes y su verificación por `AgentId`, hash y estado habilitado; verificar con pruebas que agentes inexistentes, deshabilitados o con secreto incorrecto reciben 401 sin información adicional.
-- [ ] 3.3 Crear `POST /auth/agent/token`, emitir el token de agente y configurar `AgentOnly` para requerir el claim de agente; verificar 200 para agente autorizado, 403 al usar token administrativo y que la respuesta no devuelve secretos.
-- [ ] 3.4 Incorporar el requisito de autorización que consulta el registro de agentes vigente para `AgentOnly` y crear `GET /auth/agent/me`; verificar que un token vigente pasa antes de revocar y recibe 403 tras deshabilitar o retirar su `AgentId` de la configuración activa.
-- [ ] 3.5 Documentar el aprovisionamiento de `AgentId`/`AgentSecret`, hash, rotación, revocación y comportamiento de reload/reinicio; verificar que la documentación no incluye secretos reales ni usa el `AgentId` como prueba de autenticación.
+- [x] 3.1 Añadir a Contracts sólo DTOs de token agent; verificar que no contiene opciones, hashes ni claves.
+- [x] 3.2 Implementar registro por `AgentId`, hash y estado; verificar 401 genérico para agente inexistente, deshabilitado o secreto incorrecto.
+- [x] 3.3 Crear endpoint token agent, `GET /auth/agent/me` y `AgentOnly`; verificar independencia de dos agentes, respuesta sin secretos y rechazo de token admin.
+- [x] 3.4 Consultar el registro vigente con `IOptionsMonitor` en `AgentOnly`; verificar que revocar un agente da 403 para su token vigente, no afecta a otro y que una fuente sin reload exige reinicio.
+- [x] 3.5 Implementar/documentar rotación de `SecretHash`; verificar que el secreto anterior no emite tokens y JWT previos siguen válidos hasta exp si el agente está habilitado.
+- [x] 3.6 Documentar aprovisionamiento, revocación, rotación y rotación de clave JWT de emergencia, distinguiendo efectos sobre tokens emitidos.
 
-## 4. Protección HTTP y observabilidad segura
+## 4. Cliente resiliente de token del Agent
 
-- [ ] 4.1 Actualizar `ElPrado.Migraciones.Api/Program.cs` para usar autenticación antes de autorización, HTTPS redirection y las policies de endpoints, conservando `GET /health` anónimo y Swagger sólo en Development; verificar los estados 200, 401 y 403 con `MigrationApiFactory`.
-- [ ] 4.2 Configurar la aceptación de HTTPS detrás de proxy sólo con forwarded headers de proxies confiables y el perfil HTTP de pruebas locales controladas; verificar que una solicitud HTTP no procesa credenciales como autenticadas fuera de dicho perfil.
-- [ ] 4.3 Revisar el logging de API y los manejadores de error para excluir cuerpos de autenticación, encabezado `Authorization`, contraseñas, secretos y tokens; verificar con un sink de prueba que no aparecen en logs ni `ProblemDetails`.
-- [ ] 4.4 Extender `tests/ElPrado.Migraciones.Api.Tests` para cubrir autenticación ausente, separación AdminOnly/AgentOnly, expiración/firma/issuer/audience, configuración vacía, rate limiting y revocación; verificar `dotnet test tests/ElPrado.Migraciones.Api.Tests/ElPrado.Migraciones.Api.Tests.csproj`.
+- [x] 4.1 Agregar opciones externas para URL HTTPS, `AgentId`, `AgentSecret`, margen y reintentos; validar margen 30 s–5 min menor al JWT agent y límites de backoff/jitter.
+- [x] 4.2 Implementar cliente HTTP tipado con token sólo en memoria y renovación dos minutos antes de exp; verificar renovación anticipada con `HttpMessageHandler` simulado.
+- [x] 4.3 Coordinar renovación concurrente en una solicitud en curso; verificar que múltiples consumidores causan una sola llamada al endpoint.
+- [x] 4.4 Implementar reintentos de red, timeout y 429: base 1 s, multiplicador 2, tope 60 s, jitter ±20 % y `Retry-After` acotado; verificar demora y recuperación.
+- [x] 4.5 Tratar 401 como credencial inválida sin reintento continuo y mantener Worker vivo ante fallos transitorios; verificar logs seguros, suspensión tras 401 y recuperación de API.
+- [x] 4.6 Ampliar pruebas Agent para configuración válida/inválida, renovación, concurrencia, 429, red, 401 y logs; verificar `dotnet test tests/ElPrado.Migraciones.Agent.Tests/ElPrado.Migraciones.Agent.Tests.csproj`.
 
-## 5. Cliente de token del Agent
+## 5. Validación integral
 
-- [ ] 5.1 Agregar opciones externas del Agent para URL HTTPS de API, `AgentId` y `AgentSecret`, con validación fail-closed y sin valores secretos en `ElPrado.Migraciones.Agent/appsettings*.json`; verificar el rechazo de configuración ausente con pruebas unitarias.
-- [ ] 5.2 Implementar y registrar un cliente HTTP tipado que solicite `POST /auth/agent/token`, conserve el token sólo en memoria hasta su expiración y reautentique sin refresh token; verificar solicitudes y renovación contra un `HttpMessageHandler` simulado.
-- [ ] 5.3 Integrar el cliente de token en el ciclo de vida de `AgentWorker` sin iniciar SignalR ni migraciones; verificar que el Worker maneja 401/429/error de red y registra mensajes sin `AgentSecret` ni access token.
-- [ ] 5.4 Ampliar `tests/ElPrado.Migraciones.Agent.Tests` con configuración válida/inválida, token simulado, renovación y logs seguros; verificar `dotnet test tests/ElPrado.Migraciones.Agent.Tests/ElPrado.Migraciones.Agent.Tests.csproj`.
-- [ ] 5.5 Completar `docs/migraciones/autenticacion.md` con la configuración del Agent en Development y Production, renovación y rotación; verificar que las instrucciones no requieren Firebird, Seq ni servicios externos.
-
-## 6. Validación integral
-
-- [ ] 6.1 Ejecutar restore y build de Contracts, API, Agent y ambos proyectos de pruebas; verificar `dotnet build ElPradoWeb.sln` o registrar por separado fallos ajenos a Migraciones.
-- [ ] 6.2 Ejecutar la batería de pruebas de Migraciones con configuración aislada y revisar cobertura de los escenarios de `specs/migraciones-autenticacion/spec.md`; verificar que no se conecta a Firebird, Seq ni SignalR.
-- [ ] 6.3 Ejecutar la API con secretos de Development efímeros y comprobar `/health`, Swagger en Development, login administrativo, token de agente y revocación; verificar manualmente que Production no expone Swagger y requiere HTTPS.
+- [x] 5.1 Ampliar pruebas API para identidad ausente, policies, expiración/firma/issuer/audience, HTTPS/proxy, configuración inválida, rate limit, independencia, rotación y revocación; verificar `dotnet test tests/ElPrado.Migraciones.Api.Tests/ElPrado.Migraciones.Api.Tests.csproj`.
+- [x] 5.2 Ejecutar restore/build de Contracts, API, Agent y pruebas; verificar `dotnet build ElPradoWeb.sln` o registrar fallos ajenos.
+- [x] 5.3 Ejecutar pruebas de Migraciones con configuración aislada y revisar escenarios del spec; verificar ausencia de Firebird, Seq y SignalR.
+- [x] 5.4 Ejecutar API con secretos Development efímeros y dos agentes de prueba; comprobar login, renovación, rotación, revocación, `/health`, Swagger Development y HTTPS Production.
 
 ## Seguimiento del flujo
 
-- Revisar y confirmar las decisiones listadas en `design.md` antes de aplicar el cambio.
-- Archivar el cambio tras implementar y aprobar las validaciones del proyecto.
+- Aplicar con `$openspec-apply-change migraciones-autenticacion` sólo tras aprobar esta planificación.
+- Archivar tras implementar y aprobar validaciones del proyecto.

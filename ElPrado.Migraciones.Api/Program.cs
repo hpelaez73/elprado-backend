@@ -1,4 +1,5 @@
 using ElPrado.Migraciones.Api.Features.Health;
+using ElPrado.Migraciones.Api.Features.Authentication;
 using ElPrado.Migraciones.Api.Infrastructure;
 using Serilog;
 
@@ -15,7 +16,7 @@ try
             .Enrich.FromLogContext()
             .WriteToOptionalSeq(context.Configuration));
 
-    builder.Services.AddMigrationApiServices();
+    builder.Services.AddMigrationApiServices(builder.Configuration);
 
     var app = builder.Build();
 
@@ -47,6 +48,23 @@ try
     }
 
     app.UseSerilogRequestLogging();
+    app.UseForwardedHeaders();
+    app.Use(async (context, next) =>
+    {
+        var requiresSecureTransport = context.Request.Path.StartsWithSegments("/auth");
+        var authOptions = context.RequestServices.GetRequiredService<Microsoft.Extensions.Options.IOptions<ElPrado.Migraciones.Api.Authentication.MigrationAuthenticationOptions>>().Value;
+        if (requiresSecureTransport && !context.Request.IsHttps && !authOptions.AllowInsecureLocalRequests)
+        {
+            context.Response.StatusCode = StatusCodes.Status400BadRequest;
+            await context.Response.WriteAsync("HTTPS is required.");
+            return;
+        }
+        await next();
+    });
+    app.UseRateLimiter();
+    app.UseAuthentication();
+    app.UseAuthorization();
+    app.MapAuthenticationEndpoints();
     app.MapHealthEndpoints();
 
     await app.RunAsync();

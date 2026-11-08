@@ -7,7 +7,7 @@ try
 {
     var builder = Host.CreateApplicationBuilder(args);
 
-    builder.Services.AddMigrationAgentServices();
+    builder.Services.AddMigrationAgentServices(builder.Configuration);
 
     builder.Services.AddSerilog((services, loggerConfiguration) =>
         loggerConfiguration
